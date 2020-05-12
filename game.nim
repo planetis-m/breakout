@@ -39,31 +39,33 @@ proc createEntity*(self: var Game): int =
          return i
    raise newException(ResourceExhaustedError, "No more entities available!")
 
+template `?=`(name, value): bool = (let name = value; name != -1)
 proc delete*(self: var Game, entity: int) =
    if HasHierarchy in game.world[entity]:
       template hierarchy: untyped = game.hierarchy[entity]
-      template parent: untyped = game.hierarchy[hierarchy.parent]
-      template nextSibling: untyped = game.hierarchy[hierarchy.next]
-      template prevSibling: untyped = game.hierarchy[hierarchy.prev]
+      template parent: untyped = game.hierarchy[parentId]
+      template nextSibling: untyped = game.hierarchy[nextSiblingId]
+      template prevSibling: untyped = game.hierarchy[prevSiblingId]
 
+      let parentId = hierarchy.parent
       if entity == parent.head: parent.head = hierarchy.next
-      if hierarchy.next != -1: nextSibling.prev = hierarchy.prev
-      if hierarchy.prev != -1: prevSibling.next = hierarchy.next
+      if nextSiblingId ?= hierarchy.next: nextSibling.prev = hierarchy.prev
+      if prevSiblingId ?= hierarchy.prev: prevSibling.next = hierarchy.next
 
    self.world[entity] = {}
 
 proc prepend*(game: var Game, parent, entity: int) =
-   if HasHierarchy in game.world[entity]:
-      template hierarchy: untyped = game.hierarchy[entity]
-      template parent: untyped = game.hierarchy[hierarchy.parent]
-      template headSibling: untyped = game.hierarchy[parent.head]
+   template hierarchy: untyped = game.hierarchy[entity]
+   template parent: untyped = game.hierarchy[parentId]
+   template headSibling: untyped = game.hierarchy[headSiblingId]
 
-      hierarchy.prev = -1
-      hierarchy.next = parent.head
-      if parent.head != -1:
-         assert headSibling.prev == -1
-         headSibling.prev = entity
-      parent.head = entity
+   let parentId = hierarchy.parent
+   hierarchy.prev = -1
+   hierarchy.next = parent.head
+   if headSiblingId ?= parent.head:
+      assert headSibling.prev == -1
+      headSibling.prev = entity
+   parent.head = entity
 
 proc update*(self: var Game, delta: float32) =
    sysControlBall(self, delta)
