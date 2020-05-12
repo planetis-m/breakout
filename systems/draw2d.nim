@@ -15,9 +15,10 @@ proc update(game: var Game, entity: int, intrpl: float32) =
    let width = int(draw2d.width.float32 * transform.scale.x)
    let height = int(draw2d.height.float32 * transform.scale.y)
 
+   let translation = getTranslation(transform.world)
    game.canvas.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
    game.canvas.fillRect((
-      transform.world.m11.int32 - int32(width / 2),
-      transform.world.m12.int32 - int32(height / 2),
+      (translation.x + intrpl).int32 - int32(width / 2),
+      (translation.y + intrpl).int32 - int32(height / 2),
       width.int32,
       height.int32))
