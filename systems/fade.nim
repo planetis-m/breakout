@@ -2,7 +2,7 @@ import game_types
 
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
-proc sysFade*(game: var Game, _delta: float32) =
+proc sysFade*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
          update(game, i)

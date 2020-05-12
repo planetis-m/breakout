@@ -2,14 +2,14 @@ import game_types, vmath
 
 const Query = {HasTransform2d, HasDraw2d}
 
-proc sysDraw2d*(game: var Game, _delta: float32) =
+proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.canvas.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
    game.canvas.clear()
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i)
+         update(game, i, intrpl)
 
-proc update(game: var Game, entity: int) =
+proc update(game: var Game, entity: int, intrpl: float32) =
    template transform: untyped = game.transform[entity]
    template draw2d: untyped = game.draw2d[entity]
    let width = int(draw2d.width.float32 * transform.scale.x)

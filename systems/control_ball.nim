@@ -2,12 +2,12 @@ import game_types, vmath
 
 const Query = {HasTransform2d, HasMove, HasControlBall}
 
-proc sysControlBall*(game: var Game, delta: float32) =
+proc sysControlBall*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i, delta)
+         update(game, i)
 
-proc update(game: var Game, entity: int, _delta: float32) =
+proc update(game: var Game, entity: int) =
    template transform: untyped = game.transform[entity]
    template move: untyped = game.move[entity]
    template control: untyped = game.controlBall[entity]

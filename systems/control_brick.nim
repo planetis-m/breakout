@@ -2,7 +2,7 @@ import game_types, options
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
-proc sysControlBrick*(game: var Game, _delta: float32) =
+proc sysControlBrick*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
          update(game, i)

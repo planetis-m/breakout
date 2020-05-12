@@ -68,19 +68,22 @@ proc delete*(self: var Game, entity: int) =
       removeNode(game, entity)
    self.world[entity] = {}
 
-proc update*(self: var Game, delta: float32) =
-   sysControlBall(self, delta)
-   sysControlBrick(self, delta)
-   sysControlPaddle(self, delta)
-   sysShake(self, delta)
-   sysFade(self, delta)
-   sysMove(self, delta)
-   sysTransform2d(self, delta)
-   sysCollide(self, delta)
-   sysDraw2d(self, delta)
-   sysFramerate(self, delta)
+proc update*(self: var Game) =
+   sysControlBall(self)
+   sysControlBrick(self)
+   sysControlPaddle(self)
+   sysShake(self)
+   sysFade(self)
+   sysMove(self)
+   sysTransform2d(self)
+   sysCollide(self)
 
 proc start*(self: var Game) =
+   const
+      ticksPerSec = 25
+      skipTicks = 1000 div ticksPerSec
+      maxFrameSkip = 5 # 20% of ticksPerSec
+
    var lastTime = getMonoTime()
    block running:
       while true:
@@ -102,10 +105,13 @@ proc start*(self: var Game) =
                   self.inputState[ArrowRight] = false
 
          let now = getMonoTime()
+         var frameSkip = 0
+         while now - lastTime > skipTicks and frameSkip < maxFrameSkip:
+            self.update()
+            lastTime += initDuration(skipTicks)
+            frameSkip.inc
 
-         self.update(inMilliseconds(now - lastTime).float32 / 1000.0)
-
-         lastTime = now
+         self.sysDraw2d(inMilliseconds((now - lastTime) div skipTicks).float32)
          self.canvas.present()
 
 proc main =

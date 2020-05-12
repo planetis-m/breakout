@@ -29,7 +29,7 @@ proc calculatePenetration(a, b: Collide): Vec2 =
       penetration.x = 0.0
       penetration.y = penetrationY * sgn(distanceY)
 
-proc sysCollide*(game: var Game, _delta: float32) =
+proc sysCollide*(game: var Game) =
    var allColliders: seq[Collide]
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:

@@ -2,7 +2,7 @@ import game_types, vmath
 
 const Query = {HasTransform2d, HasHierarchy}
 
-proc sysTransform2d*(game: var Game, _delta: float32) =
+proc sysTransform2d*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
          update(game, i)

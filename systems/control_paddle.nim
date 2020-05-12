@@ -2,7 +2,7 @@ import game_types, vmath
 
 const Query = {HasMove, HasControlPaddle}
 
-proc sysControlPaddle*(game: var Game, _delta: float32) =
+proc sysControlPaddle*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
          update(game, i)
