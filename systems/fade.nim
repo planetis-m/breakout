@@ -1,0 +1,23 @@
+import game_types
+
+const Query = {HasTransform2d, HasFade, HasDraw2d}
+
+proc sysFade*(game: var Game, _delta: float32) =
+   for i in 0 ..< MaxEntities:
+      if game.world[i] * Query != {}:
+         update(game, i)
+
+proc update(game: var Game, entity: int) =
+   template transform: untyped = game.transform[entity]
+   template fade: untyped = game.fade[entity]
+   template draw: untyped = game.draw2d[entity]
+
+   if draw.color[3] > 0:
+      let step = 255.0 * fade.step
+      draw.color[3] = draw.color[3] - step.uint8
+      transform.scale.x -= fade.step
+      transform.scale.y -= fade.step
+      transform.dirty = true
+
+      if transform.scale.x <= 0.0:
+         game.delete(entity)
