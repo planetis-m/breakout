@@ -40,32 +40,33 @@ proc createEntity*(self: var Game): int =
    raise newException(ResourceExhaustedError, "No more entities available!")
 
 template `?=`(name, value): bool = (let name = value; name != -1)
-proc delete*(self: var Game, entity: int) =
-   if HasHierarchy in game.world[entity]:
-      template hierarchy: untyped = game.hierarchy[entity]
-      template parent: untyped = game.hierarchy[parentId]
-      template nextSibling: untyped = game.hierarchy[nextSiblingId]
-      template prevSibling: untyped = game.hierarchy[prevSiblingId]
-
-      let parentId = hierarchy.parent
-      if entity == parent.head: parent.head = hierarchy.next
-      if nextSiblingId ?= hierarchy.next: nextSibling.prev = hierarchy.prev
-      if prevSiblingId ?= hierarchy.prev: prevSibling.next = hierarchy.next
-
-   self.world[entity] = {}
-
-proc prepend*(game: var Game, parent, entity: int) =
+proc prependNode*(game: var Game, parentId, entity: int) =
    template hierarchy: untyped = game.hierarchy[entity]
    template parent: untyped = game.hierarchy[parentId]
    template headSibling: untyped = game.hierarchy[headSiblingId]
 
-   let parentId = hierarchy.parent
    hierarchy.prev = -1
    hierarchy.next = parent.head
    if headSiblingId ?= parent.head:
       assert headSibling.prev == -1
       headSibling.prev = entity
    parent.head = entity
+
+proc removeNode*(game: var Game, entity: int) =
+   template hierarchy: untyped = game.hierarchy[entity]
+   template parent: untyped = game.hierarchy[parentId]
+   template nextSibling: untyped = game.hierarchy[nextSiblingId]
+   template prevSibling: untyped = game.hierarchy[prevSiblingId]
+
+   let parentId = hierarchy.parent
+   if entity == parent.head: parent.head = hierarchy.next
+   if nextSiblingId ?= hierarchy.next: nextSibling.prev = hierarchy.prev
+   if prevSiblingId ?= hierarchy.prev: prevSibling.next = hierarchy.next
+
+proc delete*(self: var Game, entity: int) =
+   if HasHierarchy in game.world[entity]:
+      removeNode(game, entity)
+   self.world[entity] = {}
 
 proc update*(self: var Game, delta: float32) =
    sysControlBall(self, delta)
