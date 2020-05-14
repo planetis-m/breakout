@@ -35,7 +35,7 @@ proc initGame*(windowWidth, windowHeight: int): Game =
       shake: newSeq[Shake](MaxEntities),
       transform: newSeq[Transform2d](MaxEntities))
 
-proc sysEngine(self: var Game) =
+proc engine(self: var Game) =
    # The Game engine that consist of these systems
    sysHandleInput(self)
    sysControlBall(self)
@@ -47,12 +47,12 @@ proc sysEngine(self: var Game) =
    sysTransform2d(self)
    sysCollide(self)
 
-proc sysRender(self: var Game, intrpl: float32) =
+proc render(self: var Game, intrpl: float32) =
    # The Render engine that consist of these systems
    sysPredict(self, intrpl)
    sysDraw2d(self, intrpl)
 
-proc start(self: var Game) =
+proc run(self: var Game) =
    const
       ticksPerSec = 25
       skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
@@ -63,11 +63,11 @@ proc start(self: var Game) =
       let now = getMonoTime().ticks
       var framesSkipped = 0
       while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-         self.sysEngine()
+         self.engine()
          lastTime += skippedTicks
          framesSkipped.inc
 
-      self.sysRender(float32(now - lastTime) / skippedTicks.float32))
+      self.render(float32(now - lastTime) / skippedTicks.float32))
       self.canvas.present()
 
 proc main =
@@ -75,6 +75,6 @@ proc main =
    var game = initGame(640, 480)
 
    sceneMain(game)
-   game.start()
+   game.run()
 
 main()
