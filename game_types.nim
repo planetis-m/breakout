@@ -13,6 +13,7 @@ type
       HasFade,
       HasHierarchy,
       HasMove,
+      HasPredict,
       HasShake,
       HasTransform2d
 
@@ -46,6 +47,10 @@ type
       direction*: Vec2
       speed*: float32
 
+   Predict* = object
+      world*: Mat2d # Matrix relative to the world
+      dirty*: bool
+
    Shake* = object
       duration*: float32
       strength*: float32
@@ -77,5 +82,6 @@ type
       fade*: seq[Fade]
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
+      predict*: seq[Predict]
       shake*: seq[Shake]
       transform*: seq[Transform2d]

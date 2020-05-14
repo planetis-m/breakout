@@ -9,7 +9,7 @@ else:
 
 type
    Subsystem* = enum
-      Timer, Audio, Video, Joystick, Haptic, Gamecontroller
+      Dummy, Timer, Audio = 4, Video, Joystick = 9, Haptic = 12, Gamecontroller
 
    Scancode* = enum
       A = 4, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V,
@@ -172,18 +172,21 @@ type
          code*: int32
          data1*, data2*: pointer
 
-   Canvas = object
-      target: Window
-      context: RendererPtr
+   Canvas* = object
+      target*: Window
+      context*: Renderer
 
-   Window = object
+   Window* = object
       impl: WindowPtr
 
-proc `=destroy`(canvas: var Canvas) =
-   if canvas.impl != nil:
-      sdl_destroyRenderer(canvas.impl)
-      canvas.impl = nil
-proc `=`(canvas: var Canvas; original: Canvas) {.error.}
+   Renderer* = object
+      impl: RendererPtr
+
+proc `=destroy`(renderer: var Renderer) =
+   if renderer.impl != nil:
+      sdl_destroyRenderer(renderer.impl)
+      renderer.impl = nil
+proc `=`(renderer: var Renderer; original: Renderer) {.error.}
 
 proc `=destroy`(window: var Window) =
    if window.impl != nil:
