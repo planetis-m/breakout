@@ -4,7 +4,7 @@ proc sysHandleInput(self: var Game) =
    for event in self.eventPump.poll():
       if event.kind == QuitEvent or (event.kind == KeyDown and
             event.scancode == Escape):
-         game.running = false
+         self.running = false
          return
       elif event.kind == KeyDown and not event.repeat:
          case event.scancode

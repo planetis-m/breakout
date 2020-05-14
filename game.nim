@@ -1,6 +1,6 @@
 import math, random, monotimes, sdl, game_types, scene_main
 import systems / [collide, control_ball, control_brick, control_paddle,
-   draw2d, fade, framerate, move, shake, transform2d]
+   draw2d, fade, framerate, handle_input, move, shake, transform2d]
 
 proc initGame*(windowWidth, windowHeight: int): Game =
    let sdlContext = sdlInit()
@@ -59,8 +59,8 @@ proc removeNode*(game: var Game, entity: int) =
    template nextSibling: untyped = game.hierarchy[nextSiblingId]
    template prevSibling: untyped = game.hierarchy[prevSiblingId]
 
-   let parentId = hierarchy.parent
-   if entity == parent.head: parent.head = hierarchy.next
+   if parentId ?= hierarchy.parent and
+         entity == parent.head: parent.head = hierarchy.next
    if nextSiblingId ?= hierarchy.next: nextSibling.prev = hierarchy.prev
    if prevSiblingId ?= hierarchy.prev: prevSibling.next = hierarchy.next
 
@@ -69,7 +69,8 @@ proc delete*(self: var Game, entity: int) =
       removeNode(game, entity)
    self.world[entity] = {}
 
-proc update*(self: var Game) =
+proc sysEngine*(self: var Game) =
+   # The Game engine that consist of these systems
    sysHandleInput(self)
    sysControlBall(self)
    sysControlBrick(self)
@@ -91,7 +92,7 @@ proc start(self: var Game) =
       let now = getMonoTime().ticks
       var framesSkipped = 0
       while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-         self.update()
+         self.sysEngine()
          lastTime += skippedTicks
          framesSkipped.inc
 
