@@ -1,4 +1,4 @@
-import math, random, times, monotimes, sdl, game_types, scene_main
+import math, random, monotimes, sdl, game_types, scene_main
 import systems / [collide, control_ball, control_brick, control_paddle,
    draw2d, fade, framerate, move, shake, transform2d]
 
@@ -81,10 +81,10 @@ proc update*(self: var Game) =
 proc start*(self: var Game) =
    const
       ticksPerSec = 25
-      skipTicks = 1000 div ticksPerSec
-      maxFrameSkip = 5 # 20% of ticksPerSec
+      skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
+      maxFramesSkipped = 5 # 20% of ticksPerSec
 
-   var lastTime = getMonoTime()
+   var lastTime = getMonoTime().ticks
    block running:
       while true:
          for event in game.eventPump.poll():
@@ -104,14 +104,14 @@ proc start*(self: var Game) =
                of ArrowRight, KeyD:
                   self.inputState[ArrowRight] = false
 
-         let now = getMonoTime()
-         var frameSkip = 0
-         while now - lastTime > skipTicks and frameSkip < maxFrameSkip:
+         let now = getMonoTime().ticks
+         var framesSkipped = 0
+         while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
             self.update()
-            lastTime += initDuration(skipTicks)
-            frameSkip.inc
+            lastTime += skippedTicks
+            framesSkipped.inc
 
-         self.sysDraw2d(inMilliseconds((now - lastTime) div skipTicks).float32)
+         self.sysDraw2d(float32(now - lastTime) / skippedTicks.float32))
          self.canvas.present()
 
 proc main =
