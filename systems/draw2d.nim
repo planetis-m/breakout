@@ -15,10 +15,16 @@ proc update(game: var Game, entity: int, intrpl: float32) =
    let width = int(draw2d.width.float32 * transform.scale.x)
    let height = int(draw2d.height.float32 * transform.scale.y)
 
-   let translation = getTranslation(transform.world)
+   var prediction = getTranslation(transform.world)
+   if HasMove in game.world[entity]:
+      template move: untyped = game.move[entity]
+      if move.direction.x != 0.0 or move.direction.y != 0.0:
+         prediction.x += move.direction.x * move.speed * intrpl
+         prediction.y += move.direction.y * move.speed * intrpl
+
    game.canvas.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
    game.canvas.fillRect((
-      (translation.x + intrpl).int32 - int32(width / 2),
-      (translation.y + intrpl).int32 - int32(height / 2),
+      prediction.x.int32 - int32(width / 2),
+      prediction.y.int32 - int32(height / 2),
       width.int32,
       height.int32))
