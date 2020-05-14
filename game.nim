@@ -14,6 +14,7 @@ proc initGame*(windowWidth, windowHeight: int): Game =
    let eventPump = sdlContext.eventInit()
 
    result = Game(
+      running: true,
       world: newSeq[set[HasComponent]](MaxEntities),
 
       windowWidth: windowWidth,
@@ -69,6 +70,7 @@ proc delete*(self: var Game, entity: int) =
    self.world[entity] = {}
 
 proc update*(self: var Game) =
+   sysHandleInput(self)
    sysControlBall(self)
    sysControlBrick(self)
    sysControlPaddle(self)
@@ -78,41 +80,23 @@ proc update*(self: var Game) =
    sysTransform2d(self)
    sysCollide(self)
 
-proc start*(self: var Game) =
+proc start(self: var Game) =
    const
       ticksPerSec = 25
       skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
       maxFramesSkipped = 5 # 20% of ticksPerSec
 
    var lastTime = getMonoTime().ticks
-   block running:
-      while true:
-         for event in game.eventPump.poll():
-            if event.kind == QuitEvent or (event.kind == KeyDown and
-                  event.scancode == Escape):
-               break running
-            elif event.kind == KeyDown and not event.repeat:
-               case event.scancode
-               of ArrowLeft, KeyA:
-                  self.inputState[ArrowLeft] = true
-               of ArrowRight, KeyD:
-                  self.inputState[ArrowRight] = true
-            elif event.kind == KeyUp and not event.repeat:
-               case event.scancode
-               of ArrowLeft, KeyA:
-                  self.inputState[ArrowLeft] = false
-               of ArrowRight, KeyD:
-                  self.inputState[ArrowRight] = false
+   while self.running:
+      let now = getMonoTime().ticks
+      var framesSkipped = 0
+      while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
+         self.update()
+         lastTime += skippedTicks
+         framesSkipped.inc
 
-         let now = getMonoTime().ticks
-         var framesSkipped = 0
-         while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-            self.update()
-            lastTime += skippedTicks
-            framesSkipped.inc
-
-         self.sysDraw2d(float32(now - lastTime) / skippedTicks.float32))
-         self.canvas.present()
+      self.sysDraw2d(float32(now - lastTime) / skippedTicks.float32))
+      self.canvas.present()
 
 proc main =
    randomize()

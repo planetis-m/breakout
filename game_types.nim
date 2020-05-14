@@ -59,6 +59,7 @@ type
       dirty*: bool
 
    Game* = object
+      running*: bool
       world*: seq[set[HasComponent]]
       camera*: int
 
