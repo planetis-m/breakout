@@ -5,6 +5,9 @@ type
       x*: float32
       y*: float32
 
+func lerp*(a: float32, b: float32, v: float32): float32 =
+   result = a * (1.0 - v) + b * v
+
 func vec2*(x, y: float32): Vec2 =
    result = Vec2(x: x, y: y)
 

@@ -2,12 +2,12 @@ import game_types, vmath
 
 const Query = {HasTransform2d, HasHierarchy}
 
-proc sysTransform2d*(game: var Game) =
+proc sysTransform2d*(game: var Game, isFirst: bool) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i)
+         update(game, i, isFirst)
 
-proc update(game: var Game, entity: int) =
+proc update(game: var Game, entity: int, isFirst: bool) =
    template `?=`(name, value): bool = (let name = value; name != -1)
    template transform: untyped = game.transform[entity]
    template hierarchy: untyped = game.hierarchy[entity]
@@ -26,6 +26,9 @@ proc update(game: var Game, entity: int) =
       let translated = fromTranslation(transform.translation)
       let translatedAndRotaded = rotate(translated, transform.rotation)
       let translatedRotatedAndScaled = scale(translatedAndRotaded, transform.scale)
+
+      if isFirst and HasPrevious in game.world[entity]:
+         previous.world = transform.world
 
       if parentId ?= hierarchy.parent:
          template parentTransform: untyped = game.transform[parentId]

@@ -13,7 +13,7 @@ type
       HasFade,
       HasHierarchy,
       HasMove,
-      HasPredict,
+      HasPrevious,
       HasShake,
       HasTransform2d
 
@@ -47,9 +47,8 @@ type
       direction*: Vec2
       speed*: float32
 
-   Predict* = object
-      world*: Mat2d # Matrix relative to the world
-      dirty*: bool
+   Previous* = object
+      world*: Mat2d
 
    Shake* = object
       duration*: float32

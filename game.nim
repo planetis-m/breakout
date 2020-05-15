@@ -31,11 +31,11 @@ proc initGame*(windowWidth, windowHeight: int): Game =
       fade: newSeq[Fade](MaxEntities),
       hierarchy: newSeq[Hierarchy](MaxEntities),
       move: newSeq[Move](MaxEntities),
-      predict: newSeq[Predict](MaxEntities),
+      previous: newSeq[Previous](MaxEntities),
       shake: newSeq[Shake](MaxEntities),
       transform: newSeq[Transform2d](MaxEntities))
 
-proc engine(self: var Game) =
+proc update(self: var Game, isFirst: bool) =
    # The Game engine that consist of these systems
    sysHandleInput(self)
    sysControlBall(self)
@@ -44,12 +44,10 @@ proc engine(self: var Game) =
    sysShake(self)
    sysFade(self)
    sysMove(self)
-   sysTransform2d(self)
+   sysTransform2d(self, isFirst)
    sysCollide(self)
 
 proc render(self: var Game, intrpl: float32) =
-   # The Render engine that consist of these systems
-   sysPredict(self, intrpl)
    sysDraw2d(self, intrpl)
 
 proc run(self: var Game) =
@@ -59,16 +57,18 @@ proc run(self: var Game) =
       maxFramesSkipped = 5 # 20% of ticksPerSec
 
    var lastTime = getMonoTime().ticks
-   while self.running:
-      let now = getMonoTime().ticks
-      var framesSkipped = 0
-      while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-         self.engine()
-         lastTime += skippedTicks
-         framesSkipped.inc
+   block outer:
+      while true:
+         let now = getMonoTime().ticks
+         var framesSkipped = 0
+         while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
+            self.update(framesSkipped == 0)
+            if not self.running: break outer
+            lastTime += skippedTicks
+            framesSkipped.inc
 
-      self.render(float32(now - lastTime) / skippedTicks.float32))
-      self.canvas.present()
+         self.render(float32(now - lastTime) / skippedTicks.float32))
+         self.canvas.present()
 
 proc main =
    randomize()
