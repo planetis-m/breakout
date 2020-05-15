@@ -9,7 +9,7 @@ else:
 
 type
    Subsystem* = enum
-      Dummy, Timer, Audio = 4, Video, Joystick = 9, Haptic = 12, Gamecontroller
+      Dummy, Timer, Audio = 4, Video, Joystick = 9, Haptic = 12, Gamecontroller, Events
 
    Scancode* = enum
       A = 4, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V,
@@ -182,14 +182,86 @@ type
    Renderer* = object
       impl: RendererPtr
 
+   SdlContext* = ref SdlContextObj
+   SdlContextObj = object
+
+   EventPump* = ref EventPumpObj
+   EventPumpObj = object
+
+   ObjectAlreadyInitialized* = object of Defect
+   SdlError* = object of CatchableError
+
+var
+   isSdlContextAlive: bool
+   isEventPumpAlive: bool
+
+proc `=destroy`(context: var SdlContextObj) =
+   assert isSdlContextAlive
+   SDL_quit()
+   isSdlContextAlive = false
+
+proc sdlInit*(): SdlContext =
+   if isSdlContextAlive:
+      raise newException(ObjectAlreadyInitialized,
+            "Cannot initialize `SdlContext` more than once at a time.")
+   else:
+      if SDL_Init(0) == 0:
+         # Initialize SDL without any explicit subsystems (flags = 0).
+         isSdlContextAlive = true
+         result = SdlContext()
+      else:
+         raise newException(SdlError, $SDL_getError())
+
+template subsystem(system, flag, noCopy = true) =
+   type
+      system* = ref `system Obj`
+      `system Obj` = object
+
+   proc `=destroy`(self: var `system Obj`) =
+      SDL_QuitSubSystem(flag)
+   when noCopy:
+      proc `=`(self: var `system Obj`; original: `system Obj`) {.error.}
+
+   proc `init flag`*(context: SdlContext): system =
+      if SDL_InitSubSystem(flag) == 0:
+         result = system(sdl: SdlContext)
+      else:
+         raise newException(SdlError, $SDL_getError())
+
+subsystem(AudioSubsystem, Audio)
+subsystem(GameControllerSubsystem, Gamecontroller)
+subsystem(HapticSubsystem, Haptic)
+subsystem(JoystickSubsystem, Joystick)
+subsystem(VideoSubsystem, Video)
+# Timers can be added on other threads.
+subsystem(TimerSubsystem, Timer, false)
+# The event queue can be read from other threads.
+subsystem(EventSubsystem, Events, false)
+
+proc `=destroy`(context: var EventPumpObj) =
+   assert isEventPumpAlive
+   SDL_QuitSubSystem(Events)
+   isEventPumpAlive = false
+
+proc eventInit*(context: SdlContext): EventPump =
+   if isEventPumpAlive:
+      raise newException(ObjectAlreadyInitialized,
+            "Cannot initialize `EventPump` more than once at a time.")
+   else:
+      if SDL_InitSubSystem(Events) == 0:
+         isEventPumpAlive = true
+         result = EventPump(sdl: SdlContext)
+      else:
+         raise newException(SdlError, $SDL_getError())
+
 proc `=destroy`(renderer: var Renderer) =
    if renderer.impl != nil:
-      sdl_destroyRenderer(renderer.impl)
+      SDL_destroyRenderer(renderer.impl)
       renderer.impl = nil
 proc `=`(renderer: var Renderer; original: Renderer) {.error.}
 
 proc `=destroy`(window: var Window) =
    if window.impl != nil:
-      sdl_destroyWindow(window.impl)
+      SDL_destroyWindow(window.impl)
       window.impl = nil
 proc `=`(window: var Window; original: Window) {.error.}
