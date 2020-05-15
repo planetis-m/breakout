@@ -8,13 +8,13 @@ proc sysTransform2d*(game: var Game, isFirst: bool) =
          update(game, i, isFirst)
 
 proc update(game: var Game, entity: int, isFirst: bool) =
-   template `?=`(name, value): bool = (let name = value; name != -1)
+   template `?=`(name, value): bool = (let name = value; name > -1)
    template transform: untyped = game.transform[entity]
    template hierarchy: untyped = game.hierarchy[entity]
 
    if transform.dirty:
       var childEntityId = hierarchy.head
-      while childEntityId != -1:
+      while childEntityId > -1:
          template childTransform: untyped = game.transform[childEntityId]
          template childHierarchy: untyped = game.hierarchy[childEntityId]
 

@@ -35,6 +35,7 @@ proc sysCollide*(game: var Game) =
       if game.world[i] * Query != {}:
          template transform: untyped = game.transform[i]
          template collider: untyped = game.collide[i]
+
          collider.collision = none[Collision]()
          computeAabb(transform, collider)
          allColliders.add(collider)

@@ -20,9 +20,8 @@ proc update(game: var Game, entity: int, intrpl: float32) =
    if HasPrevious in game.world[entity]:
       template previous: untyped = game.previous[entity]
 
-      let previous = getTranslation(previous.world)
-      let current = getTranslation(transform.world)
-      position = vec2(lerp(previous.x, current.x, intrpl), lerp(previous.y, current.y, intrpl))
+      position = vec2(lerp(previous.world.m11, transform.world.m11, intrpl),
+            lerp(previous.world.m12, transform.world.m12, intrpl))
    else:
       position = getTranslation(transform.world)
 

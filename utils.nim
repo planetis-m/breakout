@@ -6,7 +6,7 @@ proc createEntity*(self: var Game): int =
          return i
    raise newException(ResourceExhaustedError, "No more entities available!")
 
-template `?=`(name, value): bool = (let name = value; name != -1)
+template `?=`(name, value): bool = (let name = value; name > -1)
 proc prependNode*(game: var Game, parentId, entity: int) =
    template hierarchy: untyped = game.hierarchy[entity]
    template parent: untyped = game.hierarchy[parentId]

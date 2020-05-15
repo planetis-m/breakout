@@ -67,7 +67,7 @@ proc run(self: var Game) =
             lastTime += skippedTicks
             framesSkipped.inc
 
-         self.render(float32(now - lastTime) / skippedTicks.float32))
+         self.render(float32(now - lastTime + skippedTicks) / skippedTicks.float32))
          self.canvas.present()
 
 proc main =

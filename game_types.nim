@@ -81,6 +81,6 @@ type
       fade*: seq[Fade]
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
-      predict*: seq[Predict]
+      previous*: seq[Previous]
       shake*: seq[Shake]
       transform*: seq[Transform2d]
