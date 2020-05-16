@@ -25,6 +25,7 @@ proc mixFade*(self: var Game, entity: int, step = 0.0) =
 
 proc mixHierarchy*(self: var Game, entity: int, parent = self.camera) =
    self.world[entity].incl HasHierarchy
+   self.hierarchy[entity] = Hierarchy(parent: parent)
    if parent > -1: prependNode(self, parent, entity)
 
 proc mixMove*(self: var Game, entity: int, direction = vec2(0, 0), speed = 100.0) =
@@ -53,11 +54,10 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
 
 proc transformBlueprint(result, game, entity, parent, n: NimNode) =
    let transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
-
    let hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity)
-   if parent.kind != nnkNone: hierarchy.add parent
-
    let resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
+
+   if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
    resBody.add(transform, hierarchy,
          newTree(nnkCall, bindSym"mixPrevious", game, entity))
 
@@ -66,12 +66,12 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
 
 proc transformChildren(game, entity, parent, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =
-      expectKind n, nnkCall
+      expectMinLen n, 1
       result = copyNimNode(n)
       result.add n[0]
       result.add game
       result.add entity
-      for i in 1..<n.len: result.add n[i]
+      for i in 1 ..< n.len: result.add n[i]
 
    if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
       case $n[0]
