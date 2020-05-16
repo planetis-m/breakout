@@ -52,11 +52,12 @@ proc mixTransform2d*(self: var Game, entity: int, translation = vec2(0, 0),
 proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimNode
 
 proc transformBlueprint(result, game, entity, parent, n: NimNode) =
-   let
-      transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
-      hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity)
-      resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
+   let transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
 
+   let hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity)
+   if parent.kind != nnkNone: hierarchy.add parent
+
+   let resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
    resBody.add(transform, hierarchy,
          newTree(nnkCall, bindSym"mixPrevious", game, entity))
 
@@ -65,16 +66,12 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
 
 proc transformChildren(game, entity, parent, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =
-      if n.kind in nnkCallKinds:
-         result = copyNimNode(n)
-         result.add n[0]
-         result.add game
-         result.add entity
-         for i in 1..<n.len: result.add n[i]
-      else:
-         result = newNimNode(nnkCall, n)
-         result.add n
-         result.add entity
+      expectKind n, nnkCall
+      result = copyNimNode(n)
+      result.add n[0]
+      result.add game
+      result.add entity
+      for i in 1..<n.len: result.add n[i]
 
    if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
       case $n[0]
@@ -82,13 +79,10 @@ proc transformChildren(game, entity, parent, n: NimNode): NimNode =
          expectLen n, 2
          result = newTree(nnkStmtList)
          let temp = genSym(nskTemp)
-
          transformBlueprint(result, game, temp, entity, n[1])
-         result[^1][2].add entity # add to hierarchy.parent
          return
       of "entity":
          expectLen n, 2
-
          let temp = genSym(nskTemp)
          result = newStmtList(newLetStmt(temp, foreignCall(n[1], game, entity)))
          return
