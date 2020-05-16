@@ -212,7 +212,7 @@ proc sdlInit*(): SdlContext =
       else:
          raise newException(SdlError, $SDL_getError())
 
-template subsystem(system, flag, noCopy = true) =
+template subsystem(system, flag; noCopy = true) =
    type
       system* = ref `system Obj`
       `system Obj` = object
