@@ -1,6 +1,6 @@
 import game_types, vmath
 
-const Query = {HasTransform2d, HasHierarchy}
+const Query = {HasTransform2d, HasPrevious, HasHierarchy}
 
 proc sysTransform2d*(game: var Game, isFirst: bool) =
    for i in 0 ..< MaxEntities:
@@ -27,8 +27,7 @@ proc update(game: var Game, entity: int, isFirst: bool) =
       let translatedAndRotaded = rotate(translated, transform.rotation)
       let translatedRotatedAndScaled = scale(translatedAndRotaded, transform.scale)
 
-      if isFirst and HasPrevious in game.world[entity]:
-         previous.world = transform.world
+      if isFirst: previous.world = transform.world
 
       if parentId ?= hierarchy.parent:
          template parentTransform: untyped = game.transform[parentId]

@@ -1,4 +1,4 @@
-import math, random, monotimes, sdl, game_types, scene_main
+import math, random, monotimes, sdl, game_types, blueprints
 import systems / [collide, control_ball, control_brick, control_paddle,
    draw2d, fade, framerate, handle_input, move, shake, transform2d]
 

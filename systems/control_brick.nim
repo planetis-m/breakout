@@ -1,4 +1,4 @@
-import game_types, options
+import game_types, options, blueprints
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
