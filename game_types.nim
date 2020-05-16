@@ -1,4 +1,4 @@
-import options, sdl_private, vmath
+import options, vmath
 
 const
    MaxEntities* = 10000
@@ -69,11 +69,11 @@ type
 
       windowWidth*, windowHeight*: int
 
-      canvas*: Canvas
-      eventPump*: EventPump
+#       canvas*: Canvas
+#       eventPump*: EventPump
 
       clearColor*: array[4, uint8]
-      inputState*: array[ArrowLeft..ArrowRight, bool]
+#       inputState*: array[ArrowLeft..ArrowRight, bool]
 
       collide*: seq[Collide]
       controlBall*: seq[ControlBall]

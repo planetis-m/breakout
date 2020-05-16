@@ -15,8 +15,6 @@ proc mixPrevious(self: var Game, entity: int) = discard
 proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimNode
 
 proc transformBlueprint(result, game, entity, parent, n: NimNode) =
-   result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game))
-
    let
       transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
       hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity)
@@ -25,6 +23,7 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
    resBody.add(transform, hierarchy,
          newTree(nnkCall, bindSym"mixPrevious", game, entity))
 
+   result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game))
    result.add resBody
 
 proc transformChildren(game, entity, parent, n: NimNode): NimNode =
@@ -36,6 +35,7 @@ proc transformChildren(game, entity, parent, n: NimNode): NimNode =
          let temp = genSym(nskTemp)
 
          transformBlueprint(result, game, temp, entity, n[1])
+         result[^1][2].add entity # add to hierarchy.parent
          return
       of "entity":
          expectLen n, 2
@@ -115,6 +115,7 @@ proc getPaddle(game: var Game, parent = -1, x, y: float32): int =
          ControlBrick()
       children:
          blueprint:
+            rotation = 5.0'f32
             with ControlBall(angle: angle)
 
 proc getPaddle2(game: var Game, parent = -1, x, y: float32): int =
@@ -130,5 +131,5 @@ proc getPaddle2(game: var Game, parent = -1, x, y: float32): int =
       let temp = createEntity(game)
       mixControlBall(game, temp, angle)
       mixTransform2d(game, temp)
-      #mixHierarchy(game, temp, entity)
+      mixHierarchy(game, temp, entity)
       entity
