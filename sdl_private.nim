@@ -50,7 +50,7 @@ type
       FocusGained, FocusLost, Close,
       TakeFocus, HitTest
 
-   MouseButton* = object
+   MouseButton* = enum
       Unknown, Left, Middle, Right, X1, X2
 
    MouseWheelDirection* = enum
@@ -187,6 +187,7 @@ type
 
    EventPump* = ref EventPumpObj
    EventPumpObj = object
+      sdl: SdlContext
 
    ObjectAlreadyInitialized* = object of Defect
    SdlError* = object of CatchableError
@@ -200,7 +201,7 @@ proc `=destroy`(context: var SdlContextObj) =
    SDL_quit()
    isSdlContextAlive = false
 
-proc sdlInit*(): SdlContext =
+proc initSdl*(): SdlContext =
    if isSdlContextAlive:
       raise newException(ObjectAlreadyInitialized,
             "Cannot initialize `SdlContext` more than once at a time.")
@@ -212,10 +213,11 @@ proc sdlInit*(): SdlContext =
       else:
          raise newException(SdlError, $SDL_getError())
 
-template subsystem(system, flag; noCopy = true) =
+template subsystem(system, flag: untyped, noCopy = true) =
    type
       system* = ref `system Obj`
       `system Obj` = object
+         sdl: SdlContext
 
    proc `=destroy`(self: var `system Obj`) =
       SDL_QuitSubSystem(flag)
@@ -243,7 +245,7 @@ proc `=destroy`(context: var EventPumpObj) =
    SDL_QuitSubSystem(Events)
    isEventPumpAlive = false
 
-proc eventInit*(context: SdlContext): EventPump =
+proc initEventPump*(context: SdlContext): EventPump =
    if isEventPumpAlive:
       raise newException(ObjectAlreadyInitialized,
             "Cannot initialize `EventPump` more than once at a time.")
