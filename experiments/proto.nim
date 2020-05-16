@@ -12,53 +12,65 @@ proc mixTransform2d(game: var Game, entity: int, translation = vec2(0, 0),
 proc mixHierarchy(self: var Game, entity: int, parent = -1) = discard
 proc mixPrevious(self: var Game, entity: int) = discard
 
-proc transformBlueprint(result, n: NimNode): NimNode =
-   let entity = genSym(nskLet, "blueprintResult")
-   result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game)
-   let transParam = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
-   let resBody = blueprintImpl(game, entity, newTree(nnkNone), transParam, body)
-   resBody.add transParam
-   resBody.add newTree(nnkCall, bindSym"mixHierarchy", game, entity, b.parent)
-   resBody.add newTree(nnkCall, bindSym"mixPrevious", game, entity)
+proc blueprintImpl(game: NimNode, entity, parent: var NimNode, transform,
+      hierarchy, n: NimNode): NimNode
+
+proc transformBlueprint(result, game: NimNode, entity, parent: var NimNode,
+      n: NimNode) =
+   result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game))
+
+   let
+      transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
+      hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity, parent)
+      resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
+
+   resBody.add(transform, hierarchy,
+         newTree(nnkCall, bindSym"mixPrevious", game, entity))
 
    result.add resBody
    result.add entity
 
-proc transformChildren(game, n: NimNode): NimNode =
+proc transformChildren(game: NimNode, entity, parent: var NimNode,
+      n: NimNode): NimNode =
    if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
       case $n[0]
       of "blueprint":
          expectLen n, 2
          result = newTree(nnkStmtList)
+         var temp = genSym(nskTemp)
 
-         transformBlueprint(result, n[1])
+         transformBlueprint(result, game, temp, entity, n[1])
          return
       of "entity":
          expectLen n, 2
-         result = newTree(nnkStmtList)
+
+         var temp = genSym(nskTemp)
+         result = newStmtList(newLetStmt(temp, n[1]),
+               newTree(nnkCall, bindSym"mixHierarchy", game, temp, entity))
          return
 
    result = copyNimNode(n)
    for i in 0 ..< n.len:
-      result.add transformChildren(game, parent, n[i])
+      result.add transformChildren(game, entity, parent, n[i])
 
-proc blueprintImpl(game, entity, parent, n: NimNode): NimNode =
+proc blueprintImpl(game: NimNode, entity, parent: var NimNode, transform,
+      hierarchy, n: NimNode): NimNode =
    expectKind n, nnkStmtList
    expectMinLen n, 1
 
    proc mixinCall(n: NimNode): NimNode =
       expectMinLen n, 1
-      result = newCall(bindSym("mix" & n[0].strVal))
+      result = newCall("mix" & n[0].strVal)
       if n.kind == nnkObjConstr:
          for i in 1 ..< n.len:
             result.add newTree(nnkExprEqExpr, n[i][0], n[i][1])
 
-   proc handleStmtList(result, n: NimNode): NimNode =
+   proc handleStmtList(result, n: NimNode) =
       for a in n:
          if a.kind in {nnkStmtList, nnkStmtListExpr}:
             handleStmtList(result, a)
          else:
-            result.add mixinCall(call)
+            result.add mixinCall(a)
 
    if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
       case $n[0]
@@ -72,7 +84,7 @@ proc blueprintImpl(game, entity, parent, n: NimNode): NimNode =
          return
       of "children":
          expectLen n, 2
-         result = transformChildren(game, n[1])
+         result = transformChildren(game, entity, parent, n[1])
          return
    elif n.kind == nnkAsgn and n[0].kind == nnkIdent:
       case $n[0]
@@ -80,16 +92,19 @@ proc blueprintImpl(game, entity, parent, n: NimNode): NimNode =
          transform.add newTree(nnkExprEqExpr, n[0], n[1])
          return
       of "parent":
+         parent = n[1]
          hierarchy.add newTree(nnkExprEqExpr, n[0], n[1])
          return
 
    result = copyNimNode(n)
    for i in 0 ..< n.len:
-      result.add blueprintImpl(game, parent, n[i])
+      result.add blueprintImpl(game, entity, parent, transform, hierarchy, n[i])
 
 macro addBlueprint(game: Game, body: untyped): int =
    result = newTree(nnkStmtListExpr)
-   transformBlueprint(result, body)
+   var entity = genSym(nskLet, "blueprintResult")
+   var parent = newTree(nnkNone)
+   transformBlueprint(result, game, entity, parent, body)
    echo result.repr
 
 proc getPaddle(game: var Game, parent = -1, x, y: float32): int =
