@@ -60,13 +60,13 @@ proc sceneMain*(self: var Game) =
    self.camera = self.addBlueprint:
       with(Shake(duration: 0.0, strength: 20.0))
       children:
-         entity(getPaddle(self, float32(self.windowWidth / 2),
+         entity(getPaddle(float32(self.windowWidth / 2),
                float32(self.windowHeight - 30)))
-         entity(getBall(self, float32(self.windowWidth / 2),
+         entity(getBall(float32(self.windowWidth / 2),
                float32(self.windowHeight - 60)))
 
          for row in 0 ..< rowCount:
             let y = startingY + row * (brickHeight + margin) + brickHeight div 2
             for col in 0 ..< columnCount:
                let x = startingX + col * (brickWidth + margin) + brickWidth div 2
-               entity(getBrick(self, x.float32, y.float32, brickWidth.int32, brickHeight.int32))
+               entity(getBrick(x.float32, y.float32, brickWidth.int32, brickHeight.int32))
