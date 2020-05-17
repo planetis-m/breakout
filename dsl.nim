@@ -92,8 +92,6 @@ proc transformChildren(game, entity, parent, n: NimNode): NimNode =
       result.add transformChildren(game, entity, parent, n[i])
 
 proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimNode =
-   expectMinLen n, 1
-
    proc mixinCall(game, entity, n: NimNode): NimNode =
       expectMinLen n, 1
       result = newCall("mix" & n[0].strVal, game, entity)
@@ -108,6 +106,7 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
          else:
             result.add mixinCall(game, entity, a)
 
+   expectMinLen n, 1
    if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
       case $n[0]
       of "with":
@@ -126,7 +125,7 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
       case $n[0]
       of "translation", "rotation", "scale":
          transform.add newTree(nnkExprEqExpr, n[0], n[1])
-         result = newTree(nnkNone)
+         result = newTree(nnkNone) # tmps here?
          return
       of "parent":
          hierarchy.add newTree(nnkExprEqExpr, n[0], n[1])
