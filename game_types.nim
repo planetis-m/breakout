@@ -1,7 +1,7 @@
 import options, sdl_private, vmath
 
 const
-   MaxEntities* = 10000
+   MaxEntities* = 10_000
 
 type
    HasComponent* = enum

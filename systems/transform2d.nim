@@ -11,6 +11,7 @@ proc update(game: var Game, entity: int, isFirst: bool) =
    template `?=`(name, value): bool = (let name = value; name > -1)
    template transform: untyped = game.transform[entity]
    template hierarchy: untyped = game.hierarchy[entity]
+   template previous: untyped = game.previous[entity]
 
    if transform.dirty:
       var childEntityId = hierarchy.head

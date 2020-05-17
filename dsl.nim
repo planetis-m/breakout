@@ -106,7 +106,6 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
          else:
             result.add mixinCall(game, entity, a)
 
-   expectMinLen n, 1
    if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
       case $n[0]
       of "with":
