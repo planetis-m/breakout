@@ -1,8 +1,8 @@
 import game_types
 
-proc createEntity*(self: var Game): int =
+proc createEntity*(game: var Game): int =
    for i in 0 ..< MaxEntities:
-      if self.world[i] == {}:
+      if game.world[i] == {}:
          return i
    raise newException(ResourceExhaustedError, "No more entities available!")
 
@@ -30,7 +30,7 @@ proc removeNode*(game: var Game, entity: int) =
    if nextSiblingId ?= hierarchy.next: nextSibling.prev = hierarchy.prev
    if prevSiblingId ?= hierarchy.prev: prevSibling.next = hierarchy.next
 
-proc delete*(self: var Game, entity: int) =
-   if HasHierarchy in self.world[entity]:
-      removeNode(self, entity)
-   self.world[entity] = {}
+proc delete*(game: var Game, entity: int) =
+   if HasHierarchy in game.world[entity]:
+      removeNode(game, entity)
+   game.world[entity] = {}

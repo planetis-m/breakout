@@ -1,50 +1,50 @@
 import macros, game_types, math, vmath, utils
 
-proc mixCollide*(self: var Game, entity: int, size = vec2(0, 0)) =
-   self.world[entity].incl HasCollide
-   self.collide[entity] = Collide(entity: entity, size: size,
+proc mixCollide*(game: var Game, entity: int, size = vec2(0, 0)) =
+   game.world[entity].incl HasCollide
+   game.collide[entity] = Collide(entity: entity, size: size,
          collision: Collision(entity: -1))
 
-proc mixControlBall*(self: var Game, entity: int, angle = Pi * 0.33) =
-   self.world[entity].incl HasControlBall
-   self.controlBall[entity] = ControlBall(direction: vec2(cos(angle), sin(angle)))
+proc mixControlBall*(game: var Game, entity: int, angle = Pi * 0.33) =
+   game.world[entity].incl HasControlBall
+   game.controlBall[entity] = ControlBall(direction: vec2(cos(angle), sin(angle)))
 
-proc mixControlBrick*(self: var Game, entity: int) =
-   self.world[entity].incl HasControlBrick
+proc mixControlBrick*(game: var Game, entity: int) =
+   game.world[entity].incl HasControlBrick
 
-proc mixControlPaddle*(self: var Game, entity: int) =
-   self.world[entity].incl HasControlPaddle
+proc mixControlPaddle*(game: var Game, entity: int) =
+   game.world[entity].incl HasControlPaddle
 
-proc mixDraw2d*(self: var Game, entity: int, width, height = 100'i32,
+proc mixDraw2d*(game: var Game, entity: int, width, height = 100'i32,
       color = [255'u8, 0, 255, 255]) =
-   self.world[entity].incl HasDraw2d
-   self.draw2d[entity] = Draw2d(width: width, height: height, color: color)
+   game.world[entity].incl HasDraw2d
+   game.draw2d[entity] = Draw2d(width: width, height: height, color: color)
 
-proc mixFade*(self: var Game, entity: int, step = 0.0) =
-   self.world[entity].incl HasFade
-   self.fade[entity] = Fade(step: step)
+proc mixFade*(game: var Game, entity: int, step = 0.0) =
+   game.world[entity].incl HasFade
+   game.fade[entity] = Fade(step: step)
 
-proc mixHierarchy*(self: var Game, entity: int, parent = -1) =
-   self.world[entity].incl HasHierarchy
-   self.hierarchy[entity] = Hierarchy(parent: parent)
-   if parent > -1: prependNode(self, parent, entity)
+proc mixHierarchy*(game: var Game, entity: int, parent = -1) =
+   game.world[entity].incl HasHierarchy
+   game.hierarchy[entity] = Hierarchy(parent: parent)
+   if parent > -1: prependNode(game, parent, entity)
 
-proc mixMove*(self: var Game, entity: int, direction = vec2(0, 0), speed = 100.0) =
-   self.world[entity].incl HasMove
-   self.move[entity] = Move(direction: direction, speed: speed)
+proc mixMove*(game: var Game, entity: int, direction = vec2(0, 0), speed = 100.0) =
+   game.world[entity].incl HasMove
+   game.move[entity] = Move(direction: direction, speed: speed)
 
-proc mixPrevious*(self: var Game, entity: int) =
-   self.world[entity].incl HasPrevious
-   #self.previous[entity] = Previous(world: mat2d())
+proc mixPrevious*(game: var Game, entity: int) =
+   game.world[entity].incl HasPrevious
+   #game.previous[entity] = Previous(world: mat2d())
 
-proc mixShake*(self: var Game, entity: int, duration = 1.0, strength = 0.0) =
-   self.world[entity].incl HasShake
-   self.shake[entity] = Shake(duration: duration, strength: strength)
+proc mixShake*(game: var Game, entity: int, duration = 1.0, strength = 0.0) =
+   game.world[entity].incl HasShake
+   game.shake[entity] = Shake(duration: duration, strength: strength)
 
-proc mixTransform2d*(self: var Game, entity: int, translation = vec2(0, 0),
+proc mixTransform2d*(game: var Game, entity: int, translation = vec2(0, 0),
       rotation = 0.0, scale = vec2(1, 1)) =
-   self.world[entity].incl HasTransform2d
-   self.transform[entity] = Transform2D(world: mat2d(), self: mat2d(),
+   game.world[entity].incl HasTransform2d
+   game.transform[entity] = Transform2D(world: mat2d(), self: mat2d(),
          translation: translation, rotation: rotation, scale: scale, dirty: true)
 
 # ---------------

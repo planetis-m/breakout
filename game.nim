@@ -35,22 +35,22 @@ proc initGame*(windowWidth, windowHeight: int): Game =
       shake: newSeq[Shake](MaxEntities),
       transform: newSeq[Transform2d](MaxEntities))
 
-proc update(self: var Game, isFirst: bool) =
+proc update(game: var Game, isFirst: bool) =
    # The Game engine that consist of these systems
-   sysHandleInput(self)
-   sysControlBall(self)
-   sysControlBrick(self)
-   sysControlPaddle(self)
-   sysShake(self)
-   sysFade(self)
-   sysMove(self)
-   sysTransform2d(self, isFirst)
-   sysCollide(self)
+   sysHandleInput(game)
+   sysControlBall(game)
+   sysControlBrick(game)
+   sysControlPaddle(game)
+   sysShake(game)
+   sysFade(game)
+   sysMove(game)
+   sysTransform2d(game, isFirst)
+   sysCollide(game)
 
-proc render(self: var Game, intrpl: float32) =
-   sysDraw2d(self, intrpl)
+proc render(game: var Game, intrpl: float32) =
+   sysDraw2d(game, intrpl)
 
-proc run(self: var Game) =
+proc run(game: var Game) =
    const
       ticksPerSec = 25
       skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
@@ -62,13 +62,13 @@ proc run(self: var Game) =
          let now = getMonoTime().ticks
          var framesSkipped = 0
          while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-            self.update(framesSkipped == 0)
-            if not self.running: break outer
+            game.update(framesSkipped == 0)
+            if not game.running: break outer
             lastTime += skippedTicks
             framesSkipped.inc
 
-         self.render(float32(now - lastTime) / skippedTicks.float32))
-         self.canvas.present()
+         game.render(float32(now - lastTime) / skippedTicks.float32))
+         game.canvas.present()
 
 proc main =
    randomize()

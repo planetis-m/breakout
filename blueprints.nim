@@ -1,8 +1,8 @@
 import dsl, random, math, vmath, game_types
 
-proc getBall*(self: var Game, parent = self.camera, x, y: float32): int =
+proc getBall*(game: var Game, parent = game.camera, x, y: float32): int =
    let angle = Pi + rand(1.0) * Pi
-   result = self.addBlueprint:
+   result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       with:
@@ -11,8 +11,8 @@ proc getBall*(self: var Game, parent = self.camera, x, y: float32): int =
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
          Move(direction: Vec2(x: 1.0, y: 1.0), speed: 600.0)
 
-proc getBrick*(self: var Game, parent = self.camera, x, y: float32, width, height: int32): int =
-   result = self.addBlueprint:
+proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, height: int32): int =
+   result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       with:
@@ -21,11 +21,11 @@ proc getBrick*(self: var Game, parent = self.camera, x, y: float32, width, heigh
          Draw2d(width: 20, height: 20, color: [255'u8, 255, 0, 255])
          Fade(step: 0.0)
 
-proc getExplosion*(self: var Game, parent = self.camera, x, y: float32): int =
+proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): int =
    let explosions = 32
    let step = (Pi * 2.0) / explosions.float
    let fadeStep = 0.05
-   result = self.addBlueprint:
+   result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       children:
@@ -36,8 +36,8 @@ proc getExplosion*(self: var Game, parent = self.camera, x, y: float32): int =
                   Fade(step: fadeStep)
                   Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 800.0)
 
-proc getPaddle*(self: var Game, parent = self.camera, x, y: float32): int =
-   result = self.addBlueprint:
+proc getPaddle*(game: var Game, parent = game.camera, x, y: float32): int =
+   result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       with:
@@ -46,7 +46,7 @@ proc getPaddle*(self: var Game, parent = self.camera, x, y: float32): int =
          Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255])
          Move(speed: 600.0)
 
-proc sceneMain*(self: var Game) =
+proc sceneMain*(game: var Game) =
    let columnCount = 10
    let rowCount = 10
    let brickWidth = 50
@@ -54,16 +54,16 @@ proc sceneMain*(self: var Game) =
    let margin = 5
 
    let gridWidth = brickWidth * columnCount + margin * (columnCount - 1)
-   let startingX = (self.windowWidth - gridWidth) div 2
+   let startingX = (game.windowWidth - gridWidth) div 2
    let startingY = 50
 
-   self.camera = self.addBlueprint:
+   game.camera = game.addBlueprint:
       with(Shake(duration: 0.0, strength: 20.0))
       children:
-         entity getPaddle(float32(self.windowWidth / 2),
-               float32(self.windowHeight - 30))
-         entity getBall(float32(self.windowWidth / 2),
-               float32(self.windowHeight - 60))
+         entity getPaddle(float32(game.windowWidth / 2),
+               float32(game.windowHeight - 30))
+         entity getBall(float32(game.windowWidth / 2),
+               float32(game.windowHeight - 60))
 
          for row in 0 ..< rowCount:
             let y = startingY + row * (brickHeight + margin) + brickHeight div 2

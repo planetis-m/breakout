@@ -1,20 +1,20 @@
 import game_types
 
-proc sysHandleInput(self: var Game) =
-   for event in self.eventPump.poll():
+proc sysHandleInput(game: var Game) =
+   for event in game.eventPump.poll():
       if event.kind == QuitEvent or (event.kind == KeyDown and
             event.scancode == Escape):
-         self.running = false
+         game.running = false
          return
       elif event.kind == KeyDown and not event.repeat:
          case event.scancode
          of ArrowLeft, KeyA:
-            self.inputState[ArrowLeft] = true
+            game.inputState[ArrowLeft] = true
          of ArrowRight, KeyD:
-            self.inputState[ArrowRight] = true
+            game.inputState[ArrowRight] = true
       elif event.kind == KeyUp and not event.repeat:
          case event.scancode
          of ArrowLeft, KeyA:
-            self.inputState[ArrowLeft] = false
+            game.inputState[ArrowLeft] = false
          of ArrowRight, KeyD:
-            self.inputState[ArrowRight] = false
+            game.inputState[ArrowRight] = false
