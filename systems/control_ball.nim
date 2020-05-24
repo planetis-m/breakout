@@ -16,8 +16,8 @@ proc update(game: var Game, entity: int) =
       transform.translation.x = 0.0
       control.direction.x *= -1.0
 
-   if transform.translation.x > game.windowWidth.f32:
-      transform.translation.x = game.windowWidth.f32
+   if transform.translation.x > game.windowWidth.float32:
+      transform.translation.x = game.windowWidth.float32
       control.direction.x *= -1.0
 
    if transform.translation.y < 0.0:

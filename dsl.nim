@@ -24,7 +24,7 @@ proc mixFade*(self: var Game, entity: int, step = 0.0) =
    self.world[entity].incl HasFade
    self.fade[entity] = Fade(step: step)
 
-proc mixHierarchy*(self: var Game, entity: int, parent = self.camera) =
+proc mixHierarchy*(self: var Game, entity: int, parent = -1) =
    self.world[entity].incl HasHierarchy
    self.hierarchy[entity] = Hierarchy(parent: parent)
    if parent > -1: prependNode(self, parent, entity)
