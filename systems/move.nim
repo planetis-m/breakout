@@ -5,9 +5,9 @@ const Query = {HasTransform2d, HasMove}
 proc sysMove*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i)
+         update(game, Entity(i))
 
-proc update(game: var Game, entity: int) =
+proc update(game: var Game, entity: Entity) =
    template transform: untyped = game.transform[entity]
    template move: untyped = game.move[entity]
 

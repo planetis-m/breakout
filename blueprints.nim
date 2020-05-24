@@ -1,6 +1,6 @@
 import dsl, random, math, vmath, game_types
 
-proc getBall*(game: var Game, parent = game.camera, x, y: float32): int =
+proc getBall*(game: var Game, parent = game.camera, x, y: float32): Entity =
    let angle = Pi + rand(1.0) * Pi
    result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
@@ -11,7 +11,7 @@ proc getBall*(game: var Game, parent = game.camera, x, y: float32): int =
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
          Move(direction: Vec2(x: 1.0, y: 1.0), speed: 600.0)
 
-proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, height: int32): int =
+proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, height: int32): Entity =
    result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
@@ -21,7 +21,7 @@ proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, heigh
          Draw2d(width: 20, height: 20, color: [255'u8, 255, 0, 255])
          Fade(step: 0.0)
 
-proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): int =
+proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity =
    let explosions = 32
    let step = (Pi * 2.0) / explosions.float
    let fadeStep = 0.05
@@ -36,7 +36,7 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): int =
                   Fade(step: fadeStep)
                   Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 800.0)
 
-proc getPaddle*(game: var Game, parent = game.camera, x, y: float32): int =
+proc getPaddle*(game: var Game, parent = game.camera, x, y: float32): Entity =
    result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent

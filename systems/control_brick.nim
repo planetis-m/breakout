@@ -5,9 +5,9 @@ const Query = {HasControlBrick, HasCollide, HasFade}
 proc sysControlBrick*(game: var Game) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i)
+         update(game, Entity(i))
 
-proc update(game: var Game, entity: int) =
+proc update(game: var Game, entity: Entity) =
    template collide: untyped = game.collide[entity]
    template fade: untyped = game.fade[entity]
 

@@ -7,14 +7,14 @@ proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.canvas.clear()
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i, intrpl)
+         update(game, Entity(i), intrpl)
 
-proc update(game: var Game, entity: int, intrpl: float32) =
+proc update(game: var Game, entity: Entity, intrpl: float32) =
    template transform: untyped = game.transform[entity]
    template draw2d: untyped = game.draw2d[entity]
 
-   let width = int(draw2d.width.float32 * transform.scale.x)
-   let height = int(draw2d.height.float32 * transform.scale.y)
+   let width = int32(draw2d.width.float32 * transform.scale.x)
+   let height = int32(draw2d.height.float32 * transform.scale.y)
 
    template previous: untyped = game.previous[entity]
    let position = vec2(lerp(previous.world.m11, transform.world.m11, intrpl),

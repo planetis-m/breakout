@@ -19,12 +19,14 @@ type
       HasShake,
       HasTransform2d
 
+   Entity* = int32
+
    Collision* = object
-      entity*: int
+      entity*: Entity
       hit*: Vec2
 
    Collide* = object
-      entity*: int
+      entity*: Entity
       size*: Vec2
       min*, max*: Vec2
       center*: Vec2
@@ -41,9 +43,9 @@ type
       step*: float32
 
    Hierarchy* = object
-      head*: int        # the entity identifier of the first child, if any.
-      prev*, next*: int # the prev/next sibling in the list of children for the parent.
-      parent*: int      # the entity identifier of the parent, if any.
+      head*: Entity        # the entity identifier of the first child, if any.
+      prev*, next*: Entity # the prev/next sibling in the list of children for the parent.
+      parent*: Entity      # the entity identifier of the parent, if any.
 
    Move* = object
       direction*: Vec2
@@ -67,9 +69,9 @@ type
    Game* = object
       running*: bool
       world*: seq[set[HasComponent]]
-      camera*: int
+      camera*: Entity
 
-      windowWidth*, windowHeight*: int
+      windowWidth*, windowHeight*: int32
 
       canvas*: Canvas
       eventPump*: EventPump

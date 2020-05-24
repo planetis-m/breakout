@@ -5,9 +5,9 @@ const Query = {HasTransform2d, HasPrevious, HasHierarchy}
 proc sysTransform2d*(game: var Game, isFirst: bool) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query != {}:
-         update(game, i, isFirst)
+         update(game, Entity(i), isFirst)
 
-proc update(game: var Game, entity: int, isFirst: bool) =
+proc update(game: var Game, entity: Entity, isFirst: bool) =
    template `?=`(name, value): bool = (let name = value; name > -1)
    template transform: untyped = game.transform[entity]
    template hierarchy: untyped = game.hierarchy[entity]
