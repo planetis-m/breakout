@@ -124,7 +124,7 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
       case $n[0]
       of "translation", "rotation", "scale":
          transform.add newTree(nnkExprEqExpr, n[0], n[1])
-         result = newTree(nnkNone) # tmps here?
+         result = newTree(nnkNone) # tmps here? / copy the ast
          return
       of "parent":
          hierarchy.add newTree(nnkExprEqExpr, n[0], n[1])

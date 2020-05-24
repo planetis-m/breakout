@@ -5,6 +5,7 @@ const
 
 type
    HasComponent* = enum
+      HasClearColor,
       HasCollide,
       HasControlBall,
       HasControlBrick,
@@ -12,6 +13,7 @@ type
       HasDraw2d,
       HasFade,
       HasHierarchy,
+      HasInputState,
       HasMove,
       HasPrevious,
       HasShake,
