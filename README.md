@@ -5,6 +5,20 @@ This is a port of [rs-breakout](https://github.com/michalbe/rs-breakout)
 It was done for learning purposes. It also incorporates improvements done by me.
 These are explained below.
 
+## Improvement to the hierarchical scene graph
+As explained by the original authors in their documentation for
+[backcountry](https://piesku.com/backcountry/architecture#scene)
+
+> Transforms can have child transforms attached to them. We use this to group
+> entities into larger wholes (e.g. a character is a hierarchy of body parts,
+> the hat and the gun).
+
+However I found the implementation, space inefficient since its declared as
+``children: [Option<usize>; MAX_CHILDREN]``, where ``MAX_CHILDREN`` is ``1000``.
+To fix it I used the design described at
+[skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/)
+Now it is a seperate ``Hierarchy`` component following the unconstrained model.
+
 ## Blueprints dsl
 
 ``addBlueprint`` is a macro that allows you to declaratively specify an entity and its components.
@@ -28,22 +42,7 @@ proc getExplosion*(self: var Game, parent = self.camera, x, y: float32): int =
                   Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 800.0)
 ```
 
-For now ``Transform2d``, ``Hierarchy`` and ``Previous`` components are builtin for every entity.
-This is how the original ``Blueprint`` works and might change in the future to this:
-
-```nim
-proc getBall*(self: var Game, parent = self.camera, x, y: float32): int =
-   let angle = Pi + rand(1.0) * Pi
-   result = self.addBlueprint:
-      with:
-         Transform2d(translation: Vec2(x: x, y: y))
-         Hierarchy(parent: parent)
-         Previous()
-         Collide(size: Vec2(x: 20.0, y: 20.0))
-         ControlBall(angle: angle)
-         Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
-         Move(direction: Vec2(x: 1.0, y: 1.0), speed: 600.0)
-```
+For ``Transform2d``, ``Hierarchy`` and ``Previous`` components are builtin for every entity.
 
 ## Run systems in parallel (Wip)
 
