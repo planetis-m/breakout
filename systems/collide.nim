@@ -1,4 +1,4 @@
-import game_types, options, vmath
+import game_types, vmath
 
 const Query = {HasTransform2d, HasCollide}
 
@@ -36,7 +36,7 @@ proc sysCollide*(game: var Game) =
          template transform: untyped = game.transform[i]
          template collider: untyped = game.collide[i]
 
-         collider.collision = none[Collision]()
+         collider.collision.entity = -1
          computeAabb(transform, collider)
          allColliders.add(collider)
 
@@ -45,7 +45,7 @@ proc sysCollide*(game: var Game) =
       for j in 0 ..< allColliders.len:
          template other: untyped = allColliders[j]
          if collider.entity != other.entity and intersectAabb(collider, other):
-            collider.collision = some(Collision(
+            collider.collision = Collision(
                entity: other.entity,
-               hit: calculatePenetration(collider, other)))
+               hit: calculatePenetration(collider, other))
             game.collide[collider.entity] = collider

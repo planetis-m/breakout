@@ -1,4 +1,4 @@
-import game_types, options, blueprints
+import game_types, blueprints
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
@@ -11,7 +11,7 @@ proc update(game: var Game, entity: int) =
    template collide: untyped = game.collide[entity]
    template fade: untyped = game.fade[entity]
 
-   if collide.collision.isSome:
+   if collide.collision.entity > -1:
       fade.step = 0.02
 
       if rand(1.0) > 0.98:

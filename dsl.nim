@@ -2,7 +2,8 @@ import macros, game_types, math, vmath, utils
 
 proc mixCollide*(self: var Game, entity: int, size = vec2(0, 0)) =
    self.world[entity].incl HasCollide
-   self.collide[entity] = Collide(entity: entity, size: size)
+   self.collide[entity] = Collide(entity: entity, size: size,
+         collision: Collision(entity: -1))
 
 proc mixControlBall*(self: var Game, entity: int, angle = Pi * 0.33) =
    self.world[entity].incl HasControlBall

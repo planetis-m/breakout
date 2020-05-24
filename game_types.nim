@@ -1,4 +1,4 @@
-import options, sdl_private, vmath
+import sdl_private, vmath
 
 const
    MaxEntities* = 10_000
@@ -28,7 +28,7 @@ type
       size*: Vec2
       min*, max*: Vec2
       center*: Vec2
-      collision*: Option[Collision]
+      collision*: Collision
 
    ControlBall* = object
       direction*: Vec2
