@@ -12,11 +12,11 @@ proc sysDraw2d*(game: var Game, intrpl: float32) =
 proc update(game: var Game, entity: Entity, intrpl: float32) =
    template transform: untyped = game.transform[entity]
    template draw2d: untyped = game.draw2d[entity]
+   template previous: untyped = game.previous[entity]
 
    let width = int32(draw2d.width.float32 * transform.scale.x)
    let height = int32(draw2d.height.float32 * transform.scale.y)
 
-   template previous: untyped = game.previous[entity]
    let position = vec2(lerp(previous.world.m11, transform.world.m11, intrpl),
          lerp(previous.world.m12, transform.world.m12, intrpl))
 

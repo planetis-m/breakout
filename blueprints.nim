@@ -18,7 +18,7 @@ proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, heigh
       with:
          Collide(size: Vec2(x: width.float32, y: height.float32))
          ControlBrick()
-         Draw2d(width: 20, height: 20, color: [255'u8, 255, 0, 255])
+         Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255])
          Fade(step: 0.0)
 
 proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity =
