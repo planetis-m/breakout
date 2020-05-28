@@ -19,7 +19,11 @@ type
       HasShake,
       HasTransform2d
 
-   Entity* = int32
+   Entity* = uint16
+
+   SparseSet*[T] = object
+      sparse: array[MaxEntities, Entity] # mapping from sparse handles to dense values
+      dense: seq[T]
 
    Collision* = object
       entity*: Entity
@@ -43,9 +47,9 @@ type
       step*: float32
 
    Hierarchy* = object
-      head*: Entity        # the entity identifier of the first child, if any.
-      prev*, next*: Entity # the prev/next sibling in the list of children for the parent.
-      parent*: Entity      # the entity identifier of the parent, if any.
+      head*: Entity   # the entity identifier of the first child, if any.
+      next*: Entity   # the next sibling in the list of children for the parent.
+      parent*: Entity # the entity identifier of the parent, if any.
 
    Move* = object
       direction*: Vec2
@@ -68,7 +72,7 @@ type
 
    Game* = object
       running*: bool
-      world*: seq[set[HasComponent]]
+      world*: array[MaxEntities, set[HasComponent]]
       camera*: Entity
 
       windowWidth*, windowHeight*: int32
@@ -79,12 +83,14 @@ type
       clearColor*: array[4, uint8]
       inputState*: array[ArrowLeft..ArrowRight, bool]
 
-      collide*: seq[Collide]
-      controlBall*: seq[ControlBall]
-      draw2d*: seq[Draw2d]
-      fade*: seq[Fade]
-      hierarchy*: seq[Hierarchy]
-      move*: seq[Move]
-      previous*: seq[Previous]
-      shake*: seq[Shake]
-      transform*: seq[Transform2d]
+      collide*: SparseSet[Collide]
+      controlBall*: SparseSet[ControlBall]
+      draw2d*: SparseSet[Draw2d]
+      fade*: SparseSet[Fade]
+      hierarchy*: SparseSet[Hierarchy]
+      move*: SparseSet[Move]
+      previous*: SparseSet[Previous]
+      shake*: SparseSet[Shake]
+      transform*: SparseSet[Transform2d]
+
+const invalidId* = high(Entity) # a sentinel value to represent an invalid entity

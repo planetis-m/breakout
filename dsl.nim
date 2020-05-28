@@ -24,10 +24,10 @@ proc mixFade*(game: var Game, entity: Entity, step = 0.0) =
    game.world[entity].incl HasFade
    game.fade[entity] = Fade(step: step)
 
-proc mixHierarchy*(game: var Game, entity: Entity, parent = Entity(-1)) =
+proc mixHierarchy*(game: var Game, entity: Entity, parent = invalidId) =
    game.world[entity].incl HasHierarchy
    game.hierarchy[entity] = Hierarchy(parent: parent)
-   if parent > -1: prependNode(game, parent, entity)
+   if parent != invalidId: prepend(game, parent, entity)
 
 proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 100.0) =
    game.world[entity].incl HasMove
