@@ -1,4 +1,4 @@
-import game_types, vmath, blueprints, dsl
+import ".." / [game_types, vmath, blueprints, dsl]
 
 const Query = {HasTransform2d, HasMove, HasControlBall}
 
@@ -25,7 +25,7 @@ proc update(game: var Game, entity: Entity) =
 
    if HasCollide in game.world[entity]:
       template collide = game.collide[entity]
-      if collide.collision.entity > -1:
+      if collide.collision.entity != invalidId:
          let collision = collide.collision
 
          if HasShake in game.world[game.camera]:

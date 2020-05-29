@@ -1,4 +1,4 @@
-import ../game_types, ../sparse_set, ../vmath
+import ../[game_types, sparse_set, vmath]
 
 const Query = {HasTransform2d, HasPrevious, HasHierarchy}
 

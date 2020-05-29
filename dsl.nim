@@ -1,4 +1,4 @@
-import macros, game_types, math, vmath, utils, sparse_set
+import macros, game_types, math, vmath, utils
 
 proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
    game.world[entity].incl HasCollide
@@ -60,7 +60,8 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
 
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
    result.add(newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game)),
-      hierarchy, resBody, transform, newTree(nnkCall, bindSym"mixPrevious", game, entity))
+         transform, hierarchy, newTree(nnkCall, bindSym"mixPrevious", game, entity),
+         resBody)
 
 proc transformChildren(game, entity, parent, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =
@@ -82,7 +83,7 @@ proc transformChildren(game, entity, parent, n: NimNode): NimNode =
       of "entity":
          expectLen n, 2
          let temp = genSym(nskTemp)
-         result = newStmtList(newLetStmt(temp, foreignCall(n[1], game, entity)))
+         result = newLetStmt(temp, foreignCall(n[1], game, entity))
          return
 
    result = copyNimNode(n)

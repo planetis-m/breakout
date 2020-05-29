@@ -1,4 +1,4 @@
-import game_types
+import ".." / game_types
 
 proc sysHandleInput(game: var Game) =
    for event in game.eventPump.poll():

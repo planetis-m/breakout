@@ -21,11 +21,6 @@ type
 
    Entity* = uint16
 
-   SparseSet*[T] = object
-      len*: int
-      sparse*: array[MaxEntities, Entity] # mapping from sparse handles to dense values
-      dense*: seq[T]
-
    Collision* = object
       entity*: Entity
       hit*: Vec2
@@ -84,14 +79,14 @@ type
       clearColor*: array[4, uint8]
       inputState*: array[ArrowLeft..ArrowRight, bool]
 
-      collide*: SparseSet[Collide]
-      controlBall*: SparseSet[ControlBall]
-      draw2d*: SparseSet[Draw2d]
-      fade*: SparseSet[Fade]
-      hierarchy*: SparseSet[Hierarchy]
-      move*: SparseSet[Move]
-      previous*: SparseSet[Previous]
-      shake*: SparseSet[Shake]
-      transform*: SparseSet[Transform2d]
+      collide*: seq[Collide]
+      controlBall*: seq[ControlBall]
+      draw2d*: seq[Draw2d]
+      fade*: seq[Fade]
+      hierarchy*: seq[Hierarchy]
+      move*: seq[Move]
+      previous*: seq[Previous]
+      shake*: seq[Shake]
+      transform*: seq[Transform2d]
 
 const invalidId* = high(Entity) # a sentinel value to represent an invalid entity

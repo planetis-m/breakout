@@ -1,4 +1,4 @@
-import dsl, random, math, vmath, game_types
+import random, math, dsl, vmath, game_types
 
 proc getBall*(game: var Game, parent = game.camera, x, y: float32): Entity =
    let angle = Pi + rand(1.0) * Pi

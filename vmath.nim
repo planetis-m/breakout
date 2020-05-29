@@ -11,6 +11,9 @@ func lerp*(a, b, v: float32): float32 =
 func vec2*(x, y: float32): Vec2 =
    result = Vec2(x: x, y: y)
 
+proc `-`*(a: Vec2): Vec2 =
+   result = Vec2(x: -a.x, y: -a.y)
+
 type
    Mat2d* = object
       m00*: float32

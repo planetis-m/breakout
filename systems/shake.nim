@@ -1,4 +1,4 @@
-import game_types, random, vmath
+import ".." / [game_types, vmath], random
 
 const Query = {HasTransform2d, HasShake}
 

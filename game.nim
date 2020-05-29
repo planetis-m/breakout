@@ -1,4 +1,4 @@
-import math, random, monotimes, sdl, game_types, sparse_set, blueprints
+import math, random, monotimes, sdl, game_types, blueprints
 import systems / [collide, control_ball, control_brick, control_paddle,
    draw2d, fade, framerate, handle_input, move, shake, transform2d]
 
@@ -24,15 +24,15 @@ proc initGame*(windowWidth, windowHeight: int): Game =
 
       clearColor: [0'u8, 0, 0, 255],
 
-      collide: initSparseSet[Collide](MaxEntities),
-      controlBall: initSparseSet[ControlBall](MaxEntities),
-      draw2d: initSparseSet[Draw2d](MaxEntities),
-      fade: initSparseSet[Fade](MaxEntities),
-      hierarchy: initSparseSet[Hierarchy](MaxEntities),
-      move: initSparseSet[Move](MaxEntities),
-      previous: initSparseSet[Previous](MaxEntities),
-      shake: initSparseSet[Shake](MaxEntities),
-      transform: initSparseSet[Transform2d](MaxEntities))
+      collide: newSeq[Collide](MaxEntities),
+      controlBall: newSeq[ControlBall](MaxEntities),
+      draw2d: newSeq[Draw2d](MaxEntities),
+      fade: newSeq[Fade](MaxEntities),
+      hierarchy: newSeq[Hierarchy](MaxEntities),
+      move: newSeq[Move](MaxEntities),
+      previous: newSeq[Previous](MaxEntities),
+      shake: newSeq[Shake](MaxEntities),
+      transform: newSeq[Transform2d](MaxEntities))
 
 proc update(game: var Game, isFirst: bool) =
    # The Game engine that consist of these systems

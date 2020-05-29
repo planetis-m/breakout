@@ -1,5 +1,11 @@
 import game_types, algorithm
 
+type
+   SparseSet*[T] = object
+      len*: int
+      sparse*: array[MaxEntities, uint16] # mapping from sparse handles to dense values
+      dense*: seq[T]
+
 proc initSparseSet*[T](denseCap: Natural): SparseSet[T] =
    # `denseCap` how many components.
    result = SparseSet[T](dense: newSeq[T](denseCap))
@@ -17,7 +23,7 @@ proc `[]=`*[T](x: var SparseSet[T], entity: Entity, value: T) {.nodestroy.} =
    if entity in x:
       dense = x.sparse[entity]
    else:
-      dense = Entity(x.len)
+      dense = uint16(x.len)
       x.sparse[entity] = dense
       inc(x.len)
    x.dense[dense] = value

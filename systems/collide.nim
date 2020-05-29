@@ -28,7 +28,7 @@ proc calculatePenetration(a, b: Collide): Vec2 =
       result = vec2(0, penetrationY * sgn(distanceY).float32)
 
 proc sysCollide*(game: var Game) =
-   var allColliders: seq[Collide]
+   var allColliders: seq[Collide] # todo: only store entity id
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query == Query:
          template transform: untyped = game.transform[Entity(i)]
@@ -42,14 +42,13 @@ proc sysCollide*(game: var Game) =
       template collider: untyped = allColliders[i]
       for j in i + 1 ..< allColliders.len:
          template other: untyped = allColliders[j]
-
-         if collider.entity != other.entity and intersectAabb(collider, other):
+         # edge case: two balls hit the same brick
+         if intersectAabb(collider, other):
+            let hit = calculatePenetration(collider, other)
             collider.collision = Collision(
-               entity: other.entity,
-               hit: calculatePenetration(collider, other))
+               entity: other.entity, hit: hit)
             game.collide[collider.entity] = collider
 
             other.collision = Collision(
-               entity: collider.entity,
-               hit: calculatePenetration(other, collider))
+               entity: collider.entity, hit: -hit)
             game.collide[other.entity] = other

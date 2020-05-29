@@ -1,4 +1,4 @@
-import game_types, blueprints
+import ".." / [game_types, blueprints]
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
