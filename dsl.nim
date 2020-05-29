@@ -59,11 +59,8 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
    let resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
 
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
-   resBody.insert(0, hierarchy)
-   resBody.add(transform, newTree(nnkCall, bindSym"mixPrevious", game, entity))
-
-   result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game))
-   result.add resBody
+   result.add(newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game)),
+      hierarchy, resBody, transform, newTree(nnkCall, bindSym"mixPrevious", game, entity))
 
 proc transformChildren(game, entity, parent, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =

@@ -1,4 +1,4 @@
-import vmath
+import sdl_private, vmath
 
 const
    MaxEntities* = 10_000
@@ -78,11 +78,11 @@ type
 
       windowWidth*, windowHeight*: int32
 
-#       canvas*: Canvas
-#       eventPump*: EventPump
+      canvas*: Canvas
+      eventPump*: EventPump
 
       clearColor*: array[4, uint8]
-#       inputState*: array[ArrowLeft..ArrowRight, bool]
+      inputState*: array[ArrowLeft..ArrowRight, bool]
 
       collide*: SparseSet[Collide]
       controlBall*: SparseSet[ControlBall]
