@@ -1,9 +1,9 @@
-import macros, game_types, math, vmath, utils
+import macros, game_types, math, vmath, utils, sparse_set
 
 proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
    game.world[entity].incl HasCollide
    game.collide[entity] = Collide(entity: entity, size: size,
-         collision: Collision(entity: -1))
+         collision: Collision(entity: invalidId))
 
 proc mixControlBall*(game: var Game, entity: Entity, angle = Pi * 0.33) =
    game.world[entity].incl HasControlBall
@@ -26,7 +26,7 @@ proc mixFade*(game: var Game, entity: Entity, step = 0.0) =
 
 proc mixHierarchy*(game: var Game, entity: Entity, parent = invalidId) =
    game.world[entity].incl HasHierarchy
-   game.hierarchy[entity] = Hierarchy(parent: parent)
+   game.hierarchy[entity] = Hierarchy(head: invalidId, next: invalidId, parent: parent)
    if parent != invalidId: prepend(game, parent, entity)
 
 proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 100.0) =
@@ -59,8 +59,8 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
    let resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
 
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
-   resBody.add(transform, hierarchy,
-         newTree(nnkCall, bindSym"mixPrevious", game, entity))
+   resBody.insert(0, hierarchy)
+   resBody.add(transform, newTree(nnkCall, bindSym"mixPrevious", game, entity))
 
    result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game))
    result.add resBody
@@ -137,7 +137,7 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
       let t = blueprintImpl(game, entity, parent, transform, hierarchy, n[i])
       if t.kind != nnkNone: result.add t
 
-macro addBlueprint*(game: Game, body: untyped): int =
+macro addBlueprint*(game: Game, body: untyped): Entity =
    result = newTree(nnkStmtListExpr)
    let entity = genSym(nskLet, "blueprintResult")
    transformBlueprint(result, game, entity, newTree(nnkNone), body)

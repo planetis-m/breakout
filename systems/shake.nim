@@ -2,11 +2,6 @@ import game_types, random, vmath
 
 const Query = {HasTransform2d, HasShake}
 
-proc sysShake*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      if game.world[i] * Query != {}:
-         update(game, Entity(i))
-
 proc update(game: var Game, entity: Entity) =
    template transform: untyped = game.transform[entity]
    template shake: untyped = game.shake[entity]
@@ -29,3 +24,8 @@ proc update(game: var Game, entity: Entity) =
          game.clearColor[0] = 0
          game.clearColor[1] = 0
          game.clearColor[2] = 0
+
+proc sysShake*(game: var Game) =
+   for i in 0 ..< MaxEntities:
+      if game.world[i] * Query == Query:
+         update(game, Entity(i))

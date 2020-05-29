@@ -1,4 +1,4 @@
-import game_types
+import game_types, sparse_set
 
 proc createEntity*(game: var Game): Entity =
    for i in 0 ..< MaxEntities:

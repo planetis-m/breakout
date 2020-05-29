@@ -1,11 +1,6 @@
-import game_types, vmath
+import ../game_types, ../sparse_set, ../vmath
 
 const Query = {HasTransform2d, HasPrevious, HasHierarchy}
-
-proc sysTransform2d*(game: var Game, isFirst: bool) =
-   for i in 0 ..< MaxEntities:
-      if game.world[i] * Query != {}:
-         update(game, Entity(i), isFirst)
 
 proc update(game: var Game, entity: Entity, isFirst: bool) =
    template `?=`(name, value): bool = (let name = value; name != invalidId)
@@ -37,3 +32,8 @@ proc update(game: var Game, entity: Entity, isFirst: bool) =
          transform.world = translatedRotatedAndScaled
 
       transform.self = invert(transform.world)
+
+proc sysTransform2d*(game: var Game, isFirst: bool) =
+   for i in 0 ..< MaxEntities:
+      if game.world[i] * Query == Query:
+         update(game, Entity(i), isFirst)

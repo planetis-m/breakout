@@ -29,6 +29,53 @@ proc update(self: var Game) =
    # sysTransform2d: 4
    # sysCollide: 5
 
+type
+   Systems = enum
+      sysHandleInput, sysControlBall, sysControlBrick, sysShake, sysControlPaddle
+      sysFade, sysMove, sysTransform2d, sysCollide
+
+var finished: set[Systems]
+
+proc thread0(self: var Game) =
+   sysHandleInput(self)
+   finished.incl sysHandleInput
+
+proc thread1(self: var Game) =
+   sysControlBall(self)
+   finished.incl sysControlBall
+   sysShake(self) # depends on sysControlBall
+   finished.incl sysShake
+
+proc thread2(self: var Game) =
+   sysControlBrick(self)
+   finished.incl sysControlBrick
+
+proc update(self: var Game) =
+   const MaxThreads = 4
+   var thrs {.global.}: array[MaxThreads, Thread[World]]
+   let processors = countProcessors()
+   let currentThreads = min(processors, MaxThreads)
+
+   var i = 0
+   for sys in items([thread0, thread1, thread2]):
+      createThread(thrs[i], sys, self.world)
+      i.inc
+   joinThreads(thrs[0..<i])
+
+   i = 0
+   for sys in items([thread0, thread1, thread2]):
+      createThread(thrs[i], sys, self.world)
+      i.inc
+
+   if finished * {sysHandleInput, sysControlBall} != {}:
+      sysControlPaddle(self) # depends on sysHandleInput, sysControlBall
+   if finished * {sysControlBrick, sysShake} != {}:
+      sysFade(self.world) # depends on sysControlBrick sysShake
+
+   sysMove(self.world)
+   sysTransform2d(self.world)
+   sysCollide(self.world)
+
 proc update(self: var Game) =
 
    const MaxThreads = 4

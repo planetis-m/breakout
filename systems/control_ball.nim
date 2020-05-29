@@ -2,11 +2,6 @@ import game_types, vmath, blueprints, dsl
 
 const Query = {HasTransform2d, HasMove, HasControlBall}
 
-proc sysControlBall*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      if game.world[i] * Query != {}:
-         update(game, Entity(i))
-
 proc update(game: var Game, entity: Entity) =
    template transform: untyped = game.transform[entity]
    template move: untyped = game.move[entity]
@@ -58,3 +53,8 @@ proc update(game: var Game, entity: Entity) =
       with:
          Draw2d(witdth: 20, height: 20, color: [0'u8, 255, 0, 255])
          Fade(step: 0.05)
+
+proc sysControlBall*(game: var Game) =
+   for i in 0 ..< MaxEntities:
+      if game.world[i] * Query == Query:
+         update(game, Entity(i))

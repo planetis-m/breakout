@@ -2,34 +2,44 @@ import game_types, algorithm
 
 proc initSparseSet*[T](denseCap: Natural): SparseSet[T] =
    # `denseCap` how many components.
-   result = SparseSet[T](dense: newSeqOfCap[T](denseCap))
+   result = SparseSet[T](dense: newSeq[T](denseCap))
    result.sparse.fill(invalidId)
 
 proc clear*[T](x: var SparseSet[T]) =
-   x.dense.shrink(0)
-
-proc len*[T](x: SparseSet[T]): int {.inline.} =
-   # Returns the amount of allocated handles.
-   result = x.dense.len
-
-proc `[]=`*(x: var SparseSet[T], entity: Entity, value: T) {.nodestroy.} =
-   x.sparse[entity] = x.len
-   x.dense.add(value)
-
-proc `[]`*(x: var SparseSet[T], entity: Entity): T =
-   let dense = x.sparse[entity]
-   result = x.dense[dense]
+   x.len = 0
 
 proc contains*[T](x: SparseSet[T], entity: Entity): bool =
    # Returns true if the sparse is registered to a dense index.
    result = x.sparse[entity] != invalidId
 
+proc `[]=`*[T](x: var SparseSet[T], entity: Entity, value: T) {.nodestroy.} =
+   var dense: Entity
+   if entity in x:
+      dense = x.sparse[entity]
+   else:
+      dense = Entity(x.len)
+      x.sparse[entity] = dense
+      inc(x.len)
+   x.dense[dense] = value
+
+proc `[]`*[T](x: SparseSet[T], entity: Entity): T =
+   assert(x.len > 0)
+   assert(x.contains(entity))
+   let dense = x.sparse[entity]
+   result = x.dense[dense]
+
+proc `[]`*[T](x: var SparseSet[T], entity: Entity): var T =
+   assert(x.len > 0)
+   assert(x.contains(entity))
+   let dense = x.sparse[entity]
+   result = x.dense[dense]
+
 # proc del*(x: var SparseSet[T], entity: Entity) =
-#    assert(self.len > 0)
-#    assert(self.contains(entity))
-#    let dense = self.sparse[entity]
-#    self.sparse[self.lastSparse] = dense
-#    self.dense.del(entity)
+#    assert(x.len > 0)
+#    assert(x.contains(entity))
+#    let dense = x.sparse[entity]
+#    x.sparse[x.lastSparse] = dense
+#    x.dense.del(entity)
 
 when isMainModule:
    var ss = initSparseSet[Entity](128)

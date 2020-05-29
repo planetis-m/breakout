@@ -1,4 +1,4 @@
-import sdl_private, vmath
+import vmath
 
 const
    MaxEntities* = 10_000
@@ -22,8 +22,9 @@ type
    Entity* = uint16
 
    SparseSet*[T] = object
-      sparse: array[MaxEntities, Entity] # mapping from sparse handles to dense values
-      dense: seq[T]
+      len*: int
+      sparse*: array[MaxEntities, Entity] # mapping from sparse handles to dense values
+      dense*: seq[T]
 
    Collision* = object
       entity*: Entity
@@ -72,16 +73,16 @@ type
 
    Game* = object
       running*: bool
-      world*: array[MaxEntities, set[HasComponent]]
+      world*: seq[set[HasComponent]]
       camera*: Entity
 
       windowWidth*, windowHeight*: int32
 
-      canvas*: Canvas
-      eventPump*: EventPump
+#       canvas*: Canvas
+#       eventPump*: EventPump
 
       clearColor*: array[4, uint8]
-      inputState*: array[ArrowLeft..ArrowRight, bool]
+#       inputState*: array[ArrowLeft..ArrowRight, bool]
 
       collide*: SparseSet[Collide]
       controlBall*: SparseSet[ControlBall]

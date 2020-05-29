@@ -32,7 +32,31 @@ type
       transform*: seq[Transform2d]
       controlBall*: seq[ControlBall]
 
+iterator view(game: var Game; t: typedesc[Transform2d], k: typedesc[Collide]): (Transform2d, Collide) =
+   const Query = {HasTransform2d, HasCollide}
+   for i in 0 ..< MaxEntities:
+      if game.world[i] * Query != {}:
+         yield (game.transform[i], game.collide[i])
+iterator view(game: var Game; t: typedesc[Fade], k: typedesc[Collide]): (Fade, Collide) =
+   const Query = {HasFade, HasCollide}
+   for i in 0 ..< MaxEntities:
+      if game.world[i] * Query != {}:
+         yield (game.fade[i], game.collide[i])
+var game = Game(
+   world: newSeq[set[HasComponent]](MaxEntities),
+   transform: newSeq[Transform2d](MaxEntities),
+   move: newSeq[Move](MaxEntities),
+   fade: newSeq[Fade](MaxEntities),
+   collide: newSeq[Collide](MaxEntities),
+   controlBall: newSeq[ControlBall](MaxEntities))
+game.world[0] = {HasTransform2d, HasMove, HasControlBall, HasCollide}
+
+for transform, collider in view(game, Transform2d, Collide):
+   echo collider
+
 #[
+for transform, collider in view[Transform2d, Collide](game):
+
 # For loop
 for transform, collider in components(game, Transform2d, Collide):
 for transform, collider in components(game, (Transform2d, Collide)):
@@ -217,7 +241,6 @@ proc sysControlBall(game: var Game, entity: Entity) {.update(transform, move, co
       echo collide
 
 OR
-]#
 
 # queries(sysControlBall):
 #    hit:
@@ -254,3 +277,4 @@ var game = Game(
    controlBall: newSeq[ControlBall](MaxEntities))
 game.world[0] = {HasTransform2d, HasMove, HasControlBall, HasCollide}
 sysControlBall(game)
+]#
