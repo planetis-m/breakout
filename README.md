@@ -5,7 +5,8 @@ This is a port of [rs-breakout](https://github.com/michalbe/rs-breakout)
 It was done for learning purposes. It also incorporates improvements done by me.
 These are explained below.
 
-## Improvement to the hierarchical scene graph
+## Improvements to the hierarchical scene graph
+
 As explained by the original authors in their documentation for
 [backcountry](https://piesku.com/backcountry/architecture#scene)
 
@@ -16,14 +17,17 @@ As explained by the original authors in their documentation for
 However I found the implementation, space inefficient since its declared as
 ``children: [Option<usize>; MAX_CHILDREN]``, where ``MAX_CHILDREN`` is ``1000``.
 To fix it I used the design described at
-[skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/)
+[skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/).
 Now it is a seperate ``Hierarchy`` component following the unconstrained model.
 
-## Blueprints dsl
+## Blueprints DSL
 
 ``addBlueprint`` is a macro that allows you to declaratively specify an entity and its components.
 This gets translated to ``mixin`` proc calls that register the components under the correct entity.
-This macro supports nested entities (children) and composes perfectly with user-made procedures.
+This macro supports nested entities (children in the hierarchical scene graph) and composes perfectly
+with user-made procedures.
+
+### Examples
 
 ```nim
 proc getExplosion*(self: var Game, parent = self.camera, x, y: float32): int =
@@ -55,3 +59,12 @@ inParallel(self):
    sysControlBrick(reads = {HasCollide}, writes = {HasFade})
    sysControlPaddle(reads = {HasInputState}, writes = {HasMove})
 ```
+
+## Acknowledgments
+
+- [rs-breakout](https://github.com/michalbe/rs-breakout) the original game
+- [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial) my introduction to games
+- [Fireblade](https://github.com/fireblade-engine/ecs) as an inspiration
+- [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent explanation of ECS
+- [zig-sparse-set](https://github.com/Srekel/zig-sparse-set) helped understanding sparse sets, although not used
+- People on #nim-gamedev for answering my questions

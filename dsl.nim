@@ -51,19 +51,19 @@ proc mixTransform2d*(game: var Game, entity: Entity, translation = vec2(0, 0),
 # Blueprint macro
 # ---------------
 
-proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimNode
+proc blueprintImpl(game, entity, transform, hierarchy, n: NimNode): NimNode
 
 proc transformBlueprint(result, game, entity, parent, n: NimNode) =
    let transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
    let hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity)
-   let resBody = blueprintImpl(game, entity, parent, transform, hierarchy, n)
+   let resBody = blueprintImpl(game, entity, transform, hierarchy, n)
 
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
    result.add(newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game)),
          transform, hierarchy, newTree(nnkCall, bindSym"mixPrevious", game, entity),
          resBody)
 
-proc transformChildren(game, entity, parent, n: NimNode): NimNode =
+proc transformChildren(game, entity, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =
       expectMinLen n, 1
       result = copyNimNode(n)
@@ -88,9 +88,9 @@ proc transformChildren(game, entity, parent, n: NimNode): NimNode =
 
    result = copyNimNode(n)
    for i in 0 ..< n.len:
-      result.add transformChildren(game, entity, parent, n[i])
+      result.add transformChildren(game, entity, n[i])
 
-proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimNode =
+proc blueprintImpl(game, entity, transform, hierarchy, n: NimNode): NimNode =
    proc mixinCall(game, entity, n: NimNode): NimNode =
       expectMinLen n, 1
       result = newCall("mix" & n[0].strVal, game, entity)
@@ -117,7 +117,7 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
          return
       of "children":
          expectLen n, 2
-         result = transformChildren(game, entity, parent, n[1])
+         result = transformChildren(game, entity, n[1])
          return
    elif n.kind == nnkAsgn and n[0].kind == nnkIdent:
       case $n[0]
@@ -132,7 +132,7 @@ proc blueprintImpl(game, entity, parent, transform, hierarchy, n: NimNode): NimN
 
    result = copyNimNode(n)
    for i in 0 ..< n.len:
-      let t = blueprintImpl(game, entity, parent, transform, hierarchy, n[i])
+      let t = blueprintImpl(game, entity, transform, hierarchy, n[i])
       if t.kind != nnkNone: result.add t
 
 macro addBlueprint*(game: Game, body: untyped): Entity =
