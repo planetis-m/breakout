@@ -23,18 +23,28 @@ Now it is a seperate ``Hierarchy`` component following the unconstrained model.
 ## Blueprints DSL
 
 ``addBlueprint`` is a macro that allows you to declaratively specify an entity and its components.
-This gets translated to ``mixin`` proc calls that register the components under the correct entity.
-This macro supports nested entities (children in the hierarchical scene graph) and composes perfectly
-with user-made procedures.
+It produces ``mixin`` proc calls that register the components for the entity (with the arguments specified).
+The macro also supports nested entities (children in the hierarchical scene graph) and composes perfectly
+with user-made procedures (these must have a specific signature and tagged with ``entity``).
 
 ### Examples
 
+Creates a new entity, with these components, returns the entity handle.
+``Transform2d``, ``Hierarchy`` and ``Previous`` components are always implied.
+
 ```nim
-proc getExplosion*(self: var Game, parent = self.camera, x, y: float32): int =
+let ent1 = game.addBlueprint(with Fade(step: 0.5), Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
+```
+
+Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop
+(it composes with all of Nim's control flow constructs).
+
+```nim
+proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity =
    let explosions = 32
    let step = (Pi * 2.0) / explosions.float
    let fadeStep = 0.05
-   result = self.addBlueprint:
+   result = game.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       children:
@@ -46,25 +56,12 @@ proc getExplosion*(self: var Game, parent = self.camera, x, y: float32): int =
                   Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 800.0)
 ```
 
-For ``Transform2d``, ``Hierarchy`` and ``Previous`` components are builtin for every entity.
-
-## Run systems in parallel (Wip)
-
-```nim
-inParallel(self):
-   sysHandleInput(writes = {HasInputState})
-   sysControlBall:
-      reads = {HasCollide}
-      writes = {HasTransform2d, HasMove, HasControlBall, HasShake}
-   sysControlBrick(reads = {HasCollide}, writes = {HasFade})
-   sysControlPaddle(reads = {HasInputState}, writes = {HasMove})
-```
-
 ## Acknowledgments
 
-- [rs-breakout](https://github.com/michalbe/rs-breakout) the original game
-- [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial) my introduction to games
+- [rs-breakout](https://github.com/michalbe/rs-breakout) the game I ported to nim
+- [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial) introduced me to writing games
+- [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
 - [Fireblade](https://github.com/fireblade-engine/ecs) as an inspiration
-- [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent explanation of ECS
+- [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs
 - [zig-sparse-set](https://github.com/Srekel/zig-sparse-set) helped understanding sparse sets, although not used
 - People on #nim-gamedev for answering my questions

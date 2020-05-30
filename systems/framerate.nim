@@ -1,11 +1,9 @@
-import game_types
+import game_types, strformat
 
-proc sysFramerate*(game: var Game) =
+proc sysFramerate*(game: var Game; intrpl: float32) =
    let window = game.canvas.window
-   # let now = getTicks()
 
-   # let diff = now - game.lastTime
-   # let fps = 1000 / diff
+   #game.frameCount.inc
+   let fps = 1.0 / (intrpl * 1.0e-9)
 
-   # game.lastTime = now
-   window.setTitle("fps: " & int(1.0 / delta))
+   window.setTitle(&"fps: {fps:.1}, frames: {frameCount}")
