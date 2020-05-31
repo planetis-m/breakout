@@ -4,7 +4,7 @@ writes: [InputState]
 
 # sysControlBall
 reads: [Collide]
-writes: [Transform2d, Move, ControlBall, Shake]
+writes: [Transform2d, Move, Shake]
 
 # sysControlBrick
 reads: [Collide]

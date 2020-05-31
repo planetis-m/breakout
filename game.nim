@@ -25,7 +25,6 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       clearColor: [0'u8, 0, 0, 255],
 
       collide: newSeq[Collide](MaxEntities),
-      controlBall: newSeq[ControlBall](MaxEntities),
       draw2d: newSeq[Draw2d](MaxEntities),
       fade: newSeq[Fade](MaxEntities),
       hierarchy: newSeq[Hierarchy](MaxEntities),

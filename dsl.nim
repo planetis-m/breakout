@@ -5,9 +5,8 @@ proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
    game.collide[entity] = Collide(entity: entity, size: size,
          collision: Collision(entity: invalidId))
 
-proc mixControlBall*(game: var Game, entity: Entity, angle = Pi * 0.33) =
+proc mixControlBall*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlBall
-   game.controlBall[entity] = ControlBall(direction: vec2(cos(angle), sin(angle)))
 
 proc mixControlBrick*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlBrick

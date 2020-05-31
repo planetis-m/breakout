@@ -31,9 +31,6 @@ type
       center*: Vec2
       collision*: Collision
 
-   ControlBall* = object
-      direction*: Vec2
-
    Draw2d* = object
       width*, height*: int32
       color*: array[4, uint8]
@@ -79,7 +76,6 @@ type
       inputState*: array[ArrowLeft..ArrowRight, bool]
 
       collide*: seq[Collide]
-      controlBall*: seq[ControlBall]
       draw2d*: seq[Draw2d]
       fade*: seq[Fade]
       hierarchy*: seq[Hierarchy]
