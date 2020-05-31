@@ -9,13 +9,13 @@ proc update(game: var Game, entity: Entity, isFirst: bool) =
    template previous: untyped = game.previous[entity]
 
    if transform.dirty:
-      var childEntityId = hierarchy.head
-      while childEntityId != invalidId:
-         template childTransform: untyped = game.transform[childEntityId]
-         template childHierarchy: untyped = game.hierarchy[childEntityId]
+      var childId = hierarchy.head
+      while childId != invalidId:
+         template childTransform: untyped = game.transform[childId]
+         template childHierarchy: untyped = game.hierarchy[childId]
 
          childTransform.dirty = true
-         childEntityId = childHierarchy.next
+         childId = childHierarchy.next
 
       transform.dirty = false
 

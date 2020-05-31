@@ -25,7 +25,7 @@ proc update(game: var Game, entity: Entity) =
 
    if HasCollide in game.world[entity]:
       template collide = game.collide[entity]
-      if collide.collision.entity != invalidId:
+      if collide.collision.other != invalidId:
          let collision = collide.collision
 
          if HasShake in game.world[game.camera]:

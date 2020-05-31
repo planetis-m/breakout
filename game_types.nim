@@ -22,11 +22,10 @@ type
    Entity* = uint16
 
    Collision* = object
-      entity*: Entity
+      other*: Entity
       hit*: Vec2
 
    Collide* = object
-      entity*: Entity
       size*: Vec2
       min*, max*: Vec2
       center*: Vec2
