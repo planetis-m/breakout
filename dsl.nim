@@ -34,7 +34,7 @@ proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 10
 
 proc mixPrevious*(game: var Game, entity: Entity) =
    game.world[entity].incl HasPrevious
-   #game.previous[entity] = Previous(world: mat2d())
+   game.previous[entity] = Previous(world: mat2d())
 
 proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
    game.world[entity].incl HasShake
@@ -43,8 +43,8 @@ proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
 proc mixTransform2d*(game: var Game, entity: Entity, translation = vec2(0, 0),
       rotation = 0.0, scale = vec2(1, 1)) =
    game.world[entity].incl HasTransform2d
-   game.transform[entity] = Transform2D(world: mat2d(), self: mat2d(),
-         translation: translation, rotation: rotation, scale: scale, dirty: true)
+   game.transform[entity] = Transform2D(world: mat2d(), translation: translation,
+         rotation: rotation, scale: scale, dirty: true)
 
 # ---------------
 # Blueprint macro

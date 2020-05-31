@@ -31,8 +31,6 @@ proc update(game: var Game, entity: Entity, isFirst: bool) =
       else:
          transform.world = translatedRotatedAndScaled
 
-      transform.self = invert(transform.world)
-
 proc sysTransform2d*(game: var Game, isFirst: bool) =
    for i in 0 ..< MaxEntities:
       if game.world[i] * Query == Query:

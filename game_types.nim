@@ -48,7 +48,7 @@ type
       speed*: float32
 
    Previous* = object
-      world*: Mat2d
+      world*: Mat2d # used for interpolation from previous frame
 
    Shake* = object
       duration*: float32
@@ -56,7 +56,6 @@ type
 
    Transform2d* = object
       world*: Mat2d      # Matrix relative to the world
-      self*: Mat2d       # World to self matrix
       translation*: Vec2 # local translation relative to the parent
       rotation*: float32 # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent

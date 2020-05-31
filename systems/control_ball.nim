@@ -39,7 +39,8 @@ proc update(game: var Game, entity: Entity) =
             transform.translation.y += collision.hit.y
             move.direction.y *= -1.0
 
-         discard game.getExplosion(x, y)
+         discard game.getExplosion(transform.translation.x,
+               transform.translation.y)
 
    let ballFade = game.addBlueprint:
       translation = transform.translation
