@@ -1,18 +1,30 @@
 import math
 
+func lerp*(a, b, v: float32): float32 =
+   result = a * (1.0 - v) + b * v
+
 type
    Vec2* = object
       x*: float32
       y*: float32
-
-func lerp*(a, b, v: float32): float32 =
-   result = a * (1.0 - v) + b * v
 
 func vec2*(x, y: float32): Vec2 =
    result = Vec2(x: x, y: y)
 
 proc `-`*(a: Vec2): Vec2 =
    result = Vec2(x: -a.x, y: -a.y)
+
+# m00: 1.0 m10: 1.0
+# m01: 0.0 m11: v.x
+# m02: 0.0 m12: v.y
+#
+# m00: 1.0 m02: 0.0
+# m01: 0.0 m10: 1.0
+# m11: v.x m12: v.y
+#
+# m00: 1.0 m10: 0.0
+# m01: 0.0 m11: 1.0
+# m02: v.x m12: v.y
 
 type
    Mat2d* = object

@@ -114,3 +114,13 @@ let a = game.addBlueprint(translation = Vec2(x: 1.0, y: 2.0), parent = game.came
 discard game.addBlueprint(translation = Vec2(x: 1.0, y: 1.0), parent = game.camera,
       with(Fade(step: 0.0), ControlBrick()),
       children(blueprint(translation = Vec2(x: 2.0, y: 2.0), rotation = 1.0), entity getBrick(2.0, 2.0, 10, 10)))
+
+proc getBall*(game: var Game, parent = game.camera, x, y: float32): Entity =
+   let angle = Pi + rand(1.0) * Pi
+   result = game.createEntityWith: # no hierarchy
+      Transform2d(translation: Vec2(x: x, y: y))
+      Hierarchy(parent: parent)
+      Collide(size: Vec2(x: 20.0, y: 20.0))
+      ControlBall()
+      Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
+      Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 600.0)

@@ -14,6 +14,12 @@ proc mixControlBrick*(game: var Game, entity: Entity) =
 proc mixControlPaddle*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlPaddle
 
+proc mixDirty*(game: var Game, entity: Entity) =
+   game.world[entity].incl HasDirty
+
+proc rmDirty*(game: var Game, entity: Entity) =
+   game.world[entity].excl HasDirty
+
 proc mixDraw2d*(game: var Game, entity: Entity, width, height = 100'i32,
       color = [255'u8, 0, 255, 255]) =
    game.world[entity].incl HasDraw2d
@@ -44,7 +50,7 @@ proc mixTransform2d*(game: var Game, entity: Entity, translation = vec2(0, 0),
       rotation = 0.0, scale = vec2(1, 1)) =
    game.world[entity].incl HasTransform2d
    game.transform[entity] = Transform2D(world: mat2d(), translation: translation,
-         rotation: rotation, scale: scale, dirty: true)
+         rotation: rotation, scale: scale)
 
 # ---------------
 # Blueprint macro
@@ -53,14 +59,14 @@ proc mixTransform2d*(game: var Game, entity: Entity, translation = vec2(0, 0),
 proc blueprintImpl(game, entity, transform, hierarchy, n: NimNode): NimNode
 
 proc transformBlueprint(result, game, entity, parent, n: NimNode) =
-   let transform = newTree(nnkCall, bindSym"mixTransform2d", game, entity)
-   let hierarchy = newTree(nnkCall, bindSym"mixHierarchy", game, entity)
+   let transform = newCall(bindSym"mixTransform2d", game, entity)
+   let hierarchy = newCall(bindSym"mixHierarchy", game, entity)
    let resBody = blueprintImpl(game, entity, transform, hierarchy, n)
 
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
-   result.add(newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", game)),
-         transform, hierarchy, newTree(nnkCall, bindSym"mixPrevious", game, entity),
-         resBody)
+   result.add(newLetStmt(entity, newCall(bindSym"createEntity", game)),
+         transform, hierarchy, newCall(bindSym"mixPrevious", game, entity),
+         newCall(bindSym"mixDirty", game, entity), resBody)
 
 proc transformChildren(game, entity, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =

@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath]
+import ".." / [game_types, vmath, dsl]
 
 const Query = {HasTransform2d, HasMove}
 
@@ -10,7 +10,7 @@ proc update(game: var Game, entity: Entity) =
       transform.translation.x += move.direction.x * move.speed
       transform.translation.y += move.direction.y * move.speed
 
-      transform.dirty = true
+      game.mixDirty(entity)
 
 proc sysMove*(game: var Game) =
    for i in 0 ..< MaxEntities:

@@ -1,4 +1,4 @@
-import ".." / [game_types, utils]
+import ".." / [game_types, utils, dsl]
 
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
@@ -12,7 +12,8 @@ proc update(game: var Game, entity: Entity) =
       draw.color[3] = draw.color[3] - step.uint8
       transform.scale.x -= fade.step
       transform.scale.y -= fade.step
-      transform.dirty = true
+
+      game.mixDirty(entity)
 
       if transform.scale.x <= 0.0:
          game.delete(entity)

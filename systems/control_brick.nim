@@ -10,7 +10,8 @@ proc update(game: var Game, entity: Entity) =
       fade.step = 0.02
 
       if rand(1.0) > 0.98:
-         discard game.getBall(float32(game.windowWidth / 2), float32(game.windowHeight / 2))
+         discard game.getBall(float32(game.windowWidth / 2),
+               float32(game.windowHeight / 2))
 
 proc sysControlBrick*(game: var Game) =
    for i in 0 ..< MaxEntities:

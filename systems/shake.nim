@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath], random
+import ".." / [game_types, vmath, dsl], random
 
 const Query = {HasTransform2d, HasShake}
 
@@ -15,7 +15,7 @@ proc update(game: var Game, entity: Entity) =
       game.clearColor[1] = rand(255).uint8
       game.clearColor[2] = rand(255).uint8
 
-      transform.dirty = true
+      game.mixDirty(entity)
 
       if shake.duration <= 0.0:
          shake.duration = 0.0

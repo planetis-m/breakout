@@ -10,6 +10,7 @@ type
       HasControlBall,
       HasControlBrick,
       HasControlPaddle,
+      HasDirty,
       HasDraw2d,
       HasFade,
       HasHierarchy,
@@ -59,7 +60,6 @@ type
       translation*: Vec2 # local translation relative to the parent
       rotation*: float32 # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
-      dirty*: bool
 
    Game* = object
       running*: bool

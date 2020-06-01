@@ -1,6 +1,6 @@
-import ".." / [game_types, sparse_set, vmath]
+import ".." / [game_types, sparse_set, vmath, dsl]
 
-const Query = {HasTransform2d, HasPrevious, HasHierarchy}
+const Query = {HasTransform2d, HasPrevious, HasHierarchy, HasDirty}
 
 proc update(game: var Game, entity: Entity, isFirst: bool) =
    template `?=`(name, value): bool = (let name = value; name != invalidId)
@@ -8,28 +8,26 @@ proc update(game: var Game, entity: Entity, isFirst: bool) =
    template hierarchy: untyped = game.hierarchy[entity]
    template previous: untyped = game.previous[entity]
 
-   if transform.dirty:
-      var childId = hierarchy.head
-      while childId != invalidId:
-         template childTransform: untyped = game.transform[childId]
-         template childHierarchy: untyped = game.hierarchy[childId]
+   var childId = hierarchy.head
+   while childId != invalidId:
+      template childHierarchy: untyped = game.hierarchy[childId]
 
-         childTransform.dirty = true
-         childId = childHierarchy.next
+      game.mixDirty(childId)
+      childId = childHierarchy.next
 
-      transform.dirty = false
+   game.rmDirty(entity)
 
-      let translated = fromTranslation(transform.translation)
-      let translatedAndRotaded = rotate(translated, transform.rotation)
-      let translatedRotatedAndScaled = scale(translatedAndRotaded, transform.scale)
+   let translated = fromTranslation(transform.translation)
+   let translatedAndRotaded = rotate(translated, transform.rotation)
+   let translatedRotatedAndScaled = scale(translatedAndRotaded, transform.scale)
 
-      if isFirst: previous.world = transform.world
+   if isFirst: previous.world = transform.world
 
-      if parentId ?= hierarchy.parent:
-         template parentTransform: untyped = game.transform[parentId]
-         transform.world = parentTransform.world * translatedRotatedAndScaled
-      else:
-         transform.world = translatedRotatedAndScaled
+   if parentId ?= hierarchy.parent:
+      template parentTransform: untyped = game.transform[parentId]
+      transform.world = parentTransform.world * translatedRotatedAndScaled
+   else:
+      transform.world = translatedRotatedAndScaled
 
 proc sysTransform2d*(game: var Game, isFirst: bool) =
    for i in 0 ..< MaxEntities:
