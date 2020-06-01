@@ -62,6 +62,18 @@ func scale*(a: Mat2d, v: Vec2): Mat2d =
       m02: a.m02,
       m12: a.m12)
 
+func compose*(position, scale: Vec2, rad: float32): Mat2d =
+   let s = rad.sin()
+   let c = rad.cos()
+
+   result = Mat2d(
+      m00: c * scale.x,
+      m10: s * scale.x,
+      m01: -s * scale.y,
+      m11: c * scale.y,
+      m02: position.x,
+      m12: position.y)
+
 func invert*(a: Mat2d): Mat2d =
    let aa = a.m00
    let ab = a.m10
