@@ -10,8 +10,7 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
    let width = int32(draw2d.width.float32 * transform.scale.x)
    let height = int32(draw2d.height.float32 * transform.scale.y)
 
-   let position = vec2(lerp(previous.world.m11, transform.world.m11, intrpl),
-         lerp(previous.world.m12, transform.world.m12, intrpl))
+   let position = lerp(previous.world, transform.world, intrpl).getTranslation
 
    game.canvas.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
    game.canvas.fillRect((

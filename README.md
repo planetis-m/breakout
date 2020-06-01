@@ -60,6 +60,7 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
 ## Acknowledgments
 
 - [rs-breakout](https://github.com/michalbe/rs-breakout) the game I ported to nim
+- [java-scene_graph](https://github.com/nathanfaucett/java-scene_graph) better understanding scene graphs
 - [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial) introduced me to writing games
 - [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
 - [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs

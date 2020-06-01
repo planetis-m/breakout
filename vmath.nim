@@ -14,11 +14,25 @@ func vec2*(x, y: float32): Vec2 =
 proc `-`*(a: Vec2): Vec2 =
    result = Vec2(x: -a.x, y: -a.y)
 
+func `/`*(a: Vec2, b: float32): Vec2 =
+   result = Vec2(x: a.x / b, y: a.y / b)
+
+func lengthSq*(a: Vec2): float32 =
+   result = a.x * a.x + a.y * a.y
+
+func length*(a: Vec2): float32 =
+   result = sqrt(a.lengthSq)
+
+func normalize*(a: Vec2): Vec2 =
+   a / a.length
+
+func dot*(a: Vec2, b: Vec2): float32 =
+   result = a.x * b.x + a.y * b.y
+
 type
    Mat2d* = object
-      m00*, m10*: float32
-      m01*, m11*: float32
-      m02*, m12*: float32
+      m00*, m01*, m02*: float32
+      m10*, m11*, m12*: float32
 
 func mat2d*(): Mat2d =
    result = Mat2d(
@@ -38,12 +52,9 @@ func fromTranslation*(v: Vec2): Mat2d =
       m02: v.x,
       m12: v.y)
 
-func getTranslation*(a: Mat2d): Vec2 =
-   result = Vec2(x: a.m02, y: a.m12)
-
-func rotate*(a: Mat2d, rad: float32): Mat2d =
-   let s = rad.sin()
-   let c = rad.cos()
+func rotate*(a: Mat2d, rotation: float32): Mat2d =
+   let s = rotation.sin()
+   let c = rotation.cos()
 
    result = Mat2d(
       m00: a.m00 * c + a.m01 * s,
@@ -62,17 +73,54 @@ func scale*(a: Mat2d, v: Vec2): Mat2d =
       m02: a.m02,
       m12: a.m12)
 
-func compose*(position, scale: Vec2, rad: float32): Mat2d =
-   let s = rad.sin()
-   let c = rad.cos()
+func compose*(translation, scale: Vec2, rotation: float32): Mat2d =
+   let s = rotation.sin()
+   let c = rotation.cos()
 
    result = Mat2d(
       m00: c * scale.x,
       m10: s * scale.x,
       m01: -s * scale.y,
       m11: c * scale.y,
-      m02: position.x,
-      m12: position.y)
+      m02: translation.x,
+      m12: translation.y)
+
+func getTranslation*(a: Mat2d): Vec2 =
+   result = Vec2(x: a.m02, y: a.m12)
+
+proc getScale*(a: Mat2d): Vec2 =
+   result = vec2(vec2(a.m00, a.m01).length, vec2(a.m01, a.m11).length)
+
+proc getRotation*(a: Mat2d): float32 =
+   result = atan2(a.m01, a.m00)
+
+proc lerp*(a, b: Mat2d, t: float32): Mat2d =
+   # extract parameters
+   let p1 = a.getTranslation()
+   let r1 = a.getRotation()
+   let s1 = a.getScale()
+
+   let p2 = b.getTranslation()
+   let r2 = b.getRotation()
+   let s2 = b.getScale()
+
+   # slerp rotation
+   let v1 = vec2(cos(r1), sin(r1))
+   let v2 = vec2(cos(r2), sin(r2))
+
+   var dot = dot(v1, v2)
+   dot = clamp(dot, -1.0, 1.0)
+
+   var v: Vec2
+   if dot > 0.9995:
+      v = v1.lerp(v2, t).normalize() # linearly interpolate to avoid numerical precision issues
+   else:
+      let angle = t * acos(dot)
+      let v3 = (v2 - v1 * dot).normalize()
+      v = v1 * cos(angle) + v3 * sin(angle)
+
+   # construct matrix
+   result = compose(p1.lerp(p2, t), s1.lerp(s2, t), atan2(v.y, v.x))
 
 func invert*(a: Mat2d): Mat2d =
    let aa = a.m00

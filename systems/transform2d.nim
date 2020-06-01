@@ -17,14 +17,14 @@ proc update(game: var Game, entity: Entity, isFirst: bool) =
 
    game.rmDirty(entity)
 
-   let self = compose(transform.translation, transform.rotation, transform.scale)
+   let local = compose(transform.translation, transform.scale, transform.rotation)
    if isFirst: previous.world = transform.world
 
    if parentId ?= hierarchy.parent:
       template parentTransform: untyped = game.transform[parentId]
-      transform.world = parentTransform.world * self
+      transform.world = parentTransform.world * local
    else:
-      transform.world = self
+      transform.world = local
 
 proc sysTransform2d*(game: var Game, isFirst: bool) =
    for i in 0 ..< MaxEntities:
