@@ -5,11 +5,19 @@ func lerp*(a, b, v: float32): float32 =
 
 type
    Vec2* = object
-      x*: float32
-      y*: float32
+      x*, y*: float32
 
 func vec2*(x, y: float32): Vec2 =
    result = Vec2(x: x, y: y)
+
+func `+`*(a, b: Vec2): Vec2 =
+   result = Vec2(x: a.x + b.x, y: a.y + b.y)
+
+func `-`*(a, b: Vec2): Vec2 =
+   result = Vec2(x: a.x - b.x, y: a.y - b.y)
+
+func `*`*(a: Vec2, b: float32): Vec2 =
+   result = Vec2(x: a.x * b, y: a.y * b)
 
 proc `-`*(a: Vec2): Vec2 =
    result = Vec2(x: -a.x, y: -a.y)
@@ -28,6 +36,9 @@ func normalize*(a: Vec2): Vec2 =
 
 func dot*(a: Vec2, b: Vec2): float32 =
    result = a.x * b.x + a.y * b.y
+
+func lerp*(a, b: Vec2, v: float32): Vec2 =
+   a * (1.0 - v) + b * v
 
 type
    Mat2d* = object
@@ -92,7 +103,7 @@ proc getScale*(a: Mat2d): Vec2 =
    result = vec2(vec2(a.m00, a.m01).length, vec2(a.m01, a.m11).length)
 
 proc getRotation*(a: Mat2d): float32 =
-   result = atan2(a.m01, a.m00)
+   result = arctan2(a.m01, a.m00)
 
 proc lerp*(a, b: Mat2d, t: float32): Mat2d =
    # extract parameters
@@ -113,14 +124,14 @@ proc lerp*(a, b: Mat2d, t: float32): Mat2d =
 
    var v: Vec2
    if dot > 0.9995:
-      v = v1.lerp(v2, t).normalize() # linearly interpolate to avoid numerical precision issues
+      v = normalize(lerp(v1, v2, t)) # linearly interpolate to avoid numerical precision issues
    else:
-      let angle = t * acos(dot)
-      let v3 = (v2 - v1 * dot).normalize()
+      let angle = t * arccos(dot)
+      let v3 = normalize(v2 - v1 * dot)
       v = v1 * cos(angle) + v3 * sin(angle)
 
    # construct matrix
-   result = compose(p1.lerp(p2, t), s1.lerp(s2, t), atan2(v.y, v.x))
+   result = compose(lerp(p1, p2, t), lerp(s1, s2, t), arctan2(v.y, v.x))
 
 func invert*(a: Mat2d): Mat2d =
    let aa = a.m00
@@ -166,3 +177,7 @@ func `*`*(a, b: Mat2d): Mat2d =
       m11: a1 * b2 + a3 * b3,
       m02: a0 * b4 + a2 * b5 + a4,
       m12: a1 * b4 + a3 * b5 + a5)
+
+proc translate*(a: Mat2d, p: Vec2): Vec2 =
+   result = vec2(a.m00 * p.x + a.m01 * p.y + a.m02,
+         a.m10 * p.x + a.m11 * p.y + a.m12)

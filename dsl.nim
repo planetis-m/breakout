@@ -38,9 +38,12 @@ proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 10
    game.world[entity].incl HasMove
    game.move[entity] = Move(direction: direction, speed: speed)
 
-proc mixPrevious*(game: var Game, entity: Entity) =
+proc mixPrevious*(game: var Game, entity: Entity, world = mat2d()) =
    game.world[entity].incl HasPrevious
-   game.previous[entity] = Previous(world: mat2d())
+   game.previous[entity] = Previous(world: world)
+
+proc rmPrevious*(game: var Game, entity: Entity) =
+   game.world[entity].excl HasPrevious
 
 proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
    game.world[entity].incl HasShake
@@ -65,8 +68,8 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
 
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
    result.add(newLetStmt(entity, newCall(bindSym"createEntity", game)),
-         transform, hierarchy, newCall(bindSym"mixPrevious", game, entity),
-         newCall(bindSym"mixDirty", game, entity), resBody)
+         transform, hierarchy, newCall(bindSym"mixDirty", game, entity),
+         resBody)
 
 proc transformChildren(game, entity, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =

@@ -35,7 +35,7 @@ Creates a new entity, with these components, returns the entity handle.
 let ent1 = game.addBlueprint(with Fade(step: 0.5), Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
 ```
 
-Note: ``Transform2d``, ``Hierarchy`` and ``Previous`` components are always implied.
+Note: ``Transform2d`` and ``Hierarchy`` components are always implied.
 
 Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop
 (it composes with all of Nim's control flow constructs).

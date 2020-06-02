@@ -33,7 +33,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       shake: newSeq[Shake](MaxEntities),
       transform: newSeq[Transform2d](MaxEntities))
 
-proc update(game: var Game, isFirst: bool) =
+proc update(game: var Game) =
    # The Game engine that consist of these systems
    sysHandleInput(game)
    sysControlBall(game)
@@ -42,7 +42,7 @@ proc update(game: var Game, isFirst: bool) =
    sysShake(game)
    sysFade(game)
    sysMove(game)
-   sysTransform2d(game, isFirst)
+   sysTransform2d(game)
    sysCollide(game)
 
 proc render(game: var Game, intrpl: float32) =
@@ -61,7 +61,7 @@ proc run(game: var Game) =
          let now = getMonoTime().ticks
          var framesSkipped = 0
          while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-            game.update(framesSkipped == 0)
+            game.update()
             if not game.running: break outer
             lastTime += skippedTicks
             framesSkipped.inc

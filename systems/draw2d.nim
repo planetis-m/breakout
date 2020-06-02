@@ -1,16 +1,26 @@
 import ".." / [game_types, vmath]
 
-const Query = {HasTransform2d, HasPrevious, HasDraw2d}
+const Query = {HasTransform2d, HasDraw2d}
 
 proc update(game: var Game, entity: Entity, intrpl: float32) =
    template transform: untyped = game.transform[entity]
    template draw2d: untyped = game.draw2d[entity]
-   template previous: untyped = game.previous[entity]
 
-   let width = int32(draw2d.width.float32 * transform.scale.x)
-   let height = int32(draw2d.height.float32 * transform.scale.y)
+   var scale, position: Vec2
+   if HasPrevious in game.world[entity]:
+      template previous: untyped = game.previous[entity]
 
-   let position = lerp(previous.world, transform.world, intrpl).getTranslation
+      let interpolation = lerp(previous.world, transform.world, intrpl)
+      scale = interpolation.getScale()
+      position = interpolation.getTranslation()
+
+      game.rmPrevious(entity)
+   else:
+      scale = transform.world.getScale()
+      position = transform.world.getTranslation()
+
+   let width = int32(draw2d.width.float32 * scale.x)
+   let height = int32(draw2d.height.float32 * scale.y)
 
    game.canvas.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
    game.canvas.fillRect((
