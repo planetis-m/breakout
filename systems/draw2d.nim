@@ -6,18 +6,19 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
    template transform: untyped = game.transform[entity]
    template draw2d: untyped = game.draw2d[entity]
 
-   var scale, position: Vec2
+   var scale: Vec2
+   var position: Point2
    if HasPrevious in game.world[entity]:
       template previous: untyped = game.previous[entity]
 
       let interpolation = lerp(previous.world, transform.world, intrpl)
-      scale = interpolation.getScale()
-      position = interpolation.getTranslation()
+      scale = interpolation.scale
+      position = interpolation.origin
 
       game.rmPrevious(entity)
    else:
-      scale = transform.world.getScale()
-      position = transform.world.getTranslation()
+      scale = transform.world.scale
+      position = transform.world.origin
 
    let width = int32(draw2d.width.float32 * scale.x)
    let height = int32(draw2d.height.float32 * scale.y)

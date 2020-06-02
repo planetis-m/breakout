@@ -3,11 +3,9 @@ import ".." / [game_types, vmath, sparse_set], math
 const Query = {HasTransform2d, HasCollide}
 
 proc computeAabb(transform: Transform2d, collide: var Collide) =
-   collide.center = getTranslation(transform.world)
-   collide.min.x = collide.center.x - collide.size.x / 2.0
-   collide.min.y = collide.center.y - collide.size.y / 2.0
-   collide.max.x = collide.center.x + collide.size.x / 2.0
-   collide.max.y = collide.center.y + collide.size.y / 2.0
+   collide.center = getOrigin(transform.world)
+   collide.min = collide.center - collide.size / 2.0
+   collide.max = collide.center + collide.size / 2.0
 
 proc intersectAabb(a, b: Collide): bool =
    a.min.x < b.max.x and

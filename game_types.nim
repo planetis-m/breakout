@@ -28,8 +28,8 @@ type
 
    Collide* = object
       size*: Vec2
-      min*, max*: Vec2
-      center*: Vec2
+      min*, max*: Point2
+      center*: Point2
       collision*: Collision
 
    Draw2d* = object
