@@ -3,8 +3,8 @@ import ".." / [game_types, vmath, dsl], random
 const Query = {HasTransform2d, HasShake}
 
 proc update(game: var Game, entity: Entity) =
-   template transform: untyped = game.transform[entity]
-   template shake: untyped = game.shake[entity]
+   template transform: untyped = game.transform[entity.index]
+   template shake: untyped = game.shake[entity.index]
 
    if shake.duration > 0.0:
       shake.duration -= 0.01
@@ -27,5 +27,6 @@ proc update(game: var Game, entity: Entity) =
 
 proc sysShake*(game: var Game) =
    for i in 0 ..< MaxEntities:
-      if game.world[i] * Query == Query:
-         update(game, Entity(i))
+      let entity = Entity(i)
+      if game.world[entity] * Query == Query:
+         update(game, entity)

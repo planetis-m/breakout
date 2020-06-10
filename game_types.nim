@@ -1,7 +1,5 @@
-import sdl_private, vmath
-
-const
-   MaxEntities* = 10_000
+import sdl_private, vmath, entity, sparse_set
+export entity
 
 type
    HasComponent* = enum
@@ -10,6 +8,7 @@ type
       HasControlBall,
       HasControlBrick,
       HasControlPaddle,
+      HasCurrent,
       HasDirty,
       HasDraw2d,
       HasFade,
@@ -20,8 +19,6 @@ type
       HasShake,
       HasTransform2d
 
-   Entity* = uint16
-
    Collision* = object
       other*: Entity
       hit*: Vec2
@@ -31,6 +28,12 @@ type
       min*, max*: Point2
       center*: Point2
       collision*: Collision
+
+   Current* = object
+      world*: Mat2d      # Matrix relative to the world
+      origin*: Point2    # origin relative to the world
+      rotation*: float32 # rotation relative to the world
+      scale*: Vec2       # scale relative to the world
 
    Draw2d* = object
       width*, height*: int32
@@ -49,21 +52,26 @@ type
       speed*: float32
 
    Previous* = object
-      world*: Mat2d # used for interpolation from previous frame
+      origin*: Point2    # origin at the previous frame
+      rotation*: float32 # rotation at the previous frame
+      scale*: Vec2       # scale at the previous frame
 
    Shake* = object
       duration*: float32
       strength*: float32
 
    Transform2d* = object
-      world*: Mat2d      # Matrix relative to the world
       translation*: Vec2 # local translation relative to the parent
       rotation*: float32 # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
 
+   World* = object
+      world*: SparseSet[set[HasComponent]]
+      entities*: Registry
+
    Game* = object
       running*: bool
-      world*: seq[set[HasComponent]]
+      world*: World
       camera*: Entity
 
       windowWidth*, windowHeight*: int32
@@ -75,6 +83,7 @@ type
       inputState*: array[ArrowLeft..ArrowRight, bool]
 
       collide*: seq[Collide]
+      current*: seq[Current]
       draw2d*: seq[Draw2d]
       fade*: seq[Fade]
       hierarchy*: seq[Hierarchy]
@@ -82,5 +91,3 @@ type
       previous*: seq[Previous]
       shake*: seq[Shake]
       transform*: seq[Transform2d]
-
-const invalidId* = high(Entity) # a sentinel value to represent an invalid entity

@@ -3,7 +3,7 @@ import ".." / [game_types, vmath, sparse_set], math
 const Query = {HasTransform2d, HasCollide}
 
 proc computeAabb(transform: Transform2d, collide: var Collide) =
-   collide.center = getOrigin(transform.world)
+   collide.center = origin(transform.world)
    collide.min = collide.center - collide.size / 2.0
    collide.max = collide.center + collide.size / 2.0
 
@@ -28,10 +28,10 @@ proc calculatePenetration(a, b: Collide): Vec2 =
 proc sysCollide*(game: var Game) =
    var allColliders: seq[Entity]
    for i in 0 ..< MaxEntities:
-      if game.world[i] * Query == Query:
-         let colliderId = Entity(i)
-         template transform: untyped = game.transform[colliderId]
-         template collider: untyped = game.collide[colliderId]
+      let colliderId = Entity(i)
+      if game.world[colliderId] * Query == Query:
+         template transform: untyped = game.transform[colliderId.index]
+         template collider: untyped = game.collide[colliderId.index]
 
          collider.collision.entity = invalidId
          computeAabb(transform, collider)
@@ -39,11 +39,11 @@ proc sysCollide*(game: var Game) =
 
    for i in 0 ..< allColliders.len:
       let colliderId = allColliders[i]
-      template collider: untyped = game.collide[colliderId]
+      template collider: untyped = game.collide[colliderId.index]
 
       for j in i + 1 ..< allColliders.len:
          let otherId = allColliders[j]
-         template other: untyped = game.collide[otherId]
+         template other: untyped = game.collide[otherId.index]
 
          if intersectAabb(collider, other):
             let penetration = calculatePenetration(collider, other)

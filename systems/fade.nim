@@ -3,9 +3,9 @@ import ".." / [game_types, utils, dsl]
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
 proc update(game: var Game, entity: Entity) =
-   template transform: untyped = game.transform[entity]
-   template fade: untyped = game.fade[entity]
-   template draw: untyped = game.draw2d[entity]
+   template transform: untyped = game.transform[entity.index]
+   template fade: untyped = game.fade[entity.index]
+   template draw: untyped = game.draw2d[entity.index]
 
    if draw.color[3] > 0:
       let step = 255.0 * fade.step
@@ -20,5 +20,6 @@ proc update(game: var Game, entity: Entity) =
 
 proc sysFade*(game: var Game) =
    for i in 0 ..< MaxEntities:
-      if game.world[i] * Query == Query:
-         update(game, Entity(i))
+      let entity = Entity(i)
+      if game.world[entity] * Query == Query:
+         update(game, entity)

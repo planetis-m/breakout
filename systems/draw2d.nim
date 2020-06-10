@@ -1,21 +1,21 @@
-import ".." / [game_types, vmath]
+import ".." / [game_types, vmath, utils]
 
 const Query = {HasTransform2d, HasDraw2d}
 
 proc update(game: var Game, entity: Entity, intrpl: float32) =
-   template transform: untyped = game.transform[entity]
-   template draw2d: untyped = game.draw2d[entity]
+   template transform: untyped = game.transform[entity.index]
+   template draw2d: untyped = game.draw2d[entity.index]
 
    var scale: Vec2
    var position: Point2
    if HasPrevious in game.world[entity]:
-      template previous: untyped = game.previous[entity]
+      template previous: untyped = game.previous[entity.index]
 
       let interpolation = lerp(previous.world, transform.world, intrpl)
+      game.rmComponent(entity, HasPrevious)
+
       scale = interpolation.scale
       position = interpolation.origin
-
-      game.rmPrevious(entity)
    else:
       scale = transform.world.scale
       position = transform.world.origin
@@ -34,5 +34,6 @@ proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.canvas.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
    game.canvas.clear()
    for i in 0 ..< MaxEntities:
-      if game.world[i] * Query == Query:
-         update(game, Entity(i), intrpl)
+      let entity = Entity(i)
+      if game.world[entity] * Query == Query:
+         update(game, entity, intrpl)

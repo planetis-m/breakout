@@ -1,23 +1,17 @@
 import game_types, sparse_set
 
-proc createEntity*(game: var Game): Entity =
-   for i in 0 ..< MaxEntities:
-      if game.world[i] == {}:
-         return Entity(i)
-   raise newException(ResourceExhaustedError, "No more entities available!")
-
 template `?=`(name, value): bool = (let name = value; name != invalidId)
 proc prepend*(game: var Game, parentId, entity: Entity) =
-   template hierarchy: untyped = game.hierarchy[entity]
-   template parent: untyped = game.hierarchy[parentId]
+   template hierarchy: untyped = game.hierarchy[entity.index]
+   template parent: untyped = game.hierarchy[parentId.index]
 
    hierarchy.next = parent.head
    parent.head = entity
 
 proc delete*(game: var Game, entity: Entity) =
    if HasHierarchy in game.world[entity]:
-      template hierarchy: untyped = game.hierarchy[entity]
-      template parent: untyped = game.hierarchy[parentId]
+      template hierarchy: untyped = game.hierarchy[entity.index]
+      template parent: untyped = game.hierarchy[parentId.index]
 
       if parentId ?= hierarchy.parent:
          if entity == parent.head: parent.head = hierarchy.next
@@ -25,3 +19,6 @@ proc delete*(game: var Game, entity: Entity) =
          delete(game, childId)
 
    game.world[entity] = {}
+
+proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =
+   game.world[entity].excl has

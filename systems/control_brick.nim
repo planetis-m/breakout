@@ -3,8 +3,8 @@ import ".." / [game_types, blueprints]
 const Query = {HasControlBrick, HasCollide, HasFade}
 
 proc update(game: var Game, entity: Entity) =
-   template collide: untyped = game.collide[entity]
-   template fade: untyped = game.fade[entity]
+   template collide: untyped = game.collide[entity.index]
+   template fade: untyped = game.fade[entity.index]
 
    if collide.collision.other != invalidId:
       fade.step = 0.02
@@ -15,5 +15,6 @@ proc update(game: var Game, entity: Entity) =
 
 proc sysControlBrick*(game: var Game) =
    for i in 0 ..< MaxEntities:
-      if game.world[i] * Query == Query:
-         update(game, Entity(i))
+      let entity = Entity(i)
+      if game.world[entity] * Query == Query:
+         update(game, entity)

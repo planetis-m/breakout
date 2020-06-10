@@ -1,7 +1,28 @@
 import math
 
+type
+   Rad* = distinct float32
+
+proc `-`*(rad: Rad): Rad {.borrow.}
+func `+`*(a, b: Rad): Rad = Rad(a.float32 + b.float32)
+func `-`*(a, b: Rad): Rad = Rad(a.float32 - b.float32)
+proc `<`*(a, b: Rad): bool {.borrow.}
+proc `<=`*(a, b: Rad): bool {.borrow.}
+proc `+=`*(a: var Rad; b: Rad) {.borrow.}
+proc `-=`*(a: var Rad; b: Rad) {.borrow.}
+func sin*(rad: Rad): float32 = sin(rad.float32)
+func cos*(rad: Rad): float32 = cos(rad.float32)
+
 func lerp*(a, b, t: float32): float32 =
-   result = a * (1.0 - t) + b * t
+   result = a * (1.0'f32 - t) + b * t
+
+func wrapToPi*(rad: Rad): Rad =
+   result = rad
+   while result > Pi.Rad: result -= Tau.Rad
+   while result < -Pi.Rad: result += Tau.Rad
+
+func lerp*(a, b: Rad, t: float32): Rad =
+   result = lerp(a.float32, float32(a + wrapToPi(b - a)), t).Rad
 
 type
    Vec2* = object
@@ -28,14 +49,14 @@ proc `-`*(a: Vec2): Vec2 =
 func `/`*(v: Vec2, scalar: float32): Vec2 =
    result = Vec2(x: v.x / scalar, y: v.y / scalar)
 
-func lengthSq*(a: Vec2): float32 =
-   result = a.x * a.x + a.y * a.y
+func magSq*(v: Vec2): float32 =
+   result = v.x * v.x + v.y * v.y
 
-func length*(a: Vec2): float32 =
-   result = sqrt(a.lengthSq)
+func mag*(v: Vec2): float32 =
+   result = sqrt(v.magSq)
 
-func normalize*(a: Vec2): UnitVec2 =
-   result = UnitVec2(a / a.length)
+func normalize*(v: Vec2): UnitVec2 =
+   result = UnitVec2(v / v.mag)
 
 func dot*(a, b: Vec2): float32 =
    result = a.x * b.x + a.y * b.y
@@ -43,11 +64,14 @@ func dot*(a, b: Vec2): float32 =
 func dir*(a, b: Vec2): UnitVec2 =
    result = normalize(a - b)
 
-func dir*(rad: float32): UnitVec2 =
+func dir*(rad: Rad): UnitVec2 =
    result = UnitVec2(vec2(cos(rad), sin(rad)))
 
 func lerp*(a, b: Vec2, t: float32): Vec2 =
-   result = a * (1.0 - t) + b * t
+   result = a * (1.0'f32 - t) + b * t
+
+func heading*(v: Vec2): Rad =
+   result = arctan2(v.y, v.x).Rad
 
 func point2*(x, y: float32): Point2 =
    result = Point2(vec2(x, y))
@@ -64,79 +88,80 @@ func `+`*(p: Point2, v: Vec2): Point2 =
 func `-`*(p: Point2, v: Vec2): Point2 =
    result = Point2(Vec2(p) - v)
 
-func dist*(at, to: Point2): float32 =
-   result = length(at - to)
+func dist*(a, b: Point2): float32 =
+   result = mag(a - b)
 
-func distSq*(at, to: Point2): float32 =
-   result = lengthSq(at - to)
+func distSq*(a, b: Point2): float32 =
+   result = magSq(a - b)
 
 func lerp*(a, b: Point2, t: float32): Point2 =
-   result = Point2(lerp(Vec2(a), Vec2(b), t)
+   result = Point2(lerp(Vec2(a), Vec2(b), t))
 
 type
    Mat2d* = object
-      m00*, m01*, m02*: float32
-      m10*, m11*, m12*: float32
+      m00*, m01*: float32
+      m10*, m11*: float32
+      m20*, m21*: float32
 
 func identity*(): Mat2d =
    result = Mat2d(
       m00: 1.0,
-      m10: 0.0,
       m01: 0.0,
+      m10: 0.0,
       m11: 1.0,
-      m02: 0.0,
-      m12: 0.0)
+      m20: 0.0,
+      m21: 0.0)
 
 func translate*(a: Mat2d, v: Vec2): Mat2d =
    result = Mat2d(
       m00: a.m00,
-      m10: a.m10,
       m01: a.m01,
+      m10: a.m10,
       m11: a.m11,
-      m02: a.m02 + v.x,
-      m12: a.m12 + v.y)
+      m20: a.m20 + v.x,
+      m21: a.m21 + v.y)
 
-func rotate*(a: Mat2d, rad: float32): Mat2d =
+func rotate*(a: Mat2d, rad: Rad): Mat2d =
    let s = rad.sin()
    let c = rad.cos()
 
    result = Mat2d(
-      m00: a.m00 * c + a.m01 * s,
-      m10: a.m10 * c + a.m11 * s,
-      m01: a.m01 * -s + a.m01 * c,
+      m00: a.m00 * c + a.m10 * s,
+      m01: a.m01 * c + a.m11 * s,
+      m10: a.m10 * -s + a.m10 * c,
       m11: a.m11 * -s + a.m11 * c,
-      m02: a.m02,
-      m12: a.m12)
+      m20: a.m20,
+      m21: a.m21)
 
 func scale*(a: Mat2d, v: Vec2): Mat2d =
    result = Mat2d(
       m00: a.m00 * v.x,
-      m10: a.m10 * v.x,
-      m01: a.m01 * v.y,
+      m01: a.m01 * v.x,
+      m10: a.m10 * v.y,
       m11: a.m11 * v.y,
-      m02: a.m02,
-      m12: a.m12)
+      m20: a.m20,
+      m21: a.m21)
 
-func compose*(translation, scale: Vec2, rad: float32): Mat2d =
+func compose*(translation: Vec2, rad: Rad, scale: Vec2): Mat2d =
    let s = rad.sin()
    let c = rad.cos()
 
    result = Mat2d(
       m00: c * scale.x,
-      m10: s * scale.x,
-      m01: -s * scale.y,
+      m01: s * scale.x,
+      m10: -s * scale.y,
       m11: c * scale.y,
-      m02: translation.x,
-      m12: translation.y)
+      m20: translation.x,
+      m21: translation.y)
 
 func origin*(a: Mat2d): Point2 =
-   result = point2(a.m02, a.m12)
+   result = point2(a.m20, a.m21)
 
 proc scale*(a: Mat2d): Vec2 =
-   result = vec2(vec2(a.m00, a.m01).length, vec2(a.m01, a.m11).length)
+   result = vec2(vec2(a.m00, a.m10).mag, vec2(a.m10, a.m11).mag)
 
-proc rotation*(a: Mat2d): float32 =
-   result = arctan2(a.m01, a.m00)
+proc rotation*(a: Mat2d): Rad =
+   result = arctan2(a.m10, a.m00).Rad
 
 proc lerp*(a, b: Mat2d, t: float32): Mat2d =
    # extract parameters
@@ -148,73 +173,38 @@ proc lerp*(a, b: Mat2d, t: float32): Mat2d =
    let r2 = b.rotation
    let s2 = b.scale
 
-   # slerp rotation
-   let v1 = dir(r1).Vec2
-   let v2 = dir(r2).Vec2
-
-   var dot = dot(v1, v2)
-   dot = clamp(dot, -1.0, 1.0)
-
-   var v: Vec2
-   if dot > 0.9995:
-      v = normalize(lerp(v1, v2, t)).Vec2 # linearly interpolate to avoid numerical precision issues
-   else:
-      let angle = t * arccos(dot)
-      let v3 = normalize(v2 - v1 * dot).Vec2
-      v = v1 * cos(angle) + v3 * sin(angle)
-
    # construct matrix
-   result = compose(lerp(p1, p2, t), lerp(s1, s2, t), arctan2(v.y, v.x))
+   result = compose(lerp(p1, p2, t).Vec2, lerp(r1, r2, t), lerp(s1, s2, t))
 
 func invert*(a: Mat2d): Mat2d =
-   let aa = a.m00
-   let ab = a.m10
-   let ac = a.m01
-   let ad = a.m11
-   let atx = a.m02
-   let aty = a.m12
-
-   var det = aa * ad - ab * ac
+   var det = a.m00 * a.m11 - a.m01 * a.m10
 
    if det == 0.0:
       raise newException(DivByZeroDefect, "Mat2d determinant cannot be 0")
 
-   det = 1.0 / det
+   det = 1.0'f32 / det
 
    result = Mat2d(
-      m00: ad * det,
-      m10: -ab * det,
-      m01: -ac * det,
-      m11: aa * det,
-      m02: (ac * aty - ad * atx) * det,
-      m12: (ab * atx - aa * aty) * det)
+      m00: a.m11 * det,
+      m01: -a.m01 * det,
+      m10: -a.m10 * det,
+      m11: a.m00 * det,
+      m20: (a.m10 * a.m21 - a.m11 * a.m20) * det,
+      m21: (a.m01 * a.m20 - a.m00 * a.m21) * det)
 
 func `*`*(a, b: Mat2d): Mat2d =
-   let a0 = a.m00
-   let a1 = a.m10
-   let a2 = a.m01
-   let a3 = a.m11
-   let a4 = a.m02
-   let a5 = a.m12
-   let b0 = b.m00
-   let b1 = b.m10
-   let b2 = b.m01
-   let b3 = b.m11
-   let b4 = b.m02
-   let b5 = b.m12
-
    result = Mat2d(
-      m00: a0 * b0 + a2 * b1,
-      m10: a1 * b0 + a3 * b1,
-      m01: a0 * b2 + a2 * b3,
-      m11: a1 * b2 + a3 * b3,
-      m02: a0 * b4 + a2 * b5 + a4,
-      m12: a1 * b4 + a3 * b5 + a5)
+      m00: a.m00 * b.m00 + a.m10 * b.m01,
+      m01: a.m01 * b.m00 + a.m11 * b.m01,
+      m10: a.m00 * b.m10 + a.m10 * b.m11,
+      m11: a.m01 * b.m10 + a.m11 * b.m11,
+      m20: a.m00 * b.m20 + a.m10 * b.m21 + a.m20,
+      m21: a.m01 * b.m20 + a.m11 * b.m21 + a.m21)
 
 proc transform*(a: Mat2d, v: Vec2): Vec2 =
-   result = vec2(a.m00 * v.x + a.m01 * v.y,
-         a.m10 * v.x + a.m11 * v.y)
+   result = vec2(a.m00 * v.x + a.m10 * v.y,
+         a.m01 * v.x + a.m11 * v.y)
 
 proc transform*(a: Mat2d, p: Point2): Point2 =
-   result = point2(a.m00 * p.x + a.m01 * p.y + a.m02,
-         a.m10 * p.x + a.m11 * p.y + a.m12)
+   result = point2(a.m00 * p.x + a.m10 * p.y + a.m20,
+         a.m01 * p.x + a.m11 * p.y + a.m21)

@@ -3,7 +3,7 @@ import ".." / [game_types, vmath]
 const Query = {HasMove, HasControlPaddle}
 
 proc update(game: var Game, entity: Entity) =
-   template move: untyped = game.move[entity]
+   template move: untyped = game.move[entity.index]
 
    move.direction.x = 0.0
 
@@ -15,5 +15,6 @@ proc update(game: var Game, entity: Entity) =
 
 proc sysControlPaddle*(game: var Game) =
    for i in 0 ..< MaxEntities:
-      if game.world[i] * Query == Query:
-         update(game, Entity(i))
+      let entity = Entity(i)
+      if game.world[entity] * Query == Query:
+         update(game, entity)

@@ -1,6 +1,6 @@
-import math, random, monotimes, sdl, game_types, blueprints
+import math, random, monotimes, sdl_private, game_types, blueprints
 import systems / [collide, control_ball, control_brick, control_paddle,
-   draw2d, fade, framerate, handle_input, move, shake, transform2d]
+      draw2d, fade, handle_input, move, shake, transform2d]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
    let sdlContext = sdlInit()
@@ -47,7 +47,6 @@ proc update(game: var Game) =
 
 proc render(game: var Game, intrpl: float32) =
    sysDraw2d(game, intrpl)
-   sysFramerate(game, intrpl)
 
 proc run(game: var Game) =
    const
