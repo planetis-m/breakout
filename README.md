@@ -16,6 +16,8 @@ For entity management (creation, deletion) an implicit list is used, as explaine
 For iterating over all entities, a sparse set that contains a ``set[HasComponent]`` is used.
 There are still improvements to be made in this aspect.
 
+### Todo: sorting needs to be implemented
+
 ## Improvements to the hierarchical scene graph
 
 As explained by the original authors in their documentation for
@@ -30,6 +32,31 @@ However I found the implementation, space inefficient since its declared as
 To fix it I used the design described at
 [skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/).
 Now it is a seperate ``Hierarchy`` component following the unconstrained model.
+
+## Custom vector math library
+
+A type safe vector math library was created for use in the game. ``distinct`` types are
+used to prohibit operations that have no physical meaning, such as adding two points.
+
+```nim
+type
+   Rad* = distinct float32
+
+func lerp*(a, b: Rad, t: float32): Rad =
+   # interpolates angles
+
+type
+   Vec2* = object
+      x*, y*: float32
+
+   UnitVec2* {.borrow:`.`.} = distinct Vec2
+   Point2* {.borrow: `.`.} = distinct Vec2
+
+func `+`*(a, b: Vec2): Vec2
+func `-`*(a, b: Point2): Vec2
+func `+`*(p: Point2, v: Vec2): Point2
+func `-`*(p: Point2, v: Vec2): Point2
+```
 
 ## Blueprints DSL
 
@@ -75,4 +102,4 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
 - [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
 - [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs
 - [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf) interesting information
-- People on #nim-gamedev for answering my questions
+- #nim-gamedev, a friendly community interested in making games with nim.
