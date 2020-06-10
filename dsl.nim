@@ -1,9 +1,9 @@
-import macros, game_types, math, vmath, utils
+import macros, game_types, vmath, utils, registry, storage
 
 proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
    game.world[entity].incl HasCollide
-   game.collide[entity.index] = Collide(entity: entity, size: size,
-         collision: Collision(entity: invalidId))
+   game.collide[entity.index] = Collide(size: size,
+         collision: Collision(other: invalidId))
 
 proc mixControlBall*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlBall
@@ -35,9 +35,11 @@ proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 10
    game.world[entity].incl HasMove
    game.move[entity.index] = Move(direction: direction, speed: speed)
 
-proc mixPrevious*(game: var Game, entity: Entity, world = identity()) =
+proc mixPrevious*(game: var Game, entity: Entity, origin = point2(0, 0),
+      rotation = 0.0, scale = vec2(1, 1)) =
    game.world[entity].incl HasPrevious
-   game.previous[entity.index] = Previous(world: world)
+   game.previous[entity.index] = Previous(origin: origin,
+         rotation: rotation, scale: scale)
 
 proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
    game.world[entity].incl HasShake
@@ -46,7 +48,7 @@ proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
 proc mixTransform2d*(game: var Game, entity: Entity, translation = vec2(0, 0),
       rotation = 0.0, scale = vec2(1, 1)) =
    game.world[entity].incl HasTransform2d
-   game.transform[entity.index] = Transform2D(world: identity(), translation: translation,
+   game.transform[entity.index] = Transform2D(translation: translation,
          rotation: rotation, scale: scale)
 
 # ---------------

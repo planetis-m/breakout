@@ -5,9 +5,10 @@ type
       len: int
       sparseToPacked: array[maxEntities, EntityImpl] # mapping from sparse handles to dense values
       packedToSparse: array[maxEntities, Entity] # mapping from dense values to sparse handles
-      packed: array[maxEntities, T]
+      packed: seq[T]
 
-proc initStorage*[T](): Storage[T] =
+proc initStorage*[T](denseCap: Natural): Storage[T] =
+   result = Storage(packed: newSeq[T](denseCap))
    result.sparseToPacked.fill(invalidId.EntityImpl)
    result.packedToSparse.fill(invalidId)
 

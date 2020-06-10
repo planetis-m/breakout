@@ -15,7 +15,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
    result = Game(
       running: true,
-      world: initStorage[set[HasComponent]](),
+      world: initStorage[set[HasComponent]](maxEntities),
       entities: initRegistry(),
 
       windowWidth: windowWidth,
@@ -26,14 +26,14 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
       clearColor: [0'u8, 0, 0, 255],
 
-      collide: newSeq[Collide](MaxEntities),
-      draw2d: newSeq[Draw2d](MaxEntities),
-      fade: newSeq[Fade](MaxEntities),
-      hierarchy: newSeq[Hierarchy](MaxEntities),
-      move: newSeq[Move](MaxEntities),
-      previous: newSeq[Previous](MaxEntities),
-      shake: newSeq[Shake](MaxEntities),
-      transform: newSeq[Transform2d](MaxEntities))
+      collide: newSeq[Collide](maxEntities),
+      draw2d: newSeq[Draw2d](maxEntities),
+      fade: newSeq[Fade](maxEntities),
+      hierarchy: newSeq[Hierarchy](maxEntities),
+      move: newSeq[Move](maxEntities),
+      previous: newSeq[Previous](maxEntities),
+      shake: newSeq[Shake](maxEntities),
+      transform: newSeq[Transform2d](maxEntities))
 
 proc update(game: var Game) =
    # The Game engine that consist of these systems

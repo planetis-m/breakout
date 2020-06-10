@@ -22,6 +22,7 @@ proc delete*(game: var Game, entity: Entity) =
          delete(game, childId)
 
    game.world.delete(entity)
+   game.entities.delete(entity)
 
 proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =
    game.world[entity].excl has

@@ -5,6 +5,17 @@ This is a port of [rs-breakout](https://github.com/michalbe/rs-breakout)
 It was done for learning purposes. It also incorporates improvements done by me.
 These are explained below.
 
+## Entity management was redesigned
+
+The original codebase contains a lot of loops to ``MAX_ENTITIES`` in systems'
+update functions and at entity creation. This was eliminated by using two special data structures.
+
+For entity management (creation, deletion) an implicit list is used, as explained
+[here](https://skypjack.github.io/2019-05-06-ecs-baf-part-3/).
+
+For iterating over all entities, a sparse set that contains a ``set[HasComponent]`` is used.
+There are still improvements to be made in this aspect.
+
 ## Improvements to the hierarchical scene graph
 
 As explained by the original authors in their documentation for
@@ -60,11 +71,8 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
 ## Acknowledgments
 
 - [rs-breakout](https://github.com/michalbe/rs-breakout) the game I ported to nim
-- [java-scene_graph](https://github.com/nathanfaucett/java-scene_graph) better understanding scene graphs
 - [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial) introduced me to writing games
 - [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
 - [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs
 - [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf) interesting information
-- [Fireblade](https://github.com/fireblade-engine/ecs) as an inspiration
-- [zig-sparse-set](https://github.com/Srekel/zig-sparse-set) helped understanding sparse sets, although not used
 - People on #nim-gamedev for answering my questions

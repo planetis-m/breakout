@@ -1,5 +1,4 @@
 import sdl_private, vmath, registry, storage
-export invalidId, maxEntities, EntityImpl, Entity
 
 type
    HasComponent* = enum
@@ -66,10 +65,10 @@ type
       scale*: Vec2       # local scale relative to the parent
 
    Game* = object
-      running*: bool
       world*: Storage[set[HasComponent]]
       entities*: Registry
       camera*: Entity
+      running*: bool
 
       windowWidth*, windowHeight*: int32
 
