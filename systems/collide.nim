@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, sparse_set], math
+import ".." / [game_types, vmath, registry, storage], math
 
 const Query = {HasTransform2d, HasCollide}
 
@@ -27,9 +27,8 @@ proc calculatePenetration(a, b: Collide): Vec2 =
 
 proc sysCollide*(game: var Game) =
    var allColliders: seq[Entity]
-   for i in 0 ..< MaxEntities:
-      let colliderId = Entity(i)
-      if game.world[colliderId] * Query == Query:
+   for (colliderId, has) in game.world.pairs:
+      if has * Query == Query:
          template transform: untyped = game.transform[colliderId.index]
          template collider: untyped = game.collide[colliderId.index]
 

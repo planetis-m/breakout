@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, utils]
+import ".." / [game_types, vmath, utils, registry, storage]
 
 const Query = {HasTransform2d, HasDraw2d}
 
@@ -33,7 +33,6 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
 proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.canvas.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
    game.canvas.clear()
-   for i in 0 ..< MaxEntities:
-      let entity = Entity(i)
-      if game.world[entity] * Query == Query:
+   for (entity, has) in game.world.pairs:
+      if has * Query == Query:
          update(game, entity, intrpl)

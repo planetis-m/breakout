@@ -1,4 +1,4 @@
-import ".." / [game_types, sparse_set, vmath, dsl, utils]
+import ".." / [game_types, vmath, dsl, utils, registry, storage]
 
 const Query = {HasCurrent, HasTransform2d, HasHierarchy, HasDirty}
 
@@ -29,7 +29,6 @@ proc update(game: var Game, entity: Entity) =
       transform.world = local
 
 proc sysTransform2d*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      let entity = Entity(i)
-      if game.world[entity] * Query == Query:
+   for (entity, has) in game.world.pairs:
+      if has * Query == Query:
          update(game, entity)

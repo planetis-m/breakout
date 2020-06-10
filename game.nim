@@ -1,4 +1,4 @@
-import math, random, monotimes, sdl_private, game_types, blueprints
+import math, random, monotimes, sdl_private, game_types, blueprints, registry, storage
 import systems / [collide, control_ball, control_brick, control_paddle,
       draw2d, fade, handle_input, move, shake, transform2d]
 
@@ -15,6 +15,8 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
    result = Game(
       running: true,
+      world: initStorage[set[HasComponent]](),
+      entities: initRegistry(),
 
       windowWidth: windowWidth,
       windowHeight: windowHeight,

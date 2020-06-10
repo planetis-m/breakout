@@ -1,4 +1,4 @@
-import ".." / [game_types, blueprints]
+import ".." / [game_types, blueprints, utils, registry, storage]
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
@@ -14,7 +14,6 @@ proc update(game: var Game, entity: Entity) =
                float32(game.windowHeight / 2))
 
 proc sysControlBrick*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      let entity = Entity(i)
-      if game.world[entity] * Query == Query:
+   for (entity, has) in game.world.pairs:
+      if has * Query == Query:
          update(game, entity)

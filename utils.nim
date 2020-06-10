@@ -1,4 +1,7 @@
-import game_types, sparse_set
+import game_types, registry, storage
+
+proc createEntity*(game: var Game): Entity =
+   game.entities.createEntity()
 
 template `?=`(name, value): bool = (let name = value; name != invalidId)
 proc prepend*(game: var Game, parentId, entity: Entity) =
@@ -18,7 +21,7 @@ proc delete*(game: var Game, entity: Entity) =
       while childId ?= hierarchy.head:
          delete(game, childId)
 
-   game.world[entity] = {}
+   game.world.delete(entity)
 
 proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =
    game.world[entity].excl has

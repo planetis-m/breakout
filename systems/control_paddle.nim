@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath]
+import ".." / [game_types, vmath, registry, storage]
 
 const Query = {HasMove, HasControlPaddle}
 
@@ -14,7 +14,6 @@ proc update(game: var Game, entity: Entity) =
       move.direction.x += 1.0
 
 proc sysControlPaddle*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      let entity = Entity(i)
-      if game.world[entity] * Query == Query:
+   for (entity, has) in game.world.pairs:
+      if has * Query == Query:
          update(game, entity)

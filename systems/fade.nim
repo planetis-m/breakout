@@ -1,4 +1,4 @@
-import ".." / [game_types, utils, dsl]
+import ".." / [game_types, utils, dsl, registry, storage]
 
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
@@ -19,7 +19,6 @@ proc update(game: var Game, entity: Entity) =
          game.delete(entity)
 
 proc sysFade*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      let entity = Entity(i)
-      if game.world[entity] * Query == Query:
+   for (entity, has) in game.world.pairs:
+      if has * Query == Query:
          update(game, entity)

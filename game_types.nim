@@ -1,5 +1,5 @@
-import sdl_private, vmath, entity, sparse_set
-export entity
+import sdl_private, vmath, registry, storage
+export invalidId, maxEntities, EntityImpl, Entity
 
 type
    HasComponent* = enum
@@ -65,13 +65,10 @@ type
       rotation*: float32 # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
 
-   World* = object
-      world*: SparseSet[set[HasComponent]]
-      entities*: Registry
-
    Game* = object
       running*: bool
-      world*: World
+      world*: Storage[set[HasComponent]]
+      entities*: Registry
       camera*: Entity
 
       windowWidth*, windowHeight*: int32

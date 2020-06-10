@@ -1,5 +1,5 @@
 type
-   EntityImpl = uint16
+   EntityImpl* = uint16
    Entity* = distinct EntityImpl
 
 const

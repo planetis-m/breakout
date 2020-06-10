@@ -1,62 +1,66 @@
+import registry, algorithm
 
 type
-   Storage = object
-      sparseToPacked: seq[ArrayIndex]
-      packedToSparse: seq[Entity]
-      packed: seq[Component]
+   Storage*[T] = object
+      len: int
+      sparseToPacked: array[maxEntities, EntityImpl] # mapping from sparse handles to dense values
+      packedToSparse: array[maxEntities, Entity] # mapping from dense values to sparse handles
+      packed: array[maxEntities, T]
 
-proc assign*[T](s: Storage[T], entity: Entity, component: T): T =
-   assure(s, entity)
-   let entityIndex = entity.index
-
-   let packedIndex = s.sparseToPacked[entityIndex]
-   if packedIndex == invalidId:
-      packedIndex = s.packed.len
-      s.packedToSparse.add(entity)
-      s.packed.add(component)
-      s.sparseToPacked[entityIndex] = packedIndex
-   else:
-      s.packed[packedIndex] = component
-
-   result = s.packed[packedIndex]
-
-proc remove*[T](s: Storage[T], entity: Entity) =
-   let entityIndex = entity.index
-   if entity.index < s.sparseToPacked.len:
-      return
-
-   let packedIndex = s.sparseToPacked[entityIndex]
-   if packedIndex == invalidId:
-      return
-
-   let lastIndex = s.packed.high
-   let lastEntity = s.packedToSparse[lastIndex]
-   s.sparseToPacked[entityIndex] = invalidId
-   s.sparseToPacked[lastEntity.index] = packedIndex
-   swap(s.packed[packedIndex], s.packed[lastIndex])
-   discard s.packed.pop()
-   swap(s.packedToSparse[packedIndex], s.packedToSparse[lastIndex])
-   discard s.packedToSparse.pop()
-
-proc assure*(s: Storage[T], entity: Entity) =
-   let entityIndex = entity.index
-   if s.sparseToPacked.len <= entityIndex:
-      s.sparseToPacked.grow(entityIndex + 1, invalidId)
-
-proc `[]`*[T](s: Storage[T], entity: Entity): T =
-   if s.contains(entity):
-      let entityIndex = entity.index
-      result = s.packed[s.sparseToPacked[entityIndex]]
+proc initStorage*[T](): Storage[T] =
+   result.sparseToPacked.fill(invalidId.EntityImpl)
+   result.packedToSparse.fill(invalidId)
 
 proc contains*[T](s: Storage[T], entity: Entity): bool =
+   # Returns true if the sparse is registered to a dense index.
+   result = s.sparseToPacked[entity.index] != invalidId.EntityImpl
+
+proc `[]=`*[T](s: var Storage[T], entity: Entity, value: T) =
    let entityIndex = entity.index
-   result = entityIndex < s.sparseToPacked.len and
-         s.sparseToPacked[entityIndex] != invalidId
+   var packedIndex = s.sparseToPacked[entityIndex]
+   if packedIndex == invalidId.EntityImpl:
+      packedIndex = s.len.EntityImpl
+      s.packedToSparse[packedIndex] = entity
+      s.packed[packedIndex] = value
+      s.sparseToPacked[entityIndex] = packedIndex
+      s.len.inc
+   else:
+      s.packed[packedIndex] = value
 
-proc len*[T](s: Storage[T]): int =
-   result = s.packed.len
+proc delete*[T](s: var Storage[T], entity: Entity) =
+   let entityIndex = entity.index
+   let packedIndex = s.sparseToPacked[entityIndex]
+   if packedIndex == invalidId.EntityImpl:
+      raise newException(KeyError, "Entity not in Storage")
+   let lastIndex = s.packed.high
+   let lastEntity = s.packedToSparse[lastIndex]
+   s.sparseToPacked[entityIndex] = invalidId.EntityImpl
+   s.sparseToPacked[lastEntity.index] = packedIndex
+   swap(s.packed[packedIndex], s.packed[lastIndex])
+   s.packed[lastIndex] = default(T)
+   swap(s.packedToSparse[packedIndex], s.packedToSparse[lastIndex])
+   s.packedToSparse[lastIndex] = invalidId
+   s.len.dec
 
-proc clean*[T](s: Storage[T]) =
-   s.packed.shrink(0)
-   s.packedToSparse.shrink(0)
-   s.sparseToPacked.shrink(0)
+proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
+   if not s.contains(entity):
+      raise newException(KeyError, "Entity not in Storage")
+   let entityIndex = entity.index
+   result = s.packed[s.sparseToPacked[entityIndex]]
+
+proc `[]`*[T](s: Storage[T], entity: Entity): lent T =
+   if not s.contains(entity):
+      raise newException(KeyError, "Entity not in Storage")
+   let entityIndex = entity.index
+   result = s.packed[s.sparseToPacked[entityIndex]]
+
+proc clear*[T](s: var Storage[T]) =
+   s.sparseToPacked.fill(invalidId.EntityImpl)
+   s.packedToSparse.fill(invalidId)
+   s.len = 0
+
+proc len*[T](s: Storage[T]): int = s.len
+
+iterator pairs*[T](s: Storage[T]): (Entity, lent T) =
+   for i in 0 ..< s.len:
+      yield (s.packedToSparse[i], s.packed[i])

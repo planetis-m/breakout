@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, blueprints, dsl]
+import ".." / [game_types, vmath, blueprints, dsl, registry, storage]
 
 const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}
 
@@ -48,7 +48,6 @@ proc update(game: var Game, entity: Entity) =
          Fade(step: 0.05)
 
 proc sysControlBall*(game: var Game) =
-   for i in 0 ..< MaxEntities:
-      let entity = Entity(i)
-      if game.world[entity] * Query == Query:
+   for (entity, has) in game.world.pairs:
+      if has * Query == Query:
          update(game, entity)
