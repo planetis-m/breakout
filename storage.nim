@@ -8,7 +8,7 @@ type
       packed: seq[T]
 
 proc initStorage*[T](denseCap: Natural): Storage[T] =
-   result = Storage(packed: newSeq[T](denseCap))
+   result.packed = newSeq[T](denseCap)
    result.sparseToPacked.fill(invalidId.EntityImpl)
    result.packedToSparse.fill(invalidId)
 
@@ -16,17 +16,20 @@ proc contains*[T](s: Storage[T], entity: Entity): bool =
    # Returns true if the sparse is registered to a dense index.
    result = s.sparseToPacked[entity.index] != invalidId.EntityImpl
 
+proc assure*[T](s: var Storage[T]) =
+   if s.packed.len <= s.len:
+      s.packed.grow(s.len + 1, default(T))
+
 proc `[]=`*[T](s: var Storage[T], entity: Entity, value: T) =
    let entityIndex = entity.index
+   #assure(s)
    var packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex == invalidId.EntityImpl:
       packedIndex = s.len.EntityImpl
       s.packedToSparse[packedIndex] = entity
-      s.packed[packedIndex] = value
       s.sparseToPacked[entityIndex] = packedIndex
       s.len.inc
-   else:
-      s.packed[packedIndex] = value
+   s.packed[packedIndex] = value
 
 proc delete*[T](s: var Storage[T], entity: Entity) =
    let entityIndex = entity.index
@@ -46,14 +49,12 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
 proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
    if not s.contains(entity):
       raise newException(KeyError, "Entity not in Storage")
-   let entityIndex = entity.index
-   result = s.packed[s.sparseToPacked[entityIndex]]
+   result = s.packed[s.sparseToPacked[entity.index]]
 
 proc `[]`*[T](s: Storage[T], entity: Entity): lent T =
    if not s.contains(entity):
       raise newException(KeyError, "Entity not in Storage")
-   let entityIndex = entity.index
-   result = s.packed[s.sparseToPacked[entityIndex]]
+   result = s.packed[s.sparseToPacked[entity.index]]
 
 proc clear*[T](s: var Storage[T]) =
    s.sparseToPacked.fill(invalidId.EntityImpl)

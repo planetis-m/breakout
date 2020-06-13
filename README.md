@@ -49,7 +49,6 @@ type
    Vec2* = object
       x*, y*: float32
 
-   UnitVec2* {.borrow:`.`.} = distinct Vec2
    Point2* {.borrow: `.`.} = distinct Vec2
 
 func `+`*(a, b: Vec2): Vec2
@@ -102,4 +101,5 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
 - [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
 - [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs
 - [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf) interesting information
+- [Trace of Radiance](https://github.com/mratsim/trace-of-radiance#correctness) the idea of using distinct types in a math lib
 - #nim-gamedev, a friendly community interested in making games with nim.

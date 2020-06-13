@@ -79,6 +79,9 @@ func point2*(x, y: float32): Point2 =
 func `*`*(p: Point2, scalar: float32): Point2 =
    result = Point2(Vec2(p) * scalar)
 
+func `+`*(a, b: Point2): Point2 {.
+      error: "Adding 2 Point2 doesn't make physical sense".}
+
 func `-`*(a, b: Point2): Vec2 =
    result = Vec2(a) - Vec2(b)
 

@@ -14,9 +14,9 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
    let eventPump = sdlContext.eventInit()
 
    result = Game(
-      running: true,
       world: initStorage[set[HasComponent]](maxEntities),
       entities: initRegistry(),
+      running: true,
 
       windowWidth: windowWidth,
       windowHeight: windowHeight,
