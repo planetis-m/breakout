@@ -68,7 +68,7 @@ type
       world*: Storage[set[HasComponent]]
       entities*: Registry
       camera*: Entity
-      running*: bool
+      isRunning*: bool
 
       windowWidth*, windowHeight*: int32
 

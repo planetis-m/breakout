@@ -80,7 +80,7 @@ func `*`*(p: Point2, scalar: float32): Point2 =
    result = Point2(Vec2(p) * scalar)
 
 func `+`*(a, b: Point2): Point2 {.
-      error: "Adding 2 Point2 doesn't make physical sense".}
+      error: "Adding 2 Point2s doesn't make physical sense".}
 
 func `-`*(a, b: Point2): Vec2 =
    result = Vec2(a) - Vec2(b)
@@ -177,7 +177,7 @@ proc lerp*(a, b: Mat2d, t: float32): Mat2d =
    let s2 = b.scale
 
    # construct matrix
-   result = compose(lerp(p1, p2, t).Vec2, lerp(r1, r2, t), lerp(s1, s2, t))
+   result = compose(lerp(p1, p2, t).Vec2, lerp(r1, r2, t), lerp(s1, s2, t)) # ffs
 
 func invert*(a: Mat2d): Mat2d =
    var det = a.m00 * a.m11 - a.m01 * a.m10

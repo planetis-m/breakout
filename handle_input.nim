@@ -1,10 +1,10 @@
-import ".." / game_types
+import game_types
 
-proc sysHandleInput(game: var Game) =
+proc handleInput*(game: var Game) =
    for event in game.eventPump.poll():
       if event.kind == QuitEvent or (event.kind == KeyDown and
             event.scancode == Escape):
-         game.running = false
+         game.isRunning = false
          return
       elif event.kind == KeyDown and not event.repeat:
          case event.scancode

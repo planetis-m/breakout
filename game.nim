@@ -1,6 +1,7 @@
-import math, random, monotimes, sdl_private, game_types, blueprints, registry, storage
-import systems / [collide, control_ball, control_brick, control_paddle,
-      draw2d, fade, handle_input, move, shake, transform2d]
+import math, random, monotimes, sdl_private, game_types, handle_input,
+      blueprints, registry, storage
+import systems / [collide, control_ball, control_brick, control_paddle, draw2d,
+      fade, move, shake, transform2d]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
    let sdlContext = sdlInit()
@@ -16,7 +17,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
    result = Game(
       world: initStorage[set[HasComponent]](maxEntities),
       entities: initRegistry(),
-      running: true,
+      isRunning: true,
 
       windowWidth: windowWidth,
       windowHeight: windowHeight,
@@ -37,7 +38,6 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
 proc update(game: var Game) =
    # The Game engine that consist of these systems
-   sysHandleInput(game)
    sysControlBall(game)
    sysControlBrick(game)
    sysControlPaddle(game)
@@ -57,18 +57,19 @@ proc run(game: var Game) =
       maxFramesSkipped = 5 # 20% of ticksPerSec
 
    var lastTime = getMonoTime().ticks
-   block outer:
-      while true:
-         let now = getMonoTime().ticks
-         var framesSkipped = 0
-         while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
-            game.update()
-            if not game.running: break outer
-            lastTime += skippedTicks
-            framesSkipped.inc
+   while true:
+      handleInput(game)
+      if not game.isRunning: break
 
-         game.render(float32(now - lastTime) / skippedTicks.float32))
-         game.canvas.present()
+      let now = getMonoTime().ticks
+      var framesSkipped = 0
+      while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
+         game.update()
+         lastTime += skippedTicks
+         framesSkipped.inc
+
+      game.render(float32(now - lastTime) / skippedTicks.float32))
+      game.canvas.present()
 
 proc main =
    randomize()
