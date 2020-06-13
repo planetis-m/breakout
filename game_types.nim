@@ -67,6 +67,7 @@ type
    Game* = object
       world*: Storage[set[HasComponent]]
       entities*: Registry
+      toDelete*: seq[Entity]
       camera*: Entity
       isRunning*: bool
 

@@ -21,8 +21,14 @@ proc delete*(game: var Game, entity: Entity) =
       while childId ?= hierarchy.head:
          delete(game, childId)
 
-   game.world.delete(entity)
-   game.entities.delete(entity)
+   game.toDelete.add(entity)
+
+proc cleanup*(game: var Game) =
+   for entity in items(game.toDelete):
+      game.world.delete(entity)
+      game.entities.delete(entity)
+
+   game.toDelete.shrink(0)
 
 proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =
    game.world[entity].excl has

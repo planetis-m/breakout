@@ -38,13 +38,19 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
 proc update(game: var Game) =
    # The Game engine that consist of these systems
+   # Player input and AI
    sysControlBall(game)
    sysControlBrick(game)
    sysControlPaddle(game)
+   # Game logic
    sysShake(game)
    sysFade(game)
+   # Garbage collection
+   cleanup(game)
+   # Animation and movement
    sysMove(game)
    sysTransform2d(game)
+   # Post-transform logic
    sysCollide(game)
 
 proc render(game: var Game, intrpl: float32) =
