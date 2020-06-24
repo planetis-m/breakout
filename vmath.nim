@@ -4,14 +4,14 @@ type
    Rad* = distinct float32
 
 proc `-`*(rad: Rad): Rad {.borrow.}
-func `+`*(a, b: Rad): Rad = Rad(a.float32 + b.float32)
-func `-`*(a, b: Rad): Rad = Rad(a.float32 - b.float32)
+func `+`*(a, b: Rad): Rad {.borrow.}
+func `-`*(a, b: Rad): Rad {.borrow.}
 proc `<`*(a, b: Rad): bool {.borrow.}
 proc `<=`*(a, b: Rad): bool {.borrow.}
 proc `+=`*(a: var Rad; b: Rad) {.borrow.}
 proc `-=`*(a: var Rad; b: Rad) {.borrow.}
-func sin*(rad: Rad): float32 = sin(rad.float32)
-func cos*(rad: Rad): float32 = cos(rad.float32)
+func sin*(rad: Rad): float32 {.borrow.}
+func cos*(rad: Rad): float32 {.borrow.}
 
 func lerp*(a, b, t: float32): float32 =
    result = a * (1.0'f32 - t) + b * t
@@ -145,9 +145,9 @@ func scale*(a: Mat2d, v: Vec2): Mat2d =
       m20: a.m20,
       m21: a.m21)
 
-func compose*(translation: Vec2, rad: Rad, scale: Vec2): Mat2d =
-   let s = rad.sin()
-   let c = rad.cos()
+func compose*(translation: Vec2, rotation: Rad, scale: Vec2): Mat2d =
+   let s = rotation.sin()
+   let c = rotation.cos()
 
    result = Mat2d(
       m00: c * scale.x,

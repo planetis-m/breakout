@@ -30,7 +30,7 @@ type
 
    Current* = object
       world*: Mat2d      # Matrix relative to the world
-      origin*: Point2    # origin relative to the world
+      position*: Point2  # position relative to the world
       rotation*: float32 # rotation relative to the world
       scale*: Vec2       # scale relative to the world
 
@@ -51,9 +51,9 @@ type
       speed*: float32
 
    Previous* = object
-      origin*: Point2    # origin at the previous frame
-      rotation*: float32 # rotation at the previous frame
-      scale*: Vec2       # scale at the previous frame
+      position*: Point2  # position at the previous physics state
+      rotation*: float32 # rotation at the previous physics state
+      scale*: Vec2       # scale at the previous physics state
 
    Shake* = object
       duration*: float32

@@ -1,24 +1,15 @@
 import ".." / [game_types, vmath, utils, registry, storage]
 
-const Query = {HasTransform2d, HasDraw2d}
+const Query = {HasCurrent, HasPrevious, HasDraw2d}
 
 proc update(game: var Game, entity: Entity, intrpl: float32) =
-   template transform: untyped = game.transform[entity.index]
+   template current: untyped = game.current[entity.index]
+   template previous: untyped = game.previous[entity.index]
    template draw2d: untyped = game.draw2d[entity.index]
 
-   var scale: Vec2
-   var position: Point2
-   if HasPrevious in game.world[entity]:
-      template previous: untyped = game.previous[entity.index]
-
-      let interpolation = lerp(previous.world, transform.world, intrpl)
-      game.rmComponent(entity, HasPrevious)
-
-      scale = interpolation.scale
-      position = interpolation.origin
-   else:
-      scale = transform.world.scale
-      position = transform.world.origin
+   let position = lerp(previous.position, current.position, intrpl)
+   let scale = lerp(previous.scale, current.scale, intrpl)
+   let rotation = lerp(previous.rotation, current.rotation, intrpl)
 
    let width = int32(draw2d.width.float32 * scale.x)
    let height = int32(draw2d.height.float32 * scale.y)

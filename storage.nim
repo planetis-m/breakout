@@ -34,17 +34,16 @@ proc `[]=`*[T](s: var Storage[T], entity: Entity, value: T) =
 proc delete*[T](s: var Storage[T], entity: Entity) =
    let entityIndex = entity.index
    let packedIndex = s.sparseToPacked[entityIndex]
-   if packedIndex == invalidId.EntityImpl:
-      raise newException(KeyError, "Entity not in Storage")
-   let lastIndex = s.packed.high
-   let lastEntity = s.packedToSparse[lastIndex]
-   s.sparseToPacked[entityIndex] = invalidId.EntityImpl
-   s.sparseToPacked[lastEntity.index] = packedIndex
-   swap(s.packed[packedIndex], s.packed[lastIndex])
-   s.packed[lastIndex] = default(T)
-   swap(s.packedToSparse[packedIndex], s.packedToSparse[lastIndex])
-   s.packedToSparse[lastIndex] = invalidId
-   s.len.dec
+   if packedIndex != invalidId.EntityImpl:
+      let lastIndex = s.packed.high
+      let lastEntity = s.packedToSparse[lastIndex]
+      s.sparseToPacked[entityIndex] = invalidId.EntityImpl
+      s.sparseToPacked[lastEntity.index] = packedIndex
+      swap(s.packed[packedIndex], s.packed[lastIndex])
+      s.packed[lastIndex] = default(T)
+      swap(s.packedToSparse[packedIndex], s.packedToSparse[lastIndex])
+      s.packedToSparse[lastIndex] = invalidId
+      s.len.dec
 
 proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
    if not s.contains(entity):

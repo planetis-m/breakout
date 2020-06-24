@@ -1,7 +1,7 @@
-import math, random, monotimes, sdl_private, game_types, handle_input,
-      blueprints, registry, storage
+import math, random, monotimes, sdl_private, game_types, blueprints, registry,
+      storage
 import systems / [collide, control_ball, control_brick, control_paddle, draw2d,
-      fade, move, shake, transform2d]
+      fade, move, shake, transform2d, handle_events]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
    let sdlContext = sdlInit()
@@ -28,6 +28,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       clearColor: [0'u8, 0, 0, 255],
 
       collide: newSeq[Collide](maxEntities),
+      current: newSeq[Current](maxEntities),
       draw2d: newSeq[Draw2d](maxEntities),
       fade: newSeq[Fade](maxEntities),
       hierarchy: newSeq[Hierarchy](maxEntities),
@@ -55,6 +56,7 @@ proc update(game: var Game) =
 
 proc render(game: var Game, intrpl: float32) =
    sysDraw2d(game, intrpl)
+   game.canvas.present()
 
 proc run(game: var Game) =
    const
@@ -64,18 +66,17 @@ proc run(game: var Game) =
 
    var lastTime = getMonoTime().ticks
    while true:
-      handleInput(game)
+      handleEvents(game)
       if not game.isRunning: break
 
       let now = getMonoTime().ticks
       var framesSkipped = 0
-      while now - lastTime > skippedTicks and framesSkipped < maxFramesSkipped:
+      while now - lastTime >= skippedTicks and framesSkipped < maxFramesSkipped:
          game.update()
          lastTime += skippedTicks
          framesSkipped.inc
 
-      game.render(float32(now - lastTime) / skippedTicks.float32))
-      game.canvas.present()
+      game.render(float32(now - lastTime) / skippedTicks.float32)
 
 proc main =
    randomize()

@@ -103,3 +103,6 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
 - [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf) interesting information
 - [Trace of Radiance](https://github.com/mratsim/trace-of-radiance#correctness) the idea of using distinct types in a math lib
 - #nim-gamedev, a friendly community interested in making games with nim.
+
+## License
+This library is distributed under the [MIT license](LICENSE).

@@ -1,6 +1,6 @@
-import game_types
+import ".." / [game_types, sdl_private]
 
-proc handleInput*(game: var Game) =
+proc handleEvents*(game: var Game) =
    for event in game.eventPump.poll():
       if event.kind == QuitEvent or (event.kind == KeyDown and
             event.scancode == Escape):

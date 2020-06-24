@@ -24,7 +24,7 @@ proc delete*(game: var Game, entity: Entity) =
    game.toDelete.add(entity)
 
 proc cleanup*(game: var Game) =
-   for entity in items(game.toDelete):
+   for entity in game.toDelete.items:
       game.world.delete(entity)
       game.entities.delete(entity)
 

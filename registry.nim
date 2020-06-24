@@ -55,7 +55,6 @@ proc delete*(r: var Registry; entity: Entity) =
    ## can be recycled at any time.
    let i = entity.index
    if i.int < r.len and r.data[i] == entity:
-      raise newException(ValueError, "Entity is invalid")
-   # lengthens the implicit list of next entities
-   r.data[i] = toEntity(r.next.EntityImpl, entity.version + 1)
-   r.next = Entity(i)
+      # lengthens the implicit list of next entities
+      r.data[i] = toEntity(r.next.EntityImpl, entity.version + 1)
+      r.next = Entity(i)
