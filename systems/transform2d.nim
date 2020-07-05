@@ -16,6 +16,12 @@ proc update(game: var Game, entity: Entity) =
 
    game.rmComponent(entity, HasDirty)
 
+   let position = transform.world.origin
+   let rotation = transform.world.rotation
+   let scale = transform.world.scale
+
+   game.mixPrevious(entity, position, rotation, scale)
+
    let local = compose(transform.translation, transform.rotation, transform.scale)
    if parentId ?= hierarchy.parent:
       template parentTransform: untyped = game.transform[parentId.index]

@@ -18,6 +18,12 @@ There are still improvements to be made in this aspect.
 
 ### Todo: sorting needs to be implemented
 
+## Fixed timestep with interpolation
+
+Most non-trivial systems were redesigned (such as collisions). However implementing a fixed timestep
+took the longest to complete and required changes across the codebase. Notably a new system was
+added (``sysIntrpl2d``) as well as new components (``Current`` and ``Previous`` states).
+
 ## Improvements to the hierarchical scene graph
 
 As explained by the original authors in their documentation for
