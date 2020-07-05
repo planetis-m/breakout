@@ -94,6 +94,25 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
                   Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 800.0)
 ```
 
+It expands to:
+
+```
+let blueprintResult_13135030 = createEntity(game)
+mixTransform2d(game, blueprintResult_13135030, Vec2(x: x, y: y), 0.0, vec2(1, 1))
+mixHierarchy(game, blueprintResult_13135030, parent)
+mixDirty(game, blueprintResult_13135030)
+for i in 0 ..< explosions:
+   let :tmp_13135040 = createEntity(game)
+   mixTransform2d(game, :tmp_13135040, vec2(0, 0), 0.0, vec2(1, 1))
+   mixHierarchy(game, :tmp_13135040, blueprintResult_13135030)
+   mixDirty(game, :tmp_13135040)
+   mixDraw2d(game, :tmp_13135040, 20, 20, [255'u8, 255, 255, 255])
+   mixFade(game, :tmp_13135040, fadeStep)
+   mixMove(game, :tmp_13135040,
+         Vec2(x: sin(step * float(i)), y: cos(step * float(i))), 800.0)
+blueprintResult_13135030
+```
+
 ## Acknowledgments
 
 - [rs-breakout](https://github.com/michalbe/rs-breakout) the game I ported to nim

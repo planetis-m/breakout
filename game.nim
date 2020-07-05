@@ -55,7 +55,8 @@ proc update(game: var Game) =
    sysCollide(game)
 
 proc render(game: var Game, intrpl: float32) =
-   sysDraw2d(game, intrpl)
+   sysIntrpl2d(game, intrpl)
+   sysDraw2d(game)
    game.canvas.present()
 
 proc run(game: var Game) =

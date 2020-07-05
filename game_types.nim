@@ -29,7 +29,6 @@ type
       collision*: Collision
 
    Current* = object
-      world*: Mat2d      # Matrix relative to the world
       position*: Point2  # position relative to the world
       rotation*: float32 # rotation relative to the world
       scale*: Vec2       # scale relative to the world
@@ -60,6 +59,7 @@ type
       strength*: float32
 
    Transform2d* = object
+      world*: Mat2d      # Matrix relative to the world
       translation*: Vec2 # local translation relative to the parent
       rotation*: float32 # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
