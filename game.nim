@@ -64,20 +64,24 @@ proc run(game: var Game) =
       ticksPerSec = 25
       skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
       maxFramesSkipped = 5 # 20% of ticksPerSec
-
-   var lastTime = getMonoTime().ticks
+   var
+      lastTime = getMonoTime().ticks
+      accumulator = 0'i64
    while true:
       handleEvents(game)
       if not game.isRunning: break
 
       let now = getMonoTime().ticks
+      accumulator += now - lastTime
+      lastTime = now
+
       var framesSkipped = 0
-      while now - lastTime >= skippedTicks and framesSkipped < maxFramesSkipped:
+      while accumulator >= skippedTicks and framesSkipped < maxFramesSkipped:
          game.update()
-         lastTime += skippedTicks
+         accumulator -= skippedTicks
          framesSkipped.inc
 
-      game.render(float32(now - lastTime) / skippedTicks.float32)
+      game.render(accumulator.float32 / skippedTicks.float32)
 
 proc main =
    randomize()

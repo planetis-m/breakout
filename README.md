@@ -7,22 +7,20 @@ These are explained below.
 
 ## Entity management was redesigned
 
-The original codebase contains a lot of loops to ``MAX_ENTITIES`` in systems'
-update functions and at entity creation. This was eliminated by using two special data structures.
+The original codebase when updating a system or creating a new entity, it iterates up
+to ``MAX_ENTITIES``. This was eliminated by using two special data structures.
 
-For entity management (creation, deletion) an implicit list is used, as explained
+For entity management (creation, deletion) a ``slotmap`` data structure is used, as explained
 [here](https://skypjack.github.io/2019-05-06-ecs-baf-part-3/).
 
 For iterating over all entities, a sparse set that contains a ``set[HasComponent]`` is used.
 There are still improvements to be made in this aspect.
 
-### Todo: sorting needs to be implemented
-
 ## Fixed timestep with interpolation
 
-Most non-trivial systems were redesigned (such as collisions). However implementing a fixed timestep
-took the longest to complete and required changes across the codebase. Notably a new system was
-added (``sysIntrpl2d``) as well as new components (``Current`` and ``Previous`` states).
+Implementing a fixed timestep took the longest to complete and required changes across
+the codebase. Notably a new system was added (``sysIntrpl2d``) as well as new components
+(``Current`` and ``Previous`` states).
 
 ## Improvements to the hierarchical scene graph
 
@@ -33,11 +31,12 @@ As explained by the original authors in their documentation for
 > entities into larger wholes (e.g. a character is a hierarchy of body parts,
 > the hat and the gun).
 
-However I found the implementation, space inefficient since its declared as
-``children: [Option<usize>; MAX_CHILDREN]``, where ``MAX_CHILDREN`` is ``1000``.
-To fix it I used the design described at
+I changed the implementation of ``children: [Option<usize>; MAX_CHILDREN]``
+with the design described at
 [skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/).
 Now it is a seperate ``Hierarchy`` component following the unconstrained model.
+
+### Todo: sorting needs to be implemented
 
 ## Custom vector math library
 
@@ -61,6 +60,8 @@ func `+`*(a, b: Vec2): Vec2
 func `-`*(a, b: Point2): Vec2
 func `+`*(p: Point2, v: Vec2): Point2
 func `-`*(p: Point2, v: Vec2): Point2
+func `+`*(a, b: Point2): Point2 {.
+      error: "Adding 2 Point2s doesn't make physical sense".}
 ```
 
 ## Blueprints DSL
@@ -72,7 +73,7 @@ with user-made procedures (these must have a specific signature and tagged with 
 
 ### Examples
 
-Creates a new entity, with these components, returns the entity handle.
+1) Creates a new entity, with these components, returns the entity handle.
 
 ```nim
 let ent1 = game.addBlueprint(with Fade(step: 0.5), Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
@@ -80,7 +81,7 @@ let ent1 = game.addBlueprint(with Fade(step: 0.5), Collide(size: vec2(100.0, 20.
 
 Note: ``Transform2d`` and ``Hierarchy`` components are always implied.
 
-Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop
+2) Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop
 (it composes with all of Nim's control flow constructs).
 
 ```nim
@@ -121,11 +122,13 @@ blueprintResult_13135030
 
 ## Acknowledgments
 
-- [rs-breakout](https://github.com/michalbe/rs-breakout) the game I ported to nim
-- [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial) introduced me to writing games
+- [Fixed-Time-Step Implementation](http://lspiroengine.com/?p=378)
+- [Goodluck](https://github.com/piesku/goodluck) A hackable template for creating small and fast browser games.
+- [rs-breakout](https://github.com/michalbe/rs-breakout)
+- [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial)
 - [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
 - [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs
-- [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf) interesting information
+- [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf)
 - [Trace of Radiance](https://github.com/mratsim/trace-of-radiance#correctness) the idea of using distinct types in a math lib
 - #nim-gamedev, a friendly community interested in making games with nim.
 
