@@ -64,9 +64,11 @@ proc run(game: var Game) =
       ticksPerSec = 25
       skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
       maxFramesSkipped = 5 # 20% of ticksPerSec
+
    var
       lastTime = getMonoTime().ticks
       accumulator = 0'i64
+
    while true:
       handleEvents(game)
       if not game.isRunning: break
