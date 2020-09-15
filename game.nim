@@ -1,18 +1,16 @@
-import math, random, monotimes, sdl_private, game_types, blueprints, registry,
-      storage
-import systems / [collide, control_ball, control_brick, control_paddle, draw2d,
-      fade, move, shake, transform2d, handle_events]
+import
+   std / [random, monotimes],
+   sdl2, game_types, blueprints, registry, storage, utils,
+   systems / [collide, control_ball, control_brick, control_paddle, draw2d,
+      fade, intrpl2d, move, shake, transform2d, handle_events]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
-   let sdlContext = sdlInit()
-   let videoSubsystem = sdlContext.videoInit()
-   let window = videoSubsystem.window("breakout", positionCentered,
-         positionCentered, windowWidth, windowHeight, {Shown})
+   discard sdl2.init(INIT_VIDEO or INIT_EVENTS)
 
-   let canvas = window.intoCanvas({Accelerated, PresentVsync})
-   #canvas.setDrawBlendMode(Blend)
+   let window = createWindow("Breakout", SDL_WINDOWPOS_CENTERED,
+         SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN)
 
-   let eventPump = sdlContext.eventInit()
+   let renderer = createRenderer(window, -1, Renderer_Accelerated or Renderer_PresentVsync)
 
    result = Game(
       world: initStorage[set[HasComponent]](maxEntities),
@@ -22,8 +20,8 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       windowWidth: windowWidth,
       windowHeight: windowHeight,
 
-      canvas: canvas,
-      eventPump: eventPump,
+      window: window,
+      renderer: renderer,
 
       clearColor: [0'u8, 0, 0, 255],
 
@@ -57,7 +55,7 @@ proc update(game: var Game) =
 proc render(game: var Game, intrpl: float32) =
    sysIntrpl2d(game, intrpl)
    sysDraw2d(game)
-   game.canvas.present()
+   game.renderer.present()
 
 proc run(game: var Game) =
    const
@@ -91,5 +89,9 @@ proc main =
 
    sceneMain(game)
    game.run()
+
+   destroy(game.window)
+   destroy(game.renderer)
+   sdl2.quit()
 
 main()

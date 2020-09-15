@@ -1,6 +1,9 @@
-import sdl_private, vmath, registry, storage
+import sdl2, vmath, registry, storage
 
 type
+   Input* = enum
+      Right, Left
+
    HasComponent* = enum
       HasClearColor,
       HasCollide,
@@ -29,9 +32,9 @@ type
       collision*: Collision
 
    Current* = object
-      position*: Point2  # position relative to the world
-      rotation*: float32 # rotation relative to the world
-      scale*: Vec2       # scale relative to the world
+      position*: Point2 # position relative to the world
+      rotation*: Rad    # rotation relative to the world
+      scale*: Vec2      # scale relative to the world
 
    Draw2d* = object
       width*, height*: int32
@@ -50,9 +53,9 @@ type
       speed*: float32
 
    Previous* = object
-      position*: Point2  # position at the previous physics state
-      rotation*: float32 # rotation at the previous physics state
-      scale*: Vec2       # scale at the previous physics state
+      position*: Point2 # position at the previous physics state
+      rotation*: Rad    # rotation at the previous physics state
+      scale*: Vec2      # scale at the previous physics state
 
    Shake* = object
       duration*: float32
@@ -61,7 +64,7 @@ type
    Transform2d* = object
       world*: Mat2d      # Matrix relative to the world
       translation*: Vec2 # local translation relative to the parent
-      rotation*: float32 # local rotation relative to the parent
+      rotation*: Rad     # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
 
    Game* = object
@@ -73,11 +76,11 @@ type
 
       windowWidth*, windowHeight*: int32
 
-      canvas*: Canvas
-      eventPump*: EventPump
+      window*: WindowPtr
+      renderer*: RendererPtr
 
       clearColor*: array[4, uint8]
-      inputState*: array[ArrowLeft..ArrowRight, bool]
+      inputState*: array[Right..Left, bool]
 
       collide*: seq[Collide]
       current*: seq[Current]

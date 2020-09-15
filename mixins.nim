@@ -15,7 +15,7 @@ proc mixControlPaddle*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlPaddle
 
 proc mixCurrent*(game: var Game, entity: Entity, position = point2(0, 0),
-      rotation = 0.0, scale = vec2(1, 1)) =
+      rotation = 0.Rad, scale = vec2(1, 1)) =
    game.world[entity].incl HasCurrent
    game.current[entity.index] = Current(position: position, rotation: rotation,
          scale: scale)
@@ -42,7 +42,7 @@ proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 10
    game.move[entity.index] = Move(direction: direction, speed: speed)
 
 proc mixPrevious*(game: var Game, entity: Entity, position = point2(0, 0),
-      rotation = 0.0, scale = vec2(1, 1)) =
+      rotation = 0.Rad, scale = vec2(1, 1)) =
    game.world[entity].incl HasPrevious
    game.previous[entity.index] = Previous(position: position,
          rotation: rotation, scale: scale)
@@ -52,7 +52,7 @@ proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
    game.shake[entity.index] = Shake(duration: duration, strength: strength)
 
 proc mixTransform2d*(game: var Game, entity: Entity, world = identity(), translation = vec2(0, 0),
-      rotation = 0.0, scale = vec2(1, 1)) =
+      rotation = 0.Rad, scale = vec2(1, 1)) =
    game.world[entity].incl HasTransform2d
    game.transform[entity.index] = Transform2D(world: world, translation: translation,
          rotation: rotation, scale: scale)

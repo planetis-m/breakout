@@ -259,11 +259,9 @@ proc initEventPump*(context: SdlContext): EventPump =
 proc `=destroy`(renderer: var Renderer) =
    if renderer.impl != nil:
       SDL_destroyRenderer(renderer.impl)
-      renderer.impl = nil
 proc `=`(renderer: var Renderer; original: Renderer) {.error.}
 
 proc `=destroy`(window: var Window) =
    if window.impl != nil:
       SDL_destroyWindow(window.impl)
-      window.impl = nil
 proc `=`(window: var Window; original: Window) {.error.}

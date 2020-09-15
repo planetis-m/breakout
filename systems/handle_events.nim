@@ -1,20 +1,23 @@
-import ".." / [game_types, sdl_private]
+import ".." / [game_types], sdl2
 
 proc handleEvents*(game: var Game) =
-   for event in game.eventPump.poll():
+   var event: Event
+   while pollEvent(event):
       if event.kind == QuitEvent or (event.kind == KeyDown and
-            event.scancode == Escape):
+            event.key.keysym.scancode == SDL_SCANCODE_ESCAPE):
          game.isRunning = false
          return
-      elif event.kind == KeyDown and not event.repeat:
-         case event.scancode
-         of ArrowLeft, KeyA:
-            game.inputState[ArrowLeft] = true
-         of ArrowRight, KeyD:
-            game.inputState[ArrowRight] = true
-      elif event.kind == KeyUp and not event.repeat:
-         case event.scancode
-         of ArrowLeft, KeyA:
-            game.inputState[ArrowLeft] = false
-         of ArrowRight, KeyD:
-            game.inputState[ArrowRight] = false
+      elif event.kind == KeyDown and not event.key.repeat:
+         case event.key.keysym.scancode
+         of SDL_SCANCODE_LEFT, SDL_SCANCODE_A:
+            game.inputState[Left] = true
+         of SDL_SCANCODE_RIGHT, SDL_SCANCODE_D:
+            game.inputState[Right] = true
+         else: discard
+      elif event.kind == KeyUp and not event.key.repeat:
+         case event.key.keysym.scancode
+         of SDL_SCANCODE_LEFT, SDL_SCANCODE_A:
+            game.inputState[Left] = false
+         of SDL_SCANCODE_RIGHT, SDL_SCANCODE_D:
+            game.inputState[Right] = false
+         else: discard

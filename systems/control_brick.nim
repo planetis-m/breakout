@@ -1,4 +1,4 @@
-import ".." / [game_types, blueprints, utils, registry, storage]
+import ".." / [game_types, blueprints, registry, storage], std / random
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
@@ -10,7 +10,7 @@ proc update(game: var Game, entity: Entity) =
       fade.step = 0.02
 
       if rand(1.0) > 0.98:
-         discard game.getBall(float32(game.windowWidth / 2),
+         discard game.getBall(game.camera, float32(game.windowWidth / 2),
                float32(game.windowHeight / 2))
 
 proc sysControlBrick*(game: var Game) =
