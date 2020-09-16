@@ -45,10 +45,14 @@ proc removeNode*(game: var Game, entity: Entity) =
 proc delete*(game: var Game, entity: Entity) =
    if HasHierarchy in game.world[entity]:
       template hierarchy: untyped = game.hierarchy[entity.index]
-
       removeNode(game, entity)
-      while childId ?= hierarchy.head:
+
+      var childId = hierarchy.head
+      while childId != invalidId:
+         template childHierarchy: untyped = game.hierarchy[childId.index]
+
          delete(game, childId)
+         childId = childHierarchy.next
 
    game.toDelete.add(entity)
 

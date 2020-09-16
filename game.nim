@@ -84,7 +84,7 @@ proc run(game: var Game) =
       game.render(accumulator.float32 / skippedTicks.float32)
 
 proc main =
-   randomize(131221234)
+   randomize()
    var game = initGame(640, 480)
 
    sceneMain(game)
