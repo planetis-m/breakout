@@ -38,7 +38,7 @@ proc mixHierarchy*(game: var Game, entity: Entity, parent = invalidId) =
          next: invalidId, parent: parent)
    if parent != invalidId: prepend(game, parent, entity)
 
-proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 100.0) =
+proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 10.0) =
    game.world[entity].incl HasMove
    game.move[entity.index] = Move(direction: direction, speed: speed)
 
