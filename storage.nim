@@ -8,7 +8,7 @@ type
       packed: seq[T]
 
 proc initStorage*[T](denseCap: Natural): Storage[T] =
-   result.packed = newSeqOfCap[T](denseCap)
+   result.packed = newSeq[T](denseCap)
    result.sparseToPacked.fill(invalidId.EntityImpl)
    result.packedToSparse.fill(invalidId)
 
@@ -24,7 +24,6 @@ proc `[]=`*[T](s: var Storage[T], entity: Entity, value: T) =
       s.packedToSparse[packedIndex] = entity
       s.sparseToPacked[entityIndex] = packedIndex
       s.len.inc
-      s.packed.setLen(s.len)
    s.packed[packedIndex] = value
 
 proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
@@ -35,7 +34,6 @@ proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
       s.packedToSparse[packedIndex] = entity
       s.sparseToPacked[entityIndex] = packedIndex
       s.len.inc
-      s.packed.setLen(s.len)
    result = s.packed[packedIndex]
 
 proc `[]`*[T](s: Storage[T], entity: Entity): lent T =
@@ -47,7 +45,7 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
    let entityIndex = entity.index
    let packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex != invalidId.EntityImpl:
-      let lastIndex = s.packed.high
+      let lastIndex = s.len - 1
       let lastEntity = s.packedToSparse[lastIndex]
       s.sparseToPacked[entityIndex] = invalidId.EntityImpl
       s.sparseToPacked[lastEntity.index] = packedIndex

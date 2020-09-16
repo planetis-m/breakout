@@ -1,6 +1,6 @@
 import
-   std / [random, monotimes],
-   sdl2, game_types, blueprints, registry, storage, utils,
+   std / [random, monotimes], sdl2,
+   game_types, blueprints, registry, storage, utils,
    systems / [collide, control_ball, control_brick, control_paddle, draw2d,
       fade, intrpl2d, move, shake, transform2d, handle_events]
 
@@ -84,7 +84,7 @@ proc run(game: var Game) =
       game.render(accumulator.float32 / skippedTicks.float32)
 
 proc main =
-   randomize()
+   randomize(131221234)
    var game = initGame(640, 480)
 
    sceneMain(game)

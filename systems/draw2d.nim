@@ -9,10 +9,10 @@ proc update(game: var Game, entity: Entity) =
    let width = int32(draw2d.width.float32 * current.scale.x)
    let height = int32(draw2d.height.float32 * current.scale.y)
    var rect = (
-      x: current.position.x.int32 - int32(width / 2),
-      y: current.position.y.int32 - int32(height / 2),
-      w: width.int32,
-      h: height.int32)
+      current.position.x.int32 - int32(width / 2),
+      current.position.y.int32 - int32(height / 2),
+      width.int32,
+      height.int32)
    game.renderer.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
    game.renderer.fillRect(rect)
 

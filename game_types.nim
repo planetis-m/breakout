@@ -44,9 +44,9 @@ type
       step*: float32
 
    Hierarchy* = object
-      head*: Entity   # the entity identifier of the first child, if any.
-      next*: Entity   # the next sibling in the list of children for the parent.
-      parent*: Entity # the entity identifier of the parent, if any.
+      head*: Entity        # the entity identifier of the first child, if any.
+      prev*, next*: Entity # the prev/next sibling in the list of children for the parent.
+      parent*: Entity      # the entity identifier of the parent, if any.
 
    Move* = object
       direction*: Vec2

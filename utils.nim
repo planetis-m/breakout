@@ -22,17 +22,31 @@ template `?=`(name, value): bool = (let name = value; name != invalidId)
 proc prepend*(game: var Game, parentId, entity: Entity) =
    template hierarchy: untyped = game.hierarchy[entity.index]
    template parent: untyped = game.hierarchy[parentId.index]
+   template headSibling: untyped = game.hierarchy[headSiblingId.index]
 
+   hierarchy.prev = invalidId
    hierarchy.next = parent.head
+   if headSiblingId ?= parent.head:
+      assert headSibling.prev == invalidId
+      headSibling.prev = entity
    parent.head = entity
+
+proc removeNode*(game: var Game, entity: Entity) =
+   template hierarchy: untyped = game.hierarchy[entity.index]
+   template parent: untyped = game.hierarchy[parentId.index]
+   template nextSibling: untyped = game.hierarchy[nextSiblingId.index]
+   template prevSibling: untyped = game.hierarchy[prevSiblingId.index]
+
+   if parentId ?= hierarchy.parent:
+      if entity == parent.head: parent.head = hierarchy.next
+   if nextSiblingId ?= hierarchy.next: nextSibling.prev = hierarchy.prev
+   if prevSiblingId ?= hierarchy.prev: prevSibling.next = hierarchy.next
 
 proc delete*(game: var Game, entity: Entity) =
    if HasHierarchy in game.world[entity]:
       template hierarchy: untyped = game.hierarchy[entity.index]
-      template parent: untyped = game.hierarchy[parentId.index]
 
-      if parentId ?= hierarchy.parent:
-         if entity == parent.head: parent.head = hierarchy.next
+      removeNode(game, entity)
       while childId ?= hierarchy.head:
          delete(game, childId)
 

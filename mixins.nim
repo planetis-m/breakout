@@ -34,7 +34,8 @@ proc mixFade*(game: var Game, entity: Entity, step = 0.0) =
 
 proc mixHierarchy*(game: var Game, entity: Entity, parent = invalidId) =
    game.world[entity].incl HasHierarchy
-   game.hierarchy[entity.index] = Hierarchy(head: invalidId, next: invalidId, parent: parent)
+   game.hierarchy[entity.index] = Hierarchy(head: invalidId, prev: invalidId,
+         next: invalidId, parent: parent)
    if parent != invalidId: prepend(game, parent, entity)
 
 proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 100.0) =
