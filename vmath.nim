@@ -156,10 +156,10 @@ func `*`*(a, b: Mat2d): Mat2d =
    result = Mat2d(
       m00: a.m00 * b.m00 + a.m01 * b.m10,
       m01: a.m00 * b.m01 + a.m01 * b.m11,
-      m02: a.m02 + a.m00 * b.m02 + a.m01 * b.m12,
+      m02: a.m00 * b.m02 + a.m01 * b.m12 + a.m02,
       m10: a.m10 * b.m00 + a.m11 * b.m10,
       m11: a.m10 * b.m01 + a.m11 * b.m11,
-      m12: a.m12 + a.m10 * b.m02 + a.m11 * b.m12)
+      m12: a.m10 * b.m02 + a.m11 * b.m12 + a.m12)
 
 proc transform*(a: Mat2d, v: Vec2): Vec2 =
    result = vec2(v.x * a.m00 + v.y * a.m01,
