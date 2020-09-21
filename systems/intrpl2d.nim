@@ -14,6 +14,13 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
          lerp(previous.rotation, rotation, intrpl),
          lerp(previous.scale, scale, intrpl))
 
+   #template current: untyped = game.current[entity.index]
+   #echo "Intrpl Entity: ", entity.index
+   #echo "  Comp: ", game.world[entity]
+   #echo "  Previous: ", previous.position.Vec2
+   #echo "  Current: ", current.position.Vec2
+   #echo "  Transform ", position.Vec2
+
 proc sysIntrpl2d*(game: var Game, intrpl: float32) =
    for (entity, has) in game.world.pairs:
       if has * Query == Query:

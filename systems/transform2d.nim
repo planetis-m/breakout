@@ -22,6 +22,12 @@ proc update(game: var Game, entity: Entity) =
 
    game.mixPrevious(entity, position, rotation, scale)
 
+   #template previous: untyped = game.previous[entity.index]
+   #echo "Transform Entity: ", entity.index
+   #echo "  Comp: ", game.world[entity]
+   #echo "  Previous: ", previous.position.Vec2
+   #echo "  Transform ", position.Vec2
+
    let local = compose(transform.translation, transform.rotation, transform.scale)
    if parentId ?= hierarchy.parent:
       template parentTransform: untyped = game.transform[parentId.index]

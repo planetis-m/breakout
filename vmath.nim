@@ -80,7 +80,7 @@ func `*`*(p: Point2, scalar: float32): Point2 =
    result = Point2(Vec2(p) * scalar)
 
 func `+`*(a, b: Point2): Point2 {.
-      error: "Adding 2 Point2s doesn't make physical sense".}
+      error: "Adding 2 Point2 doesn't make physical sense".}
 
 func `-`*(a, b: Point2): Vec2 =
    result = Vec2(a) - Vec2(b)
@@ -124,9 +124,9 @@ func translate*(a: Mat2d, v: Vec2): Mat2d =
       m20: a.m20 + v.x,
       m21: a.m21 + v.y)
 
-func rotate*(a: Mat2d, rad: Rad): Mat2d =
-   let s = rad.sin()
-   let c = rad.cos()
+func rotate*(a: Mat2d, rotation: Rad): Mat2d =
+   let s = rotation.sin()
+   let c = rotation.cos()
 
    result = Mat2d(
       m00: a.m00 * c + a.m10 * s,
@@ -151,8 +151,8 @@ func compose*(translation: Vec2, rotation: Rad, scale: Vec2): Mat2d =
 
    result = Mat2d(
       m00: c * scale.x,
-      m01: s * scale.x,
-      m10: -s * scale.y,
+      m01: -s * scale.y,
+      m10: s * scale.x,
       m11: c * scale.y,
       m20: translation.x,
       m21: translation.y)
@@ -197,12 +197,12 @@ func invert*(a: Mat2d): Mat2d =
 
 func `*`*(a, b: Mat2d): Mat2d =
    result = Mat2d(
-      m00: a.m00 * b.m00 + a.m10 * b.m01,
-      m01: a.m01 * b.m00 + a.m11 * b.m01,
-      m10: a.m00 * b.m10 + a.m10 * b.m11,
-      m11: a.m01 * b.m10 + a.m11 * b.m11,
-      m20: a.m00 * b.m20 + a.m10 * b.m21 + a.m20,
-      m21: a.m01 * b.m20 + a.m11 * b.m21 + a.m21)
+      m00: a.m00 * b.m00 + a.m01 * b.m10,
+      m01: a.m00 * b.m01 + a.m01 * b.m11,
+      m10: a.m10 * b.m00 + a.m11 * b.m10,
+      m11: a.m10 * b.m01 + a.m11 * b.m11,
+      m20: a.m20 * b.m00 + a.m21 * b.m10 + b.m20,
+      m21: a.m20 * b.m01 + a.m21 * b.m11 + b.m21)
 
 proc transform*(a: Mat2d, v: Vec2): Vec2 =
    result = vec2(a.m00 * v.x + a.m10 * v.y,

@@ -7,7 +7,7 @@ proc update(game: var Game, entity: Entity) =
    template fade: untyped = game.fade[entity.index]
 
    if collide.collision.other != invalidId:
-      fade.step = 0.02
+      fade.step = 0.05
 
       if rand(1.0) > 0.98:
          discard game.getBall(game.camera, float32(game.windowWidth / 2),
