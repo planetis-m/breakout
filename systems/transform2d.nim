@@ -31,7 +31,7 @@ proc update(game: var Game, entity: Entity) =
    let local = compose(transform.translation, transform.rotation, transform.scale)
    if parentId ?= hierarchy.parent:
       template parentTransform: untyped = game.transform[parentId.index]
-      transform.world = parentTransform.world * local
+      transform.world = local * parentTransform.world
    else:
       transform.world = local
 

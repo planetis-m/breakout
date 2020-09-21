@@ -101,70 +101,43 @@ func lerp*(a, b: Point2, t: float32): Point2 =
    result = Point2(lerp(Vec2(a), Vec2(b), t))
 
 type
-   Mat2d* = object
-      m00*, m01*: float32
-      m10*, m11*: float32
-      m20*, m21*: float32
+   Mat2d* = object # column major
+      m00*: float32
+      m01*: float32
+      m02*: float32
+      m10*: float32
+      m11*: float32
+      m12*: float32
 
 func identity*(): Mat2d =
    result = Mat2d(
       m00: 1.0,
       m01: 0.0,
+      m02: 0.0,
       m10: 0.0,
       m11: 1.0,
-      m20: 0.0,
-      m21: 0.0)
-
-func translate*(a: Mat2d, v: Vec2): Mat2d =
-   result = Mat2d(
-      m00: a.m00,
-      m01: a.m01,
-      m10: a.m10,
-      m11: a.m11,
-      m20: a.m20 + v.x,
-      m21: a.m21 + v.y)
-
-func rotate*(a: Mat2d, rotation: Rad): Mat2d =
-   let s = rotation.sin()
-   let c = rotation.cos()
-
-   result = Mat2d(
-      m00: a.m00 * c + a.m10 * s,
-      m01: a.m01 * c + a.m11 * s,
-      m10: a.m10 * -s + a.m10 * c,
-      m11: a.m11 * -s + a.m11 * c,
-      m20: a.m20,
-      m21: a.m21)
-
-func scale*(a: Mat2d, v: Vec2): Mat2d =
-   result = Mat2d(
-      m00: a.m00 * v.x,
-      m01: a.m01 * v.x,
-      m10: a.m10 * v.y,
-      m11: a.m11 * v.y,
-      m20: a.m20,
-      m21: a.m21)
+      m12: 0.0)
 
 func compose*(translation: Vec2, rotation: Rad, scale: Vec2): Mat2d =
-   let s = rotation.sin()
-   let c = rotation.cos()
+   let s = sin(rotation)
+   let c = cos(rotation)
 
    result = Mat2d(
       m00: c * scale.x,
-      m01: -s * scale.y,
-      m10: s * scale.x,
+      m01: s * scale.x,
+      m02: c * scale.x * translation.x + s * scale.x * translation.y,
+      m10: -s * scale.y,
       m11: c * scale.y,
-      m20: translation.x,
-      m21: translation.y)
+      m12: -s * scale.y * translation.x + c * scale.y * translation.y)
 
 func origin*(a: Mat2d): Point2 =
-   result = point2(a.m20, a.m21)
+   result = point2(a.m02, a.m12)
 
 proc scale*(a: Mat2d): Vec2 =
-   result = vec2(vec2(a.m00, a.m10).mag, vec2(a.m10, a.m11).mag)
+   result = vec2(vec2(a.m00, a.m10).mag, vec2(a.m01, a.m11).mag)
 
 proc rotation*(a: Mat2d): Rad =
-   result = arctan2(a.m10, a.m00).Rad
+   result = arctan2(a.m10, a.m11).Rad
 
 proc lerp*(a, b: Mat2d, t: float32): Mat2d =
    # extract parameters
@@ -177,37 +150,21 @@ proc lerp*(a, b: Mat2d, t: float32): Mat2d =
    let s2 = b.scale
 
    # construct matrix
-   result = compose(lerp(p1, p2, t).Vec2, lerp(r1, r2, t), lerp(s1, s2, t)) # ffs
-
-func invert*(a: Mat2d): Mat2d =
-   var det = a.m00 * a.m11 - a.m01 * a.m10
-
-   if det == 0.0:
-      raise newException(DivByZeroDefect, "Mat2d determinant cannot be 0")
-
-   det = 1.0'f32 / det
-
-   result = Mat2d(
-      m00: a.m11 * det,
-      m01: -a.m01 * det,
-      m10: -a.m10 * det,
-      m11: a.m00 * det,
-      m20: (a.m10 * a.m21 - a.m11 * a.m20) * det,
-      m21: (a.m01 * a.m20 - a.m00 * a.m21) * det)
+   result = compose(lerp(p1, p2, t).Vec2, lerp(r1, r2, t), lerp(s1, s2, t))
 
 func `*`*(a, b: Mat2d): Mat2d =
    result = Mat2d(
       m00: a.m00 * b.m00 + a.m01 * b.m10,
       m01: a.m00 * b.m01 + a.m01 * b.m11,
+      m02: a.m02 + a.m00 * b.m02 + a.m01 * b.m12,
       m10: a.m10 * b.m00 + a.m11 * b.m10,
       m11: a.m10 * b.m01 + a.m11 * b.m11,
-      m20: a.m20 * b.m00 + a.m21 * b.m10 + b.m20,
-      m21: a.m20 * b.m01 + a.m21 * b.m11 + b.m21)
+      m12: a.m12 + a.m10 * b.m02 + a.m11 * b.m12)
 
 proc transform*(a: Mat2d, v: Vec2): Vec2 =
-   result = vec2(a.m00 * v.x + a.m10 * v.y,
-         a.m01 * v.x + a.m11 * v.y)
+   result = vec2(v.x * a.m00 + v.y * a.m01,
+         v.x * a.m10 + v.y * a.m11)
 
 proc transform*(a: Mat2d, p: Point2): Point2 =
-   result = point2(a.m00 * p.x + a.m10 * p.y + a.m20,
-         a.m01 * p.x + a.m11 * p.y + a.m21)
+   result = point2(p.x * a.m00 + p.y * a.m01 + a.m02,
+         p.x * a.m10 + p.y * a.m11 + a.m12)
