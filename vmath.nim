@@ -101,7 +101,7 @@ func lerp*(a, b: Point2, t: float32): Point2 =
    result = Point2(lerp(Vec2(a), Vec2(b), t))
 
 type
-   Mat2d* = object # column major
+   Mat2d* = object
       m00*: float32
       m01*: float32
       m02*: float32
@@ -118,17 +118,17 @@ func identity*(): Mat2d =
       m11: 1.0,
       m12: 0.0)
 
-func compose*(translation: Vec2, rotation: Rad, scale: Vec2): Mat2d =
+func compose*(scale: Vec2, rotation: Rad, translation: Vec2): Mat2d =
    let s = sin(rotation)
    let c = cos(rotation)
 
    result = Mat2d(
       m00: c * scale.x,
-      m01: s * scale.x,
-      m02: c * scale.x * translation.x + s * scale.x * translation.y,
-      m10: -s * scale.y,
+      m01: s * scale.y,
+      m02: translation.x,
+      m10: -s * scale.x,
       m11: c * scale.y,
-      m12: -s * scale.y * translation.x + c * scale.y * translation.y)
+      m12: translation.y)
 
 func origin*(a: Mat2d): Point2 =
    result = point2(a.m02, a.m12)
