@@ -6,13 +6,15 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
    template transform: untyped = game.transform[entity.index]
    template previous: untyped = game.previous[entity.index]
 
-   let position = transform.world.origin
-   let rotation = transform.world.rotation
-   let scale = transform.world.scale
+   let position = lerp(previous.position, transform.world.origin, intrpl)
+   let rotation = lerp(previous.rotation, transform.world.rotation, intrpl)
+   let scale = lerp(previous.scale, transform.world.scale, intrpl)
 
-   game.mixCurrent(entity, lerp(previous.position, position, intrpl),
-         lerp(previous.rotation, rotation, intrpl),
-         lerp(previous.scale, scale, intrpl))
+   if HasCurrent in game.world[entity]:
+      template current: untyped = game.current[entity.index]
+      game.mixPrevious(entity, current.position, current.rotation, current.scale)
+
+   game.mixCurrent(entity, position, rotation, scale)
 
 proc sysIntrpl2d*(game: var Game, intrpl: float32) =
    for (entity, has) in game.world.pairs:
