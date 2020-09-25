@@ -20,14 +20,18 @@ proc update(game: var Game, entity: Entity) =
    let rotation = transform.world.rotation
    let scale = transform.world.scale
 
-   game.mixPrevious(entity, position, rotation, scale)
-
    let local = compose(transform.scale, transform.rotation, transform.translation)
    if parentId ?= hierarchy.parent:
       template parentTransform: untyped = game.transform[parentId.index]
       transform.world = parentTransform.world * local
    else:
       transform.world = local
+
+   if transform.shown:
+      game.mixPrevious(entity, position, rotation, scale)
+   else:
+      transform.shown = true
+      game.mixPrevious(entity, transform.world.origin, transform.world.rotation, transform.world.scale)
 
 proc sysTransform2d*(game: var Game) =
    for (entity, has) in game.world.pairs:

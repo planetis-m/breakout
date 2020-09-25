@@ -66,6 +66,7 @@ type
       translation*: Vec2 # local translation relative to the parent
       rotation*: Rad     # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
+      shown*: bool
 
    Game* = object
       world*: Storage[set[HasComponent]]
