@@ -10,10 +10,6 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
    let rotation = lerp(previous.rotation, transform.world.rotation, intrpl)
    let scale = lerp(previous.scale, transform.world.scale, intrpl)
 
-   if HasCurrent in game.world[entity]:
-      template current: untyped = game.current[entity.index]
-      game.mixPrevious(entity, current.position, current.rotation, current.scale)
-
    game.mixCurrent(entity, position, rotation, scale)
 
 proc sysIntrpl2d*(game: var Game, intrpl: float32) =

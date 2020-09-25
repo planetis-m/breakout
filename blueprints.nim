@@ -9,7 +9,7 @@ proc getBall*(game: var Game, parent = game.camera, x, y: float32): Entity =
          Collide(size: Vec2(x: 20.0, y: 20.0))
          ControlBall()
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
-         Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 10.0)
+         Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14.0)
 
 proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, height: int32): Entity =
    result = game.addBlueprint:
@@ -44,7 +44,7 @@ proc getPaddle*(game: var Game, parent = game.camera, x, y: float32): Entity =
          Collide(size: Vec2(x: 100.0, y: 20.0))
          ControlPaddle()
          Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255])
-         Move(speed: 10.0)
+         Move(speed: 20.0)
 
 proc sceneMain*(game: var Game) =
    let columnCount = 10

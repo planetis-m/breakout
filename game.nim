@@ -75,13 +75,15 @@ proc run(game: var Game) =
       accumulator += now - lastTime
       lastTime = now
 
+      var updated = false
       var framesSkipped = 0
       while accumulator >= skippedTicks and framesSkipped < maxFramesSkipped:
          game.update()
          accumulator -= skippedTicks
          framesSkipped.inc
+         updated = true
 
-      game.render(accumulator.float32 / skippedTicks.float32)
+      if updated: game.render(accumulator.float32 / skippedTicks.float32)
 
 proc main =
    randomize()
