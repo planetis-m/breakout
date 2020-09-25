@@ -16,9 +16,12 @@ proc update(game: var Game, entity: Entity) =
 
    game.rmComponent(entity, HasDirty)
 
-   let position = transform.world.origin
-   let rotation = transform.world.rotation
-   let scale = transform.world.scale
+   if HasNewlyCreated notin game.world[entity]:
+      let position = transform.world.origin
+      let rotation = transform.world.rotation
+      let scale = transform.world.scale
+
+      game.mixPrevious(entity, position, rotation, scale)
 
    let local = compose(transform.scale, transform.rotation, transform.translation)
    if parentId ?= hierarchy.parent:
@@ -27,11 +30,13 @@ proc update(game: var Game, entity: Entity) =
    else:
       transform.world = local
 
-   if transform.shown:
-      game.mixPrevious(entity, position, rotation, scale)
-   else:
-      transform.shown = true
-      game.mixPrevious(entity, transform.world.origin, transform.world.rotation, transform.world.scale)
+   if HasNewlyCreated in game.world[entity]:
+      let position = transform.world.origin
+      let rotation = transform.world.rotation
+      let scale = transform.world.scale
+
+      game.mixCurrent(entity, position, rotation, scale)
+      game.rmComponent(entity, HasNewlyCreated)
 
 proc sysTransform2d*(game: var Game) =
    for (entity, has) in game.world.pairs:

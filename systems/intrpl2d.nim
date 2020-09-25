@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, mixins, registry, storage]
+import ".." / [game_types, vmath, mixins, registry, storage, utils]
 
 const Query = {HasTransform2d, HasPrevious}
 

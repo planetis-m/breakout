@@ -42,6 +42,9 @@ proc mixMove*(game: var Game, entity: Entity, direction = vec2(0, 0), speed = 10
    game.world[entity].incl HasMove
    game.move[entity.index] = Move(direction: direction, speed: speed)
 
+proc mixNewlyCreated*(game: var Game, entity: Entity) =
+   game.world[entity].incl HasNewlyCreated
+
 proc mixPrevious*(game: var Game, entity: Entity, position = point2(0, 0),
       rotation = 0.Rad, scale = vec2(1, 1)) =
    game.world[entity].incl HasPrevious
