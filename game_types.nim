@@ -5,7 +5,6 @@ type
       Right, Left
 
    HasComponent* = enum
-      HasClearColor,
       HasCollide,
       HasControlBall,
       HasControlBrick,
@@ -15,7 +14,6 @@ type
       HasFade,
       HasFresh,
       HasHierarchy,
-      HasInputState,
       HasMove,
       HasPrevious,
       HasShake,
