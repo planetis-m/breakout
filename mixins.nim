@@ -14,12 +14,6 @@ proc mixControlBrick*(game: var Game, entity: Entity) =
 proc mixControlPaddle*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlPaddle
 
-proc mixCurrent*(game: var Game, entity: Entity, position = point2(0, 0),
-      rotation = 0.Rad, scale = vec2(1, 1)) =
-   game.world[entity].incl HasCurrent
-   game.current[entity.index] = Current(position: position, rotation: rotation,
-         scale: scale)
-
 proc mixDirty*(game: var Game, entity: Entity) =
    game.world[entity].incl HasDirty
 

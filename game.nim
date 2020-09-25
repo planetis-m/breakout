@@ -2,7 +2,7 @@ import
    std / [random, monotimes], sdl2,
    game_types, blueprints, registry, storage, utils,
    systems / [collide, control_ball, control_brick, control_paddle, draw2d,
-      fade, intrpl2d, move, shake, transform2d, handle_events]
+      fade, move, shake, transform2d, handle_events]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
    discard sdl2.init(INIT_VIDEO or INIT_EVENTS)
@@ -26,7 +26,6 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       clearColor: [0'u8, 0, 0, 255],
 
       collide: newSeq[Collide](maxEntities),
-      current: newSeq[Current](maxEntities),
       draw2d: newSeq[Draw2d](maxEntities),
       fade: newSeq[Fade](maxEntities),
       hierarchy: newSeq[Hierarchy](maxEntities),
@@ -53,8 +52,7 @@ proc update(game: var Game) =
    sysCollide(game)
 
 proc render(game: var Game, intrpl: float32) =
-   sysIntrpl2d(game, intrpl)
-   sysDraw2d(game)
+   sysDraw2d(game, intrpl)
    game.renderer.present()
 
 proc run(game: var Game) =

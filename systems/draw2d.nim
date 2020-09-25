@@ -1,19 +1,24 @@
 import math, sdl2, ".." / [game_types, vmath, registry, storage]
 
-const Query = {HasCurrent, HasDraw2d}
+const Query = {HasDraw2d, HasPrevious, HasTransform2d}
 const Tolerance = 0.75'f32
 
-proc update(game: var Game, entity: Entity) =
-   template current: untyped = game.current[entity.index]
+proc update(game: var Game, entity: Entity, intrpl: float32) =
+   template transform: untyped = game.transform[entity.index]
+   template previous: untyped = game.previous[entity.index]
    template draw2d: untyped = game.draw2d[entity.index]
 
-   let width = int32(draw2d.width.float32 * current.scale.x)
-   let height = int32(draw2d.height.float32 * current.scale.y)
+   let position = lerp(previous.position, transform.world.origin, intrpl)
+   let rotation = lerp(previous.rotation, transform.world.rotation, intrpl)
+   let scale = lerp(previous.scale, transform.world.scale, intrpl)
 
-   var x = current.position.x.int32
-   var y = current.position.y.int32
-   if abs(current.position.x - x.float32) > Tolerance: x = ceil(current.position.x).int32
-   if abs(current.position.y - y.float32) > Tolerance: y = ceil(current.position.y).int32
+   let width = int32(draw2d.width.float32 * scale.x)
+   let height = int32(draw2d.height.float32 * scale.y)
+
+   var x = position.x.int32
+   var y = position.y.int32
+   if abs(position.x - x.float32) > Tolerance: x = ceil(position.x).int32
+   if abs(position.y - y.float32) > Tolerance: y = ceil(position.y).int32
 
    var rectangle = (
       x - int32(width / 2),
@@ -23,9 +28,9 @@ proc update(game: var Game, entity: Entity) =
    game.renderer.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
    game.renderer.fillRect(rectangle)
 
-proc sysDraw2d*(game: var Game) =
+proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.renderer.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
    game.renderer.clear()
    for (entity, has) in game.world.pairs:
       if has * Query == Query:
-         update(game, entity)
+         update(game, entity, intrpl)

@@ -10,7 +10,6 @@ type
       HasControlBall,
       HasControlBrick,
       HasControlPaddle,
-      HasCurrent,
       HasDirty,
       HasDraw2d,
       HasFade,
@@ -31,11 +30,6 @@ type
       min*, max*: Point2
       center*: Point2
       collision*: Collision
-
-   Current* = object
-      position*: Point2 # position relative to the world
-      rotation*: Rad    # rotation relative to the world
-      scale*: Vec2      # scale relative to the world
 
    Draw2d* = object
       width*, height*: int32
@@ -84,7 +78,6 @@ type
       inputState*: array[Right..Left, bool]
 
       collide*: seq[Collide]
-      current*: seq[Current]
       draw2d*: seq[Draw2d]
       fade*: seq[Fade]
       hierarchy*: seq[Hierarchy]
