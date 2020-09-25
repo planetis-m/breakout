@@ -11,7 +11,7 @@ proc transformBlueprint(result, game, entity, parent, n: NimNode) =
    if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
    result.add(newLetStmt(entity, newCall(bindSym"createEntity", game)),
          transform, hierarchy, newCall(bindSym"mixDirty", game, entity),
-         newCall(bindSym"mixNewlyCreated", game, entity), resBody)
+         newCall(bindSym"mixFresh", game, entity), resBody)
 
 proc transformChildren(game, entity, n: NimNode): NimNode =
    proc foreignCall(n, game, entity: NimNode): NimNode =

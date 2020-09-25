@@ -14,10 +14,10 @@ type
       HasDirty,
       HasDraw2d,
       HasFade,
+      HasFresh,
       HasHierarchy,
       HasInputState,
       HasMove,
-      HasNewlyCreated,
       HasPrevious,
       HasShake,
       HasTransform2d

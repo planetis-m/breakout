@@ -14,7 +14,7 @@ proc update(game: var Game, entity: Entity) =
       game.mixDirty(childId)
       childId = childHierarchy.next
 
-   if HasNewlyCreated notin game.world[entity]:
+   if HasFresh notin game.world[entity]:
       let position = transform.world.origin
       let rotation = transform.world.rotation
       let scale = transform.world.scale
@@ -22,7 +22,7 @@ proc update(game: var Game, entity: Entity) =
       game.rmComponent(entity, HasDirty)
       game.mixPrevious(entity, position, rotation, scale)
    else:
-      game.rmComponent(entity, HasNewlyCreated)
+      game.rmComponent(entity, HasFresh)
 
    let local = compose(transform.scale, transform.rotation, transform.translation)
    if parentId ?= hierarchy.parent:
