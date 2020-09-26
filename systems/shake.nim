@@ -4,7 +4,7 @@ const Query = {HasTransform2d, HasShake}
 
 proc update(game: var Game, entity: Entity) =
    template transform: untyped = game.transform[entity.index]
-   template shake: untyped = game.shake[entity.index]
+   template shake: untyped = game.shake
 
    if shake.duration > 0.0:
       shake.duration -= 0.01
@@ -26,6 +26,6 @@ proc update(game: var Game, entity: Entity) =
          game.clearColor[2] = 0
 
 proc sysShake*(game: var Game) =
-   for entity, has in game.world.pairs:
-      if has * Query == Query:
-         update(game, entity)
+   let has = game.world[game.camera]
+   if has * Query == Query:
+      update(game, game.camera)

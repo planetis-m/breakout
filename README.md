@@ -18,9 +18,7 @@ There are still improvements to be made in this aspect.
 
 ## Fixed timestep with interpolation
 
-Implementing a fixed timestep took the longest to complete and required changes across
-the codebase. Notably a new system was added (``sysIntrpl2d``) as well as new components
-(``Current`` and ``Previous`` states).
+
 
 ## Improvements to the hierarchical scene graph
 

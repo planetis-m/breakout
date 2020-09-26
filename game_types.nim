@@ -81,5 +81,5 @@ type
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
       previous*: seq[Previous]
-      shake*: seq[Shake]
+      shake*: Shake
       transform*: seq[Transform2d]
