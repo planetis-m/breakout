@@ -85,7 +85,7 @@ proc run(game: var Game) =
 
 proc main =
    randomize()
-   var game = initGame(700, 525)
+   var game = initGame(740, 555)
 
    sceneMain(game)
    game.run()

@@ -32,6 +32,6 @@ proc update(game: var Game, entity: Entity) =
       transform.world = local
 
 proc sysTransform2d*(game: var Game) =
-   for (entity, has) in game.world.pairs:
+   for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)

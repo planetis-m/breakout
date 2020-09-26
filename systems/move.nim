@@ -13,6 +13,6 @@ proc update(game: var Game, entity: Entity) =
       game.mixDirty(entity)
 
 proc sysMove*(game: var Game) =
-   for (entity, has) in game.world.pairs:
+   for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)

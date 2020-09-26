@@ -27,7 +27,7 @@ proc penetrateAabb(a, b: Collide): Vec2 =
 
 proc sysCollide*(game: var Game) =
    var allColliders: seq[Entity]
-   for (colliderId, has) in game.world.pairs:
+   for colliderId, has in game.world.pairs:
       if has * Query == Query:
          template transform: untyped = game.transform[colliderId.index]
          template collider: untyped = game.collide[colliderId.index]

@@ -31,6 +31,6 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
 proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.renderer.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
    game.renderer.clear()
-   for (entity, has) in game.world.pairs:
+   for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity, intrpl)

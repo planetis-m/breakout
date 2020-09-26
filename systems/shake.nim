@@ -26,6 +26,6 @@ proc update(game: var Game, entity: Entity) =
          game.clearColor[2] = 0
 
 proc sysShake*(game: var Game) =
-   for (entity, has) in game.world.pairs:
+   for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)

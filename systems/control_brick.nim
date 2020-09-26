@@ -14,6 +14,6 @@ proc update(game: var Game, entity: Entity) =
                float32(game.windowHeight / 2))
 
 proc sysControlBrick*(game: var Game) =
-   for (entity, has) in game.world.pairs:
+   for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)

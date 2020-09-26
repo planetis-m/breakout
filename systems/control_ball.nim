@@ -48,6 +48,6 @@ proc update(game: var Game, entity: Entity) =
          Fade(step: 0.05)
 
 proc sysControlBall*(game: var Game) =
-   for (entity, has) in game.world.pairs:
+   for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)
