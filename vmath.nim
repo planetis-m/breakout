@@ -109,7 +109,7 @@ type
       m11*: float32
       m12*: float32
 
-func identity*(): Mat2d =
+func mat2d*(): Mat2d =
    result = Mat2d(
       m00: 1.0,
       m01: 0.0,

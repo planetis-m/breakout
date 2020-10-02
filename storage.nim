@@ -16,7 +16,7 @@ proc contains*[T](s: Storage[T], entity: Entity): bool =
    # Returns true if the sparse is registered to a dense index.
    result = s.sparseToPacked[entity.index] != invalidId.EntityImpl
 
-proc `[]=`*[T](s: var Storage[T], entity: Entity, value: T) =
+proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
    let entityIndex = entity.index
    var packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex == invalidId.EntityImpl:

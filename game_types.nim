@@ -81,5 +81,22 @@ type
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
       previous*: seq[Previous]
-      shake*: Shake
+      shake*: ptr Shake
       transform*: seq[Transform2d]
+
+proc `=destroy`(game: var Game) =
+   `=destroy`(game.toDelete)
+   `=destroy`(game.collide)
+   `=destroy`(game.draw2d)
+   `=destroy`(game.fade)
+   `=destroy`(game.hierarchy)
+   `=destroy`(game.move)
+   `=destroy`(game.previous)
+   `=destroy`(game.transform)
+
+   dealloc(game.shake)
+   destroy(game.window)
+   destroy(game.renderer)
+   sdl2.quit()
+
+proc `=`(game: var Game, other: Game) {.error.}
