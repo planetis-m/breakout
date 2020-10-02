@@ -83,12 +83,19 @@ type
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
       previous*: seq[Previous]
-      shake*: ShakePtr
+      shakePtr*: ShakePtr
       transform*: seq[Transform2d]
 
 proc `=destroy`(x: var ShakePtr) =
    if x.impl != nil:
       dealloc(x.impl)
 proc `=`(dest: var ShakePtr; source: ShakePtr) {.error.}
+
 proc newShake*(): ShakePtr =
    result.impl = create(Shake)
+proc shake*(game: Game): lent Shake =
+   game.shakePtr.impl[]
+proc shake*(game: var Game): var Shake =
+   game.shakePtr.impl[]
+proc `shake=`*(game: var Game, value: Shake) =
+   game.shakePtr.impl[] = value

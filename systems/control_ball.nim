@@ -27,7 +27,7 @@ proc update(game: var Game, entity: Entity) =
       let collision = collide.collision
 
       if HasShake in game.world[game.camera]:
-         template cameraShake: untyped = game.shake.impl
+         template cameraShake: untyped = game.shake
          cameraShake.duration = 0.1
 
       if collision.hit.x != 0.0:
