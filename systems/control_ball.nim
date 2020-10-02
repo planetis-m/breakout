@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, blueprints, dsl, registry, storage]
+import ".." / [game_types, vmath, blueprints, dsl, registry, storage, smartptrs]
 
 const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}
 
@@ -27,7 +27,7 @@ proc update(game: var Game, entity: Entity) =
       let collision = collide.collision
 
       if HasShake in game.world[game.camera]:
-         template cameraShake: untyped = game.shake
+         template cameraShake: untyped = game.shake[]
          cameraShake.duration = 0.1
 
       if collision.hit.x != 0.0:

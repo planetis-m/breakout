@@ -1,4 +1,4 @@
-import sdl2, vmath, registry, storage
+import sdl2, vmath, registry, storage, smartptrs
 
 type
    Input* = enum
@@ -50,8 +50,6 @@ type
       rotation*: Rad    # rotation at the previous physics state
       scale*: Vec2      # scale at the previous physics state
 
-   ShakePtr = object
-      impl*: ptr Shake
    Shake* = object
       duration*: float32
       strength*: float32
@@ -83,19 +81,5 @@ type
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
       previous*: seq[Previous]
-      shakePtr*: ShakePtr
+      shake*: UniquePtr[Shake]
       transform*: seq[Transform2d]
-
-proc `=destroy`(x: var ShakePtr) =
-   if x.impl != nil:
-      dealloc(x.impl)
-proc `=`(dest: var ShakePtr; source: ShakePtr) {.error.}
-
-proc newShake*(): ShakePtr =
-   result.impl = create(Shake)
-proc shake*(game: Game): lent Shake =
-   game.shakePtr.impl[]
-proc shake*(game: var Game): var Shake =
-   game.shakePtr.impl[]
-proc `shake=`*(game: var Game, value: Shake) =
-   game.shakePtr.impl[] = value

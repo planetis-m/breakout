@@ -1,4 +1,4 @@
-import game_types, vmath, utils, registry, storage
+import game_types, vmath, utils, registry, storage, smartptrs
 
 proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
    game.world[entity].incl HasCollide
@@ -47,7 +47,7 @@ proc mixPrevious*(game: var Game, entity: Entity, position = point2(0, 0),
 
 proc mixShake*(game: var Game, entity: Entity, duration = 1.0, strength = 0.0) =
    game.world[entity].incl HasShake
-   game.shake = Shake(duration: duration, strength: strength)
+   game.shake = newUniquePtr(Shake(duration: duration, strength: strength))
 
 proc mixTransform2d*(game: var Game, entity: Entity, world = mat2d(), translation = vec2(0, 0),
       rotation = 0.Rad, scale = vec2(1, 1)) =

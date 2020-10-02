@@ -1,10 +1,10 @@
-import ".." / [game_types, vmath, dsl, registry, storage], random
+import ".." / [game_types, vmath, dsl, registry, storage, smartptrs], random
 
 const Query = {HasTransform2d, HasShake}
 
 proc update(game: var Game, entity: Entity) =
    template transform: untyped = game.transform[entity.index]
-   template shake: untyped = game.shake
+   template shake: untyped = game.shake[]
 
    if shake.duration > 0.0:
       shake.duration -= 0.01

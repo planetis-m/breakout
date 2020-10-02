@@ -31,7 +31,6 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       hierarchy: newSeq[Hierarchy](maxEntities),
       move: newSeq[Move](maxEntities),
       previous: newSeq[Previous](maxEntities),
-      shakePtr: newShake(),
       transform: newSeq[Transform2d](maxEntities))
 
 proc update(game: var Game) =
