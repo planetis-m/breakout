@@ -31,7 +31,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       hierarchy: newSeq[Hierarchy](maxEntities),
       move: newSeq[Move](maxEntities),
       previous: newSeq[Previous](maxEntities),
-      shake: create(Shake),
+      shake: newShake(),
       transform: newSeq[Transform2d](maxEntities))
 
 proc update(game: var Game) =
@@ -89,5 +89,9 @@ proc main =
 
    sceneMain(game)
    game.run()
+
+   destroy(game.window)
+   destroy(game.renderer)
+   sdl2.quit()
 
 main()

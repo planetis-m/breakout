@@ -50,6 +50,8 @@ type
       rotation*: Rad    # rotation at the previous physics state
       scale*: Vec2      # scale at the previous physics state
 
+   ShakePtr = object
+      impl*: ptr Shake
    Shake* = object
       duration*: float32
       strength*: float32
@@ -81,22 +83,12 @@ type
       hierarchy*: seq[Hierarchy]
       move*: seq[Move]
       previous*: seq[Previous]
-      shake*: ptr Shake
+      shake*: ShakePtr
       transform*: seq[Transform2d]
 
-proc `=destroy`(game: var Game) =
-   `=destroy`(game.toDelete)
-   `=destroy`(game.collide)
-   `=destroy`(game.draw2d)
-   `=destroy`(game.fade)
-   `=destroy`(game.hierarchy)
-   `=destroy`(game.move)
-   `=destroy`(game.previous)
-   `=destroy`(game.transform)
-
-   dealloc(game.shake)
-   destroy(game.window)
-   destroy(game.renderer)
-   sdl2.quit()
-
-proc `=`(game: var Game, other: Game) {.error.}
+proc `=destroy`(x: var ShakePtr) =
+   if x.impl != nil:
+      dealloc(x.impl)
+proc `=`(dest: var ShakePtr; source: ShakePtr) {.error.}
+proc newShake*(): ShakePtr =
+   result.impl = create(Shake)
