@@ -8,7 +8,6 @@ proc `=destroy`*[T](p: var UniquePtr[T]) =
    if p.val != nil:
       `=destroy`(p.val[])
       deallocShared(p.val)
-      p.val = nil
 
 proc `=`*[T](dest: var UniquePtr[T], src: UniquePtr[T]) {.error.}
 
