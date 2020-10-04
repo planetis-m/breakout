@@ -6,7 +6,7 @@ import
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
    let sdlContext = sdlInit(INIT_VIDEO or INIT_EVENTS)
-   let window = newWindow(sdlContext, "Breakout", SDL_WINDOWPOS_CENTERED,
+   let window = newWindow("Breakout", SDL_WINDOWPOS_CENTERED,
          SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN)
 
    let renderer = newRenderer(window, -1, Renderer_Accelerated or Renderer_PresentVsync)
@@ -19,8 +19,9 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       windowWidth: windowWidth,
       windowHeight: windowHeight,
 
-      window: window,
       renderer: renderer,
+      window: window,
+      sdlContext: sdlContext,
 
       clearColor: [0'u8, 0, 0, 255],
 
@@ -51,7 +52,7 @@ proc update(game: var Game) =
 
 proc render(game: var Game, intrpl: float32) =
    sysDraw2d(game, intrpl)
-   game.renderer.get.present()
+   game.renderer.impl.present()
 
 proc run(game: var Game) =
    const

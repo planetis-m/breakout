@@ -2,20 +2,12 @@ import sdl2
 export sdl2
 
 type
-   SdlContext[T] = object
-      sdl: SdlContextRef
-      impl: T
+   SdlContext* = object
 
-   WindowObj = object
-      impl: WindowPtr
-   Window* = SdlContext[WindowObj]
-
-   RendererObj* = object
-      impl: RendererPtr
-   Renderer* = SdlContext[RendererObj]
-
-   SdlContextRef* = ref SdlContextObj
-   SdlContextObj = object
+   Window* = object
+      impl*: WindowPtr
+   Renderer* = object
+      impl*: RendererPtr
 
    ObjectAlreadyInitialized* = object of Defect
    SdlException* = object of Defect
@@ -23,12 +15,12 @@ type
 var
    isSdlContextAlive: bool
 
-proc `=destroy`(context: var SdlContextObj) =
+proc `=destroy`(context: var SdlContext) =
    if isSdlContextAlive:
       sdl2.quit()
       isSdlContextAlive = false
 
-proc sdlInit*(flags: cint): SdlContextRef =
+proc sdlInit*(flags: cint): SdlContext =
    if isSdlContextAlive:
       raise newException(ObjectAlreadyInitialized,
             "Cannot initialize `SdlContext` more than once at a time.")
@@ -36,24 +28,21 @@ proc sdlInit*(flags: cint): SdlContextRef =
       if sdl2.init(flags) == SdlSuccess:
          # Initialize SDL without any explicit subsystems (flags = 0).
          isSdlContextAlive = true
-         result = SdlContextRef()
+         result = SdlContext()
       else:
          raise newException(SdlException, $getError())
 
-proc `=destroy`(renderer: var RendererObj) =
+proc `=destroy`(renderer: var Renderer) =
    if renderer.impl != nil:
       destroy(renderer.impl)
-proc `=`(renderer: var RendererObj; original: RendererObj) {.error.}
+proc `=`(renderer: var Renderer; original: Renderer) {.error.}
 
-proc `=destroy`(window: var WindowObj) =
+proc `=destroy`(window: var Window) =
    if window.impl != nil:
       destroy(window.impl)
-proc `=`(window: var WindowObj; original: WindowObj) {.error.}
+proc `=`(window: var Window; original: Window) {.error.}
 
-proc get*(x: Window): WindowPtr = x.impl.impl
-proc get*(x: Renderer): RendererPtr = x.impl.impl
-
-proc newWindow*(sdl: SdlContextRef, title: string; x, y, w, h: cint; flags: uint32): Window =
-   Window(sdl: sdl, impl: WindowObj(impl: createWindow(title, x, y, w, h, flags)))
+proc newWindow*(title: string; x, y, w, h: cint; flags: uint32): Window =
+   Window(impl: createWindow(title, x, y, w, h, flags))
 proc newRenderer*(window: Window; index: cint; flags: cint): Renderer =
-   Renderer(sdl: window.sdl, impl: RendererObj(impl: createRenderer(window.get, index, flags)))
+   Renderer(impl: createRenderer(window.impl, index, flags))

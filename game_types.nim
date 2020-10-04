@@ -69,8 +69,9 @@ type
 
       windowWidth*, windowHeight*: int32
 
-      window*: Window
       renderer*: Renderer
+      window*: Window
+      sdlContext*: SdlContext
 
       clearColor*: array[4, uint8]
       inputState*: array[Right..Left, bool]

@@ -25,12 +25,12 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
       y - int32(height / 2),
       width.int32,
       height.int32)
-   game.renderer.get.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
-   game.renderer.get.fillRect(rectangle)
+   game.renderer.impl.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
+   game.renderer.impl.fillRect(rectangle)
 
 proc sysDraw2d*(game: var Game, intrpl: float32) =
-   game.renderer.get.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
-   game.renderer.get.clear()
+   game.renderer.impl.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
+   game.renderer.impl.clear()
    for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity, intrpl)
