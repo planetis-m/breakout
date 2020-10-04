@@ -1,4 +1,4 @@
-import math, sdl2, ".." / [game_types, vmath, registry, storage]
+import math, ".." / [game_types, vmath, registry, storage, sdl_private]
 
 const Query = {HasDraw2d, HasPrevious, HasTransform2d}
 const Tolerance = 0.75'f32
@@ -25,12 +25,12 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
       y - int32(height / 2),
       width.int32,
       height.int32)
-   game.renderer.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
-   game.renderer.fillRect(rectangle)
+   game.renderer.get.setDrawColor(draw2d.color[0], draw2d.color[1], draw2d.color[2], draw2d.color[3])
+   game.renderer.get.fillRect(rectangle)
 
 proc sysDraw2d*(game: var Game, intrpl: float32) =
-   game.renderer.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
-   game.renderer.clear()
+   game.renderer.get.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
+   game.renderer.get.clear()
    for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity, intrpl)

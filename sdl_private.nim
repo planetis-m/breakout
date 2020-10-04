@@ -2,98 +2,58 @@ import sdl2
 export sdl2
 
 type
-   SdlPtr[T] = object
-      sdl: SdlContext
-      x: T
+   SdlContext[T] = object
+      sdl: SdlContextRef
+      impl: T
 
-   Window* = object
-      sdl: SdlContext
+   WindowObj = object
       impl: WindowPtr
+   Window* = SdlContext[WindowObj]
 
-   Renderer* = object
-      sdl: SdlContext
+   RendererObj* = object
       impl: RendererPtr
+   Renderer* = SdlContext[RendererObj]
 
-   SdlContext* = ref SdlContextObj
+   SdlContextRef* = ref SdlContextObj
    SdlContextObj = object
-
-   EventPump* = ref EventPumpObj
-   EventPumpObj = object
-      sdl: SdlContext
 
    ObjectAlreadyInitialized* = object of Defect
    SdlException* = object of Defect
 
 var
    isSdlContextAlive: bool
-   isEventPumpAlive: bool
 
 proc `=destroy`(context: var SdlContextObj) =
-   assert isSdlContextAlive
-   SDL_quit()
-   isSdlContextAlive = false
+   if isSdlContextAlive:
+      sdl2.quit()
+      isSdlContextAlive = false
 
-proc initSdl*(): SdlContext =
+proc sdlInit*(flags: cint): SdlContextRef =
    if isSdlContextAlive:
       raise newException(ObjectAlreadyInitialized,
             "Cannot initialize `SdlContext` more than once at a time.")
    else:
-      if sdl2.init(0) == SdlSuccess:
+      if sdl2.init(flags) == SdlSuccess:
          # Initialize SDL without any explicit subsystems (flags = 0).
          isSdlContextAlive = true
-         result = SdlContext()
+         result = SdlContextRef()
       else:
          raise newException(SdlException, $getError())
 
-template subsystem(system, flag: untyped) =
-   type
-      `system Subsystem`* = object
-         sdl: SdlContext
-
-   proc `=destroy`(self: var `system Subsystem`) =
-      quitSubSystem(flag)
-      `=destroy`(self.sdl)
-   proc `=`(self: var `system Subsystem`; original: `system Subsystem`) {.error.}
-
-   proc `init system`*(context: SdlContext): `system Subsystem` =
-      if initSubSystem(flag) == 0:
-         result = `system Subsystem`(sdl: SdlContext)
-      else:
-         raise newException(SdlException, $getError())
-
-subsystem(Audio, INIT_AUDIO)
-subsystem(GameController, INIT_GAMECONTROLLER)
-subsystem(Haptic, INIT_HAPTIC)
-subsystem(Joystick, INIT_JOYSTICK)
-subsystem(Video, INIT_VIDEO)
-subsystem(Timer, INIT_TIMER)
-subsystem(Event, INIT_EVENTS)
-
-proc `=destroy`(context: var EventPumpObj) =
-   assert isEventPumpAlive
-   quitSubSystem(INIT_EVENTS)
-   isEventPumpAlive = false
-
-proc initEventPump*(context: SdlContext): EventPump =
-   if isEventPumpAlive:
-      raise newException(ObjectAlreadyInitialized,
-            "Cannot initialize `EventPump` more than once at a time.")
-   else:
-      if initSubSystem(INIT_EVENTS) == 0:
-         isEventPumpAlive = true
-         result = EventPump(sdl: SdlContext)
-      else:
-         raise newException(SdlException, $getError())
-
-proc `=destroy`(renderer: var Renderer) =
+proc `=destroy`(renderer: var RendererObj) =
    if renderer.impl != nil:
       destroy(renderer.impl)
-proc `=`(renderer: var Renderer; original: Renderer) {.error.}
+proc `=`(renderer: var RendererObj; original: RendererObj) {.error.}
 
-proc `=destroy`(window: var Window) =
+proc `=destroy`(window: var WindowObj) =
    if window.impl != nil:
       destroy(window.impl)
-proc `=`(window: var Window; original: Window) {.error.}
+proc `=`(window: var WindowObj; original: WindowObj) {.error.}
 
-proc pollEvent*(self: EventPump, event: Event): bool =
-proc pumpEvents*(self: EventPump) = pumpEvents()
+proc get*(x: Window): WindowPtr = x.impl.impl
+proc get*(x: Renderer): RendererPtr = x.impl.impl
+
+proc newWindow*(sdl: SdlContextRef, title: string; x, y, w, h: cint; flags: uint32): Window =
+   Window(sdl: sdl, impl: WindowObj(impl: createWindow(title, x, y, w, h, flags)))
+proc newRenderer*(window: Window; index: cint; flags: cint): Renderer =
+   Renderer(sdl: window.sdl, impl: RendererObj(impl: createRenderer(window.get, index, flags)))

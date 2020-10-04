@@ -1,4 +1,4 @@
-import sdl2, vmath, registry, storage, smartptrs
+import sdl_private, vmath, registry, storage, smartptrs
 
 type
    Input* = enum
@@ -69,8 +69,8 @@ type
 
       windowWidth*, windowHeight*: int32
 
-      window*: WindowPtr
-      renderer*: RendererPtr
+      window*: Window
+      renderer*: Renderer
 
       clearColor*: array[4, uint8]
       inputState*: array[Right..Left, bool]
