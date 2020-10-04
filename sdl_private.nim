@@ -43,6 +43,14 @@ proc `=destroy`(window: var Window) =
 proc `=`(window: var Window; original: Window) {.error.}
 
 proc newWindow*(title: string; x, y, w, h: cint; flags: uint32): Window =
-   Window(impl: createWindow(title, x, y, w, h, flags))
+   let impl = createWindow(title, x, y, w, h, flags)
+   if impl != nil:
+      result = Window(impl: impl)
+   else:
+      raise newException(SdlException, $getError())
 proc newRenderer*(window: Window; index: cint; flags: cint): Renderer =
-   Renderer(impl: createRenderer(window.impl, index, flags))
+   let impl = createRenderer(window.impl, index, flags)
+   if impl != nil:
+      result = Renderer(impl: impl)
+   else:
+      raise newException(SdlException, $getError())
