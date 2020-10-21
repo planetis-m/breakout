@@ -1,7 +1,5 @@
 import ".." / [game_types, vmath, mixins, utils, registry, storage]
 
-const Query = {HasTransform2d, HasHierarchy}
-
 proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
    template `?=`(name, value): bool = (let name = value; name != invalidId)
    template transform: untyped = game.transform[entity.index]
@@ -32,7 +30,14 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
       transform.world = local
 
 proc sysTransform2d*(game: var Game) =
+   template entity: untyped = game.dirty[i]
+   template hierarchy: untyped = game.hierarchy[entity.index]
+
    var dirty: seq[Entity]
-   for entity in game.dirty.items:
+   for i in 0 .. game.dirty.high:
+      for j in i + 1 .. game.dirty.high:
+         if game.dirty[j] == hierarchy.parent:
+            swap(game.dirty[i], game.dirty[j])
+            break
       update(game, entity, dirty)
    game.dirty = dirty
