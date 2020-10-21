@@ -15,7 +15,7 @@ proc update(game: var Game, entity: Entity) =
       game.clearColor[1] = rand(255).uint8
       game.clearColor[2] = rand(255).uint8
 
-      game.mixDirty(entity)
+      game.dirty.add(entity)
 
       if shake.duration <= 0.0:
          shake.duration = 0.0

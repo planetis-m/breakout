@@ -10,7 +10,7 @@ proc update(game: var Game, entity: Entity) =
       transform.translation.x += move.direction.x * move.speed
       transform.translation.y += move.direction.y * move.speed
 
-      game.mixDirty(entity)
+      game.dirty.add(entity)
 
 proc sysMove*(game: var Game) =
    for entity, has in game.world.pairs:

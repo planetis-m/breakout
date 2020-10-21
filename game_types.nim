@@ -9,7 +9,6 @@ type
       HasControlBall,
       HasControlBrick,
       HasControlPaddle,
-      HasDirty,
       HasDraw2d,
       HasFade,
       HasFresh,
@@ -64,6 +63,7 @@ type
       world*: Storage[set[HasComponent]]
       entities*: Registry
       toDelete*: seq[Entity]
+      dirty*: seq[Entity]
       camera*: Entity
       isRunning*: bool
 

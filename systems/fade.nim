@@ -13,7 +13,7 @@ proc update(game: var Game, entity: Entity) =
       transform.scale.x -= fade.step
       transform.scale.y -= fade.step
 
-      game.mixDirty(entity)
+      game.dirty.add(entity)
 
       if transform.scale.x <= 0.0:
          game.delete(entity)

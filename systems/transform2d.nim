@@ -1,8 +1,8 @@
 import ".." / [game_types, vmath, mixins, utils, registry, storage]
 
-const Query = {HasTransform2d, HasHierarchy, HasDirty}
+const Query = {HasTransform2d, HasHierarchy}
 
-proc update(game: var Game, entity: Entity) =
+proc update(game: var Game, entity: Entity, i: var int) =
    template `?=`(name, value): bool = (let name = value; name != invalidId)
    template transform: untyped = game.transform[entity.index]
    template hierarchy: untyped = game.hierarchy[entity.index]
@@ -11,7 +11,7 @@ proc update(game: var Game, entity: Entity) =
    while childId != invalidId:
       template childHierarchy: untyped = game.hierarchy[childId.index]
 
-      game.mixDirty(childId)
+      game.dirty.add(childId)
       childId = childHierarchy.next
 
    if HasFresh notin game.world[entity]:
@@ -19,7 +19,8 @@ proc update(game: var Game, entity: Entity) =
       let rotation = transform.world.rotation
       let scale = transform.world.scale
 
-      game.rmComponent(entity, HasDirty)
+      game.dirty.delete(i)
+      i.dec
       game.mixPrevious(entity, position, rotation, scale)
    else:
       game.rmComponent(entity, HasFresh)
@@ -32,6 +33,7 @@ proc update(game: var Game, entity: Entity) =
       transform.world = local
 
 proc sysTransform2d*(game: var Game) =
-   for entity, has in game.world.pairs:
-      if has * Query == Query:
-         update(game, entity)
+   var i = 0
+   while i < game.dirty.len:
+      update(game, game.dirty[i], i)
+      i.inc

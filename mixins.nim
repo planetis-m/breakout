@@ -14,9 +14,6 @@ proc mixControlBrick*(game: var Game, entity: Entity) =
 proc mixControlPaddle*(game: var Game, entity: Entity) =
    game.world[entity].incl HasControlPaddle
 
-proc mixDirty*(game: var Game, entity: Entity) =
-   game.world[entity].incl HasDirty
-
 proc mixDraw2d*(game: var Game, entity: Entity, width, height = 100'i32,
       color = [255'u8, 0, 255, 255]) =
    game.world[entity].incl HasDraw2d
