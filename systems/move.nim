@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, dsl, registry, storage]
+import ".." / [game_types, vmath, registry, storage]
 
 const Query = {HasTransform2d, HasMove}
 

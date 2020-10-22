@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, dsl, registry, storage, smartptrs], random
+import ".." / [game_types, vmath, registry, storage, smartptrs], random
 
 const Query = {HasTransform2d, HasShake}
 

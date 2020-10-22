@@ -34,6 +34,8 @@ proc sysTransform2d*(game: var Game) =
    template hierarchy: untyped = game.hierarchy[entity.index]
 
    var dirty: seq[Entity]
+   # Implements partial sorting
+   # Corner case of |child|parent|grand-parent| seems to be rare
    for i in 0 .. game.dirty.high:
       for j in i + 1 .. game.dirty.high:
          if game.dirty[j] == hierarchy.parent:

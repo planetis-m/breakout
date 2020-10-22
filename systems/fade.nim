@@ -1,4 +1,4 @@
-import ".." / [game_types, utils, dsl, registry, storage]
+import ".." / [game_types, utils, registry, storage]
 
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
