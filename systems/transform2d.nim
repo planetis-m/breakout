@@ -30,16 +30,14 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
       transform.world = local
 
 proc sysTransform2d*(game: var Game) =
-   template hierarchy: untyped = game.hierarchy[entity.index]
-
    var dirty: seq[Entity]
+   for i in 1 .. game.dirty.high:
+      let entity = game.dirty[i]
+      var j = i - 1
+      while j >= 0 and game.hierarchy[game.dirty[j].index].parent == entity:
+         game.dirty[j + 1] = game.dirty[j]
+         dec(j)
+      game.dirty[j + 1] = entity
    for i in 0 .. game.dirty.high:
-      var entity = game.dirty[i]
-      var index = i
-      for j in i + 1 .. game.dirty.high:
-         if game.dirty[j] == hierarchy.parent:
-            index = j
-            entity = game.dirty[j]
-      swap(game.dirty[i], game.dirty[index])
       update(game, game.dirty[i], dirty)
    game.dirty = dirty
