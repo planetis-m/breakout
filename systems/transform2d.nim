@@ -35,9 +35,11 @@ proc sysTransform2d*(game: var Game) =
    var dirty: seq[Entity]
    for i in 0 .. game.dirty.high:
       var entity = game.dirty[i]
+      var index = i
       for j in i + 1 .. game.dirty.high:
          if game.dirty[j] == hierarchy.parent:
+            index = j
             entity = game.dirty[j]
-      swap(game.dirty[i], entity) # I just love how this even works
-      update(game, entity, dirty)
+      swap(game.dirty[i], game.dirty[index])
+      update(game, game.dirty[i], dirty)
    game.dirty = dirty
