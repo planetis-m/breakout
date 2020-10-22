@@ -30,16 +30,14 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
       transform.world = local
 
 proc sysTransform2d*(game: var Game) =
-   template entity: untyped = game.dirty[i]
    template hierarchy: untyped = game.hierarchy[entity.index]
 
    var dirty: seq[Entity]
-   # Implements partial sorting
-   # Corner case of |child|parent|grand-parent| seems to be rare
    for i in 0 .. game.dirty.high:
+      var entity = game.dirty[i]
       for j in i + 1 .. game.dirty.high:
          if game.dirty[j] == hierarchy.parent:
-            swap(game.dirty[i], game.dirty[j])
-            break
+            entity = game.dirty[j]
+      swap(game.dirty[i], entity)
       update(game, entity, dirty)
    game.dirty = dirty
