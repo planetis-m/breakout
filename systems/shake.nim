@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, registry, storage, smartptrs], random
+import ".." / [game_types, vmath, registry, storage], fusion/smartptrs, random
 
 const Query = {HasTransform2d, HasShake}
 

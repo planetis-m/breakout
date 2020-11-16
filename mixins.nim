@@ -1,4 +1,4 @@
-import game_types, vmath, utils, registry, storage, smartptrs
+import game_types, vmath, utils, registry, storage, fusion/smartptrs
 
 proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
    game.world[entity].incl HasCollide

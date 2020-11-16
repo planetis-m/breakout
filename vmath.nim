@@ -28,7 +28,7 @@ type
    Vec2* = object
       x*, y*: float32
 
-   UnitVec2* {.borrow:`.`.} = distinct Vec2
+   UnitVec2* {.borrow: `.`.} = distinct Vec2
    Point2* {.borrow: `.`.} = distinct Vec2
 
 func vec2*(x, y: float32): Vec2 =

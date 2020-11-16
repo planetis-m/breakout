@@ -1,4 +1,4 @@
-import sdl_private, vmath, registry, storage, smartptrs
+import sdl_private, vmath, registry, storage, fusion/smartptrs
 
 type
    Input* = enum
@@ -74,7 +74,7 @@ type
       sdlContext*: SdlContext
 
       clearColor*: array[4, uint8]
-      inputState*: array[Right..Left, bool]
+      inputState*: array[Input, bool]
 
       collide*: seq[Collide]
       draw2d*: seq[Draw2d]
