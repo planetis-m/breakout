@@ -11,14 +11,15 @@ The original codebase when updating a system or creating a new entity, it iterat
 to ``MAX_ENTITIES``. This was eliminated by using two special data structures.
 
 For entity management (creation, deletion) a ``slotmap`` data structure is used, as explained
-[here](https://skypjack.github.io/2019-05-06-ecs-baf-part-3/).
+in [ECS back and forth part 3](https://skypjack.github.io/2019-05-06-ecs-baf-part-3/).
 
 For iterating over all entities, a sparse set that contains a ``set[HasComponent]`` is used.
 There are still improvements to be made in this aspect.
 
 ## Fixed timestep with interpolation
 
-
+Alpha value is used to interpolate between next and previous transforms. Interpolation function
+for `angles` was implemented.
 
 ## Improvements to the hierarchical scene graph
 
@@ -34,7 +35,11 @@ with the design described at
 [skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/).
 Now it is a seperate ``Hierarchy`` component following the unconstrained model.
 
-### Todo: sorting needs to be implemented
+### Sorting for hierachies
+
+Implemented using selection sort over `dirty: seq[Entities]`. Followed the idea in
+[bitquid](http://bitsquid.blogspot.com/2014/10/building-data-oriented-entity-system.html)
+blog. Might worth switching to immediate updates in the future.
 
 ## Custom vector math library
 
