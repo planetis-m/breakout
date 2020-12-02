@@ -1,4 +1,4 @@
-import eminim, registry, std/[algorithm, streams, parsejson]
+import registry, std/algorithm
 
 type
    Storage*[T] = object
@@ -65,31 +65,3 @@ proc len*[T](s: Storage[T]): int = s.len
 iterator pairs*[T](s: Storage[T]): (Entity, lent T) =
    for i in 0 ..< s.len:
       yield (s.packedToSparse[i], s.packed[i])
-
-proc storeJson*[T](s: Stream; a: Storage[T]) =
-   s.write "["
-   var comma = false
-   for i in 0 ..< a.len:
-      if comma: s.write ","
-      else: comma = true
-      s.write "["
-      storeJson(s, a.packedToSparse[i])
-      s.write ","
-      storeJson(s, a.packed[i])
-      s.write "]"
-   s.write "]"
-
-proc initFromJson*[T](dst: var Storage[T]; p: var JsonParser) =
-   eat(p, tkBracketLe)
-   while p.tok != tkBracketRi:
-      eat(p, tkBracketLe)
-      var e: Entity
-      initFromJson(e, p)
-      eat(p, tkComma)
-      var val: T
-      initFromJson(val, p)
-      dst[e] = val
-      eat(p, tkBracketRi)
-      if p.tok != tkComma: break
-      discard getTok(p)
-   eat(p, tkBracketRi)

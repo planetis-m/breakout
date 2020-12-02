@@ -1,30 +1,10 @@
 import
   game_types, registry, storage, sdl_private, vmath,
-  std/[parsejson, streams], eminim, fusion/smartptrs
+  std/[parsejson, streams], eminim, eminim/jsmartptrs, fusion/smartptrs
 
-proc storeJson*[T](s: Stream; o: UniquePtr[T]) =
-   ## Generic constructor for JSON data. Creates a new `JObject JsonNode`
-   if o.isNil:
-      s.newJNull()
-   else:
-      storeJson(s, o[])
-
-proc initFromJson*[T](dst: var UniquePtr[T]; p: var JsonParser) =
-   if p.tok == tkNull:
-      reset(dst)
-      discard getTok(p)
-   elif p.tok == tkCurlyLe:
-      var tmp: T
-      initFromJson(tmp, p)
-      dst = newUniquePtr(tmp)
-   else:
-      raiseParseErr(p, "object or null")
-
+proc storeJson*(s: Stream; h: HasComponent) = storeJson(s, int(h))
 proc storeJson*(s: Stream; a: Rad) = storeJson(s, float32(a))
 proc initFromJson*(dst: var Rad; p: var JsonParser) = initFromJson(float32(dst), p)
-#proc storeJson*(s: Stream; o: set[HasComponent]) = storeJson(s, cast[int16](o))
-#proc initFromJson*(dst: var set[HasComponent]; p: var JsonParser) = initFromJson(cast[var int16](dst), p)
-
 proc storeJson*(s: Stream; p: Point2) = storeJson(s, Vec2(p))
 proc storeJson*(s: Stream; v: UnitVec2) = storeJson(s, Vec2(v))
 proc initFromJson*(dst: var Point2; p: var JsonParser) = initFromJson(Vec2(dst), p)
@@ -36,6 +16,34 @@ proc storeJson*(s: Stream; o: SdlContext) = discard
 proc initFromJson*(dst: var Window; p: var JsonParser) = discard
 proc initFromJson*(dst: var Renderer; p: var JsonParser) = discard
 proc initFromJson*(dst: var SdlContext; p: var JsonParser) = discard
+
+proc storeJson*[T](s: Stream; a: Storage[T]) =
+   s.write "["
+   var comma = false
+   for e, v in a.pairs:
+      if comma: s.write ","
+      else: comma = true
+      s.write "["
+      storeJson(s, e)
+      s.write ","
+      storeJson(s, v)
+      s.write "]"
+   s.write "]"
+
+proc initFromJson*[T](dst: var Storage[T]; p: var JsonParser) =
+   eat(p, tkBracketLe)
+   while p.tok != tkBracketRi:
+      eat(p, tkBracketLe)
+      var e: Entity
+      initFromJson(e, p)
+      eat(p, tkComma)
+      var v: T
+      initFromJson(v, p)
+      dst[e] = v
+      eat(p, tkBracketRi)
+      if p.tok != tkComma: break
+      discard getTok(p)
+   eat(p, tkBracketRi)
 
 type
    SomeComponent = Collide|Draw2d|Fade|Hierarchy|Move|Previous|Transform2d
