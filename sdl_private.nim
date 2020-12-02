@@ -19,6 +19,17 @@ proc `=destroy`(context: var SdlContext) =
    if isSdlContextAlive:
       sdl2.quit()
       isSdlContextAlive = false
+proc `=copy`(context: var SdlContext; original: SdlContext) {.error.}
+
+proc `=destroy`(renderer: var Renderer) =
+   if renderer.impl != nil:
+      destroy(renderer.impl)
+proc `=copy`(renderer: var Renderer; original: Renderer) {.error.}
+
+proc `=destroy`(window: var Window) =
+   if window.impl != nil:
+      destroy(window.impl)
+proc `=copy`(window: var Window; original: Window) {.error.}
 
 proc sdlInit*(flags: cint): SdlContext =
    if isSdlContextAlive:
@@ -32,22 +43,13 @@ proc sdlInit*(flags: cint): SdlContext =
       else:
          raise newException(SdlException, $getError())
 
-proc `=destroy`(renderer: var Renderer) =
-   if renderer.impl != nil:
-      destroy(renderer.impl)
-proc `=`(renderer: var Renderer; original: Renderer) {.error.}
-
-proc `=destroy`(window: var Window) =
-   if window.impl != nil:
-      destroy(window.impl)
-proc `=`(window: var Window; original: Window) {.error.}
-
 proc newWindow*(title: string; x, y, w, h: cint; flags: uint32): Window =
    let impl = createWindow(title, x, y, w, h, flags)
    if impl != nil:
       result = Window(impl: impl)
    else:
       raise newException(SdlException, $getError())
+
 proc newRenderer*(window: Window; index: cint; flags: cint): Renderer =
    let impl = createRenderer(window.impl, index, flags)
    if impl != nil:

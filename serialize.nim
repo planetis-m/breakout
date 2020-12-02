@@ -22,8 +22,8 @@ proc initFromJson*[T](dst: var UniquePtr[T]; p: var JsonParser) =
 
 proc storeJson*(s: Stream; a: Rad) = storeJson(s, float32(a))
 proc initFromJson*(dst: var Rad; p: var JsonParser) = initFromJson(float32(dst), p)
-proc storeJson*(s: Stream; o: set[HasComponent]) = storeJson(s, cast[int](o))
-proc initFromJson*(dst: var set[HasComponent]; p: var JsonParser) = initFromJson(cast[var int](dst), p)
+#proc storeJson*(s: Stream; o: set[HasComponent]) = storeJson(s, cast[int16](o))
+#proc initFromJson*(dst: var set[HasComponent]; p: var JsonParser) = initFromJson(cast[var int16](dst), p)
 
 proc storeJson*(s: Stream; p: Point2) = storeJson(s, Vec2(p))
 proc storeJson*(s: Stream; v: UnitVec2) = storeJson(s, Vec2(v))
@@ -89,10 +89,10 @@ proc save*(game: Game) =
    let fs = newFileStream("save1.json", fmWrite)
    if fs != nil:
       storeJson(fs, game)
-   fs.close()
+      fs.close()
 
 proc load*(game: var Game) =
    let fs = newFileStream("save1.json")
    if fs != nil:
       loadJson(fs, game)
-   fs.close()
+      fs.close()
