@@ -1,3 +1,5 @@
+import eminim, std/[streams, parsejson]
+
 type
    EntityImpl* = uint16
    Entity* = distinct EntityImpl
@@ -58,3 +60,29 @@ proc delete*(r: var Registry; entity: Entity) =
       # lengthens the implicit list of next entities
       r.data[i] = toEntity(r.next.EntityImpl, entity.version + 1)
       r.next = Entity(i)
+
+proc storeJson*(s: Stream; e: Entity) = storeJson(s, int(e))
+proc storeJson*(s: Stream; e: EntityImpl) = storeJson(s, int(e))
+proc initFromJson*(dst: var Entity; p: var JsonParser) = initFromJson(EntityImpl(dst), p)
+proc initFromJson*(dst: var EntityImpl; p: var JsonParser) = initFromJson(dst, p)
+
+proc storeJson*(s: Stream; r: Registry) =
+   s.write "{"
+   escapeJson(s, "len")
+   s.write ":"
+   storeJson(s, r.len)
+   s.write ","
+   escapeJson(s, "next")
+   s.write ":"
+   storeJson(s, r.next)
+   s.write ","
+   escapeJson(s, "data")
+   s.write ":"
+   var comma = false
+   s.write "["
+   for i in 0 ..< r.len:
+      if comma: s.write ","
+      else: comma = true
+      storeJson(s, r.data[i])
+   s.write "]"
+   s.write "}"

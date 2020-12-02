@@ -1,6 +1,6 @@
 import
    std / [random, monotimes], sdl_private,
-   game_types, blueprints, registry, storage, utils,
+   game_types, blueprints, registry, storage, utils, serialize,
    systems / [collide, control_ball, control_brick, control_paddle, draw2d,
       fade, move, shake, transform2d, handle_events]
 
@@ -87,5 +87,6 @@ proc main =
 
    sceneMain(game)
    game.run()
+   save(game)
 
 main()
