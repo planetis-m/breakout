@@ -1,14 +1,11 @@
 import
   game_types, registry, storage, sdl_private, vmath,
   std/[parsejson, streams], eminim, eminim/jsmartptrs, fusion/smartptrs
+from typetraits import distinctBase
 
-proc storeJson*(s: Stream; h: HasComponent) = storeJson(s, int(h))
-proc storeJson*(s: Stream; a: Rad) = storeJson(s, float32(a))
-proc initFromJson*(dst: var Rad; p: var JsonParser) = initFromJson(float32(dst), p)
-proc storeJson*(s: Stream; p: Point2) = storeJson(s, Vec2(p))
-proc storeJson*(s: Stream; v: UnitVec2) = storeJson(s, Vec2(v))
-proc initFromJson*(dst: var Point2; p: var JsonParser) = initFromJson(Vec2(dst), p)
-proc initFromJson*(dst: var UnitVec2; p: var JsonParser) = initFromJson(Vec2(dst), p)
+proc storeJson*[T: distinct](s: Stream; x: T) = storeJson(s, x.distinctBase)
+proc initFromJson[T: distinct](dst: var T; p: var JsonParser) =
+  initFromJson(dst.distinctBase, p)
 # Remove once .skipped custom pragma is implemented
 proc storeJson*(s: Stream; o: Window) = discard
 proc storeJson*(s: Stream; o: Renderer) = discard
