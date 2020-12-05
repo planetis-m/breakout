@@ -49,7 +49,7 @@ proc update(game: var Game) =
    sysTransform2d(game)
    # Post-transform logic
    sysCollide(game)
-   # Increment the tick id
+   # Increment the Game engine tick
    inc(game.tickId)
 
 proc render(game: var Game, intrpl: float32) =

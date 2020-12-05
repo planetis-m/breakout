@@ -17,19 +17,19 @@ proc update(game: var Game, entity: Entity) =
    else:
       game.rmComponent(entity, HasFresh)
 
-   var childId = hierarchy.head
-   while childId != invalidId:
-      template childHierarchy: untyped = game.hierarchy[childId.index]
-
-      game.mixDirty(childId)
-      childId = childHierarchy.next
-
    let local = compose(transform.scale, transform.rotation, transform.translation)
    if parentId ?= hierarchy.parent:
       template parentTransform: untyped = game.transform[parentId.index]
       transform.world = parentTransform.world * local
    else:
       transform.world = local
+
+   var childId = hierarchy.head
+   while childId != invalidId:
+      template childHierarchy: untyped = game.hierarchy[childId.index]
+
+      update(game, childId)
+      childId = childHierarchy.next
 
 proc sysTransform2d*(game: var Game) =
    for entity, has in game.world.pairs:
