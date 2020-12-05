@@ -60,22 +60,9 @@ type
       rotation*: Rad     # local rotation relative to the parent
       scale*: Vec2       # local scale relative to the parent
 
-   Game* = object
-      world*: Storage[set[HasComponent]]
-      entities*: Registry
-      toDelete*: seq[Entity]
-      tickId*: int
-      camera*: Entity
-      isRunning*: bool
-
-      windowWidth*, windowHeight*: int32
-
-      renderer*: Renderer
-      window*: Window
-      sdlContext*: SdlContext
-
-      clearColor*: array[4, uint8]
-      inputState*: array[Input, bool]
+   World* = object
+      signature*: Storage[set[HasComponent]]
+      registry*: Registry
 
       collide*: seq[Collide]
       draw2d*: seq[Draw2d]
@@ -85,3 +72,20 @@ type
       previous*: seq[Previous]
       shake*: UniquePtr[Shake]
       transform*: seq[Transform2d]
+
+   Game* = object
+      world*: World
+
+      windowWidth*, windowHeight*: int32
+      tickId*: int
+      isRunning*: bool
+
+      renderer*: Renderer
+      window*: Window
+      sdlContext*: SdlContext
+
+      toDelete*: seq[Entity]
+      camera*: Entity
+
+      clearColor*: array[4, uint8]
+      inputState*: array[Input, bool]

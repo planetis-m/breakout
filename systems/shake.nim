@@ -3,8 +3,8 @@ import ".." / [game_types, vmath, dsl, registry, storage], fusion / smartptrs, s
 const Query = {HasTransform2d, HasShake}
 
 proc update(game: var Game, entity: Entity) =
-   template transform: untyped = game.transform[entity.index]
-   template shake: untyped = game.shake[]
+   template transform: untyped = game.world.transform[entity.index]
+   template shake: untyped = game.world.shake[]
 
    if shake.duration > 0.0:
       shake.duration -= 0.01
@@ -15,7 +15,7 @@ proc update(game: var Game, entity: Entity) =
       game.clearColor[1] = rand(255).uint8
       game.clearColor[2] = rand(255).uint8
 
-      game.mixDirty(entity)
+      game.world.mixDirty(entity)
 
       if shake.duration <= 0.0:
          shake.duration = 0.0
@@ -26,6 +26,6 @@ proc update(game: var Game, entity: Entity) =
          game.clearColor[2] = 0
 
 proc sysShake*(game: var Game) =
-   let has = game.world[game.camera]
+   let has = game.world.signature[game.camera]
    if has * Query == Query:
       update(game, game.camera)

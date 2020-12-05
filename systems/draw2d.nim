@@ -4,9 +4,9 @@ const Query = {HasDraw2d, HasPrevious, HasTransform2d}
 const Tolerance = 0.75'f32
 
 proc update(game: var Game, entity: Entity, intrpl: float32) =
-   template transform: untyped = game.transform[entity.index]
-   template previous: untyped = game.previous[entity.index]
-   template draw2d: untyped = game.draw2d[entity.index]
+   template transform: untyped = game.world.transform[entity.index]
+   template previous: untyped = game.world.previous[entity.index]
+   template draw2d: untyped = game.world.draw2d[entity.index]
 
    let position = lerp(previous.position, transform.world.origin, intrpl)
    let rotation = lerp(previous.rotation, transform.world.rotation, intrpl)
@@ -31,6 +31,6 @@ proc update(game: var Game, entity: Entity, intrpl: float32) =
 proc sysDraw2d*(game: var Game, intrpl: float32) =
    game.renderer.impl.setDrawColor(game.clearColor[0], game.clearColor[1], game.clearColor[2])
    game.renderer.impl.clear()
-   for entity, has in game.world.pairs:
+   for entity, has in game.world.signature.pairs:
       if has * Query == Query:
          update(game, entity, intrpl)

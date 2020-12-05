@@ -1,8 +1,8 @@
 import random, math, dsl, vmath, game_types, registry
 
-proc getBall*(game: var Game, parent = game.camera, x, y: float32): Entity =
+proc getBall*(world: var World, parent: Entity, x, y: float32): Entity =
    let angle = Pi + rand(1.0) * Pi
-   result = game.addBlueprint:
+   result = world.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       with:
@@ -11,8 +11,8 @@ proc getBall*(game: var Game, parent = game.camera, x, y: float32): Entity =
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
          Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14.0)
 
-proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, height: int32): Entity =
-   result = game.addBlueprint:
+proc getBrick*(world: var World, parent: Entity, x, y: float32, width, height: int32): Entity =
+   result = world.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       with:
@@ -21,11 +21,11 @@ proc getBrick*(game: var Game, parent = game.camera, x, y: float32, width, heigh
          Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255])
          Fade(step: 0.0)
 
-proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity =
+proc getExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
    let explosions = 32
    let step = (Pi * 2.0) / explosions.float
    let fadeStep = 0.05
-   result = game.addBlueprint:
+   result = world.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       children:
@@ -36,8 +36,8 @@ proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity 
                   Fade(step: fadeStep)
                   Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 20.0)
 
-proc getPaddle*(game: var Game, parent = game.camera, x, y: float32): Entity =
-   result = game.addBlueprint:
+proc getPaddle*(world: var World, parent: Entity, x, y: float32): Entity =
+   result = world.addBlueprint:
       translation = Vec2(x: x, y: y)
       parent = parent
       with:
@@ -57,7 +57,7 @@ proc sceneMain*(game: var Game) =
    let startingX = (game.windowWidth - gridWidth) div 2
    let startingY = 50
 
-   game.camera = game.addBlueprint:
+   game.camera = game.world.addBlueprint:
       with(Shake(duration: 0.0, strength: 10.0))
       children:
          entity getPaddle(float32(game.windowWidth / 2),

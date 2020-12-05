@@ -3,9 +3,9 @@ import ".." / [game_types, vmath, blueprints, dsl, registry, storage], fusion/sm
 const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}
 
 proc update(game: var Game, entity: Entity) =
-   template collide: untyped = game.collide[entity.index]
-   template move: untyped = game.move[entity.index]
-   template transform: untyped = game.transform[entity.index]
+   template collide: untyped = game.world.collide[entity.index]
+   template move: untyped = game.world.move[entity.index]
+   template transform: untyped = game.world.transform[entity.index]
 
    if collide.min.x < 0.0:
       transform.translation.x = collide.size.x / 2.0
@@ -26,8 +26,8 @@ proc update(game: var Game, entity: Entity) =
    if collide.collision.other != invalidId:
       let collision = collide.collision
 
-      if HasShake in game.world[game.camera]:
-         template cameraShake: untyped = game.shake[]
+      if HasShake in game.world.signature[game.camera]:
+         template cameraShake: untyped = game.world.shake[]
          cameraShake.duration = 0.1
 
       if collision.hit.x != 0.0:
@@ -38,16 +38,16 @@ proc update(game: var Game, entity: Entity) =
          transform.translation.y += collision.hit.y
          move.direction.y *= -1.0
 
-      discard game.getExplosion(game.camera, transform.translation.x,
+      discard game.world.getExplosion(game.camera, transform.translation.x,
             transform.translation.y)
 
-   let ballFade = game.addBlueprint:
+   let ballFade = game.world.addBlueprint:
       translation = transform.translation
       with:
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
          Fade(step: 0.05)
 
 proc sysControlBall*(game: var Game) =
-   for entity, has in game.world.pairs:
+   for entity, has in game.world.signature.pairs:
       if has * Query == Query:
          update(game, entity)

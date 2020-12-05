@@ -6,13 +6,13 @@ from typetraits import distinctBase
 proc storeToBin*[T: distinct](s: Stream; x: T) = storeToBin(s, x.distinctBase)
 proc initFromBin[T: distinct](dst: var T; s: Stream) =
   initFromBin(dst.distinctBase, s)
-# Remove once .skipped custom pragma is implemented
-proc storeToBin*(s: Stream; o: Window) = discard
-proc storeToBin*(s: Stream; o: Renderer) = discard
-proc storeToBin*(s: Stream; o: SdlContext) = discard
-proc initFromBin*(dst: var Window; s: Stream) = discard
-proc initFromBin*(dst: var Renderer; s: Stream) = discard
-proc initFromBin*(dst: var SdlContext; s: Stream) = discard
+
+#proc storeToBin*(s: Stream; o: Window) = discard
+#proc storeToBin*(s: Stream; o: Renderer) = discard
+#proc storeToBin*(s: Stream; o: SdlContext) = discard
+#proc initFromBin*(dst: var Window; s: Stream) = discard
+#proc initFromBin*(dst: var Renderer; s: Stream) = discard
+#proc initFromBin*(dst: var SdlContext; s: Stream) = discard
 
 proc storeToBin*[T](s: Stream; a: Storage[T]) =
    write(s, int64(a.len))
@@ -30,17 +30,17 @@ proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
 type
    SomeComponent = Collide|Draw2d|Fade|Hierarchy|Move|Previous|Transform2d
 
-proc storeToBin*(s: Stream; g: Game) =
+proc storeToBin*(s: Stream; w: World) =
    const components = [HasCollide, HasDraw2d, HasFade, HasHierarchy,
                        HasMove, HasPrevious, HasTransform2d]
    var i = 0
-   for v in g.fields:
+   for v in w.fields:
       when v is seq[SomeComponent]:
          var len = 0
-         for _, has in g.world.pairs:
+         for _, has in w.signature.pairs:
             if components[i] in has: inc(len)
          storeToBin(s, int64(len))
-         for entity, has in g.world.pairs:
+         for entity, has in w.signature.pairs:
             if components[i] in has:
                storeToBin(s, entity.index)
                storeToBin(s, v[entity.index])
@@ -59,9 +59,9 @@ proc initFromBin*[T: SomeComponent](dst: var seq[T]; s: Stream) =
 proc save*(game: Game) =
    let fs = newFileStream("save1.bin", fmWrite)
    if fs != nil:
-      try: storeBin(fs, game) finally: fs.close()
+      try: storeBin(fs, game.world) finally: fs.close()
 
 proc load*(game: var Game) =
    let fs = newFileStream("save1.bin")
    if fs != nil:
-      try: loadBin(fs, game) finally: fs.close()
+      try: loadBin(fs, game.world) finally: fs.close()

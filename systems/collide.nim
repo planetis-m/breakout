@@ -27,10 +27,10 @@ proc penetrateAabb(a, b: Collide): Vec2 =
 
 proc sysCollide*(game: var Game) =
    var allColliders: seq[Entity]
-   for colliderId, has in game.world.pairs:
+   for colliderId, has in game.world.signature.pairs:
       if has * Query == Query:
-         template transform: untyped = game.transform[colliderId.index]
-         template collider: untyped = game.collide[colliderId.index]
+         template transform: untyped = game.world.transform[colliderId.index]
+         template collider: untyped = game.world.collide[colliderId.index]
 
          collider.collision.other = invalidId
          computeAabb(transform, collider)
@@ -38,11 +38,11 @@ proc sysCollide*(game: var Game) =
 
    for i in 0 ..< allColliders.len:
       let colliderId = allColliders[i]
-      template collider: untyped = game.collide[colliderId.index]
+      template collider: untyped = game.world.collide[colliderId.index]
 
       for j in i + 1 ..< allColliders.len:
          let otherId = allColliders[j]
-         template other: untyped = game.collide[otherId.index]
+         template other: untyped = game.world.collide[otherId.index]
 
          if intersectAabb(collider, other):
             let hit = penetrateAabb(collider, other)

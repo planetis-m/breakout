@@ -11,19 +11,9 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
    let renderer = newRenderer(window, -1, Renderer_Accelerated or Renderer_PresentVsync)
 
-   result = Game(
-      world: initStorage[set[HasComponent]](maxEntities),
-      entities: initRegistry(),
-      isRunning: true,
-
-      windowWidth: windowWidth,
-      windowHeight: windowHeight,
-
-      renderer: renderer,
-      window: window,
-      sdlContext: sdlContext,
-
-      clearColor: [0'u8, 0, 0, 255],
+   let world = World(
+      signature: initStorage[set[HasComponent]](maxEntities),
+      registry: initRegistry(),
 
       collide: newSeq[Collide](maxEntities),
       draw2d: newSeq[Draw2d](maxEntities),
@@ -32,6 +22,19 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       move: newSeq[Move](maxEntities),
       previous: newSeq[Previous](maxEntities),
       transform: newSeq[Transform2d](maxEntities))
+
+   result = Game(
+      world: world,
+
+      windowWidth: windowWidth,
+      windowHeight: windowHeight,
+      isRunning: true,
+
+      renderer: renderer,
+      window: window,
+      sdlContext: sdlContext,
+
+      clearColor: [0'u8, 0, 0, 255])
 
 proc update(game: var Game) =
    # The Game engine that consist of these systems
