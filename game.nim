@@ -33,22 +33,22 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
       previous: newSeq[Previous](maxEntities),
       transform: newSeq[Transform2d](maxEntities))
 
-proc update(game: var Game) =
+proc update(game: var Game, id: int64) =
    # The Game engine that consist of these systems
    # Player input and AI
-   sysControlBall(game)
-   sysControlBrick(game)
-   sysControlPaddle(game)
+   sysControlBall(game, id)
+   sysControlBrick(game, id)
+   sysControlPaddle(game, id)
    # Game logic
-   sysShake(game)
-   sysFade(game)
+   sysShake(game, id)
+   sysFade(game, id)
    # Garbage collection
-   cleanup(game)
+   cleanup(game, id)
    # Animation and movement
-   sysMove(game)
-   sysTransform2d(game)
+   sysMove(game, id)
+   sysTransform2d(game, id)
    # Post-transform logic
-   sysCollide(game)
+   sysCollide(game, id)
 
 proc render(game: var Game, intrpl: float32) =
    sysDraw2d(game, intrpl)
@@ -74,7 +74,7 @@ proc run(game: var Game) =
 
       var framesSkipped = 0
       while accumulator >= skippedTicks and framesSkipped < maxFramesSkipped:
-         game.update()
+         game.update(accumulator)
          accumulator -= skippedTicks
          framesSkipped.inc
 
@@ -82,7 +82,7 @@ proc run(game: var Game) =
          game.render(accumulator.float32 / skippedTicks.float32)
 
 proc main =
-   randomize()
+   randomize(12093412)
    var game = initGame(740, 555)
 
    sceneMain(game)

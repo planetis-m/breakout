@@ -31,6 +31,7 @@ template get(s, entity) =
    let entityIndex = entity.index
    let packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex == invalidId.EntityImpl:
+      echo entityIndex
       raise newException(KeyError, "Entity not in Storage")
    result = s.packed[packedIndex]
 

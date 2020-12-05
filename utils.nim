@@ -57,12 +57,15 @@ proc delete*(game: var Game, entity: Entity) =
 
    game.toDelete.add(entity)
 
-proc cleanup*(game: var Game) =
+proc cleanup*(game: var Game, id: int64) =
    for entity in game.toDelete.items:
       game.world.delete(entity)
       game.entities.delete(entity)
       if (let f = find(game.dirty, entity); f >= 0):
+         if entity.index == 192: echo "here"
          game.dirty.del(f)
+      if entity.index == 192:
+         echo "cleanup ", id, " ", isValid(entity, game.entities), " ", entity in game.dirty
    game.toDelete.shrink(0)
 
 proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =

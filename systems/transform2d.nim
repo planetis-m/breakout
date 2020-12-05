@@ -1,10 +1,13 @@
-import ".." / [game_types, vmath, mixins, utils, registry, storage]
+import ".." / [game_types, vmath, mixins, utils, registry, storage], std/sugar
 
-proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
+proc update(game: var Game, entity: Entity, dirty: var seq[Entity], id: int64) =
    template `?=`(name, value): bool = (let name = value; name != invalidId)
    template transform: untyped = game.transform[entity.index]
    template hierarchy: untyped = game.hierarchy[entity.index]
 
+   if entity.index == 192:
+      echo "sysTransform2d.update ", id, " ", isValid(entity, game.entities), " ", entity.version
+      echo entity in game.world
    if HasFresh notin game.world[entity]:
       let position = transform.world.origin
       let rotation = transform.world.rotation
@@ -19,7 +22,7 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
    while childId != invalidId:
       template childHierarchy: untyped = game.hierarchy[childId.index]
       if HasTransform2d notin game.world[childId]:
-        echo isValid(childId, game.entities), " ", game.world[childId]
+        echo "sysTransform.addChildren ", isValid(childId, game.entities), " ", game.world[childId]
       dirty.add(childId)
       childId = childHierarchy.next
 
@@ -30,17 +33,26 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
    else:
       transform.world = local
 
-proc sysTransform2d*(game: var Game) =
-   template hierarchy: untyped = game.hierarchy[entity.index]
+proc selectionSort(s: var openarray[Entity];
+      pred: proc(x, y: Entity): bool {.closure.}) =
+   for i in 0 ..< len(s):
+      var minIndex = i
+      var minVal = s[i]
+      # searches for the smallest of all following items
+      for j in i + 1 ..< len(s):
+         if pred(minVal, s[j]):
+            minIndex = j
+            minVal = s[j]
+      swap(s[i], s[minIndex])
+
+proc sysTransform2d*(game: var Game, id: int64) =
+   template hierarchy: untyped = game.hierarchy[x.index]
 
    var dirty: seq[Entity]
-   for i in 0 .. game.dirty.high:
-      var entity = game.dirty[i]
-      var minIndex = i
-      for j in i + 1 .. game.dirty.high:
-         if hierarchy.parent == game.dirty[j]:
-            minIndex = j
-            entity = game.dirty[j]
-      game.dirty[minIndex] = game.dirty[i]
-      update(game, entity, dirty)
+   selectionSort(game.dirty, (x, y) => hierarchy.parent == y)
+   for entity in game.dirty:
+      update(game, entity, dirty, id)
+      if entity.index == 192:
+         echo "sysTransform2d.sort ", id, " ", game.draw2d[entity.index].color
+         echo game.world[entity]
    game.dirty = dirty

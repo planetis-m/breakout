@@ -25,7 +25,7 @@ proc penetrateAabb(a, b: Collide): Vec2 =
    else:
       result = vec2(0, penetrationY * sgn(distanceY).float32)
 
-proc sysCollide*(game: var Game) =
+proc sysCollide*(game: var Game, id: int64) =
    var allColliders: seq[Entity]
    for colliderId, has in game.world.pairs:
       if has * Query == Query:

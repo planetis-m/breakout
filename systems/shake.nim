@@ -25,7 +25,7 @@ proc update(game: var Game, entity: Entity) =
          game.clearColor[1] = 0
          game.clearColor[2] = 0
 
-proc sysShake*(game: var Game) =
+proc sysShake*(game: var Game, id: int64) =
    let has = game.world[game.camera]
    if has * Query == Query:
       update(game, game.camera)

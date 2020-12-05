@@ -13,7 +13,7 @@ proc update(game: var Game, entity: Entity) =
          discard game.getBall(game.camera, float32(game.windowWidth / 2),
                float32(game.windowHeight / 2))
 
-proc sysControlBrick*(game: var Game) =
+proc sysControlBrick*(game: var Game, id: int64) =
    for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)
