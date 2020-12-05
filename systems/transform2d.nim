@@ -33,21 +33,20 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity], id: int64) =
    else:
       transform.world = local
 
-proc selectionSort(s: var openarray[Entity]; h: openarray[Hierarchy];
-      pred: proc(x, y: Entity): bool) =
+proc selectionSort(s: var openarray[Entity]; c: openarray[Hierarchy];
+      pred: proc(x: Hierarchy, y: Entity): bool) =
    for i in 0 ..< len(s):
       var minIndex = i
       var minVal = s[i]
       # searches for the smallest of all following items
       for j in i + 1 ..< len(s):
-         if pred(minVal, s[j]):
+         if pred(c[minVal.index], s[j]):
             minIndex = j
             minVal = s[j]
       swap(s[i], s[minIndex])
 
 proc sysTransform2d*(game: var Game, id: int64) =
-   template hierarchy: untyped = h[x.index]
-   selectionSort(game.dirty, game.hierarchy, (x, y) => hierarchy.parent == y)
+   selectionSort(game.dirty, game.hierarchy, (x, y) => x.parent == y)
 
    var dirty: seq[Entity]
    for entity in game.dirty:
