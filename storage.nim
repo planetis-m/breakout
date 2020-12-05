@@ -1,4 +1,4 @@
-import registry, std/algorithm
+import registry, std / algorithm
 
 type
    Storage*[T] = object

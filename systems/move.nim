@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, registry, storage]
+import ".." / [game_types, vmath, dsl, registry, storage]
 
 const Query = {HasTransform2d, HasMove}
 
@@ -10,9 +10,7 @@ proc update(game: var Game, entity: Entity) =
       transform.translation.x += move.direction.x * move.speed
       transform.translation.y += move.direction.y * move.speed
 
-      if entity.index == 192:
-         echo "sysMove ", game.tickId, " ", isValid(entity, game.entities)
-      game.dirty.add(entity)
+      game.mixDirty(entity)
 
 proc sysMove*(game: var Game) =
    for entity, has in game.world.pairs:

@@ -1,4 +1,4 @@
-import ".." / [game_types, utils, registry, storage]
+import ".." / [game_types, utils, dsl, registry, storage]
 
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
@@ -13,9 +13,7 @@ proc update(game: var Game, entity: Entity) =
       transform.scale.x -= fade.step
       transform.scale.y -= fade.step
 
-      if entity.index == 192:
-         echo "sysfade ", game.tickId, " ", isValid(entity, game.entities)
-      game.dirty.add(entity)
+      game.mixDirty(entity)
 
       if transform.scale.x <= 0.0:
          game.delete(entity)
