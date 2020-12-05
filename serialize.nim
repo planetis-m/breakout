@@ -59,11 +59,9 @@ proc initFromBin*[T: SomeComponent](dst: var seq[T]; s: Stream) =
 proc save*(game: Game) =
    let fs = newFileStream("save1.bin", fmWrite)
    if fs != nil:
-      storeBin(fs, game)
-      fs.close()
+      try: storeBin(fs, game) finally: fs.close()
 
 proc load*(game: var Game) =
    let fs = newFileStream("save1.bin")
    if fs != nil:
-      loadBin(fs, game)
-      fs.close()
+      try: loadBin(fs, game) finally: fs.close()
