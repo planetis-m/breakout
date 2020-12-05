@@ -17,6 +17,7 @@ proc contains*[T](s: Storage[T], entity: Entity): bool =
    s.sparseToPacked[entity.index] != invalidId.EntityImpl
 
 proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
+   ## Inserts a `(entity, value)` pair into `s`.
    let entityIndex = entity.index
    var packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex == invalidId.EntityImpl:
@@ -26,17 +27,24 @@ proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
       s.len.inc
    s.packed[packedIndex] = value
 
-proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
-   if entity notin s:
+template get(s, entity) =
+   let entityIndex = entity.index
+   let packedIndex = s.sparseToPacked[entityIndex]
+   if packedIndex == invalidId.EntityImpl:
       raise newException(KeyError, "Entity not in Storage")
-   result = s.packed[s.sparseToPacked[entity.index]]
+   result = s.packed[packedIndex]
 
+proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
+   ## Retrieves the value at `s[entity]`. The value can be modified.
+   ## If `entity` is not in `s`, the `KeyError` exception is raised.
+   get(s, entity)
 proc `[]`*[T](s: Storage[T], entity: Entity): lent T =
-   if entity notin s:
-      raise newException(KeyError, "Entity not in Storage")
-   result = s.packed[s.sparseToPacked[entity.index]]
+   ## Retrieves the value at `s[entity]`.
+   ## If `entity` is not in `s`, the `KeyError` exception is raised.
+   get(s, entity)
 
 proc delete*[T](s: var Storage[T], entity: Entity) =
+   ## Deletes `entity` from sparse set `s`. Does nothing if the key does not exist.
    let entityIndex = entity.index
    let packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex != invalidId.EntityImpl:
@@ -44,7 +52,7 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
       let lastEntity = s.packedToSparse[lastIndex]
       s.sparseToPacked[lastEntity.index] = packedIndex
       s.sparseToPacked[entityIndex] = invalidId.EntityImpl
-      s.packed[packedIndex] = s.packed[lastIndex]
+      s.packed[packedIndex] = move(s.packed[lastIndex])
       s.packed[lastIndex] = default(T)
       s.packedToSparse[packedIndex] = s.packedToSparse[lastIndex]
       s.packedToSparse[lastIndex] = invalidId
