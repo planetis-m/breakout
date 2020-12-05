@@ -2,7 +2,7 @@ import ".." / [game_types, vmath, registry, storage]
 
 const Query = {HasTransform2d, HasMove}
 
-proc update(game: var Game, entity: Entity, id: int64) =
+proc update(game: var Game, entity: Entity) =
    template transform: untyped = game.transform[entity.index]
    template move: untyped = game.move[entity.index]
 
@@ -11,10 +11,10 @@ proc update(game: var Game, entity: Entity, id: int64) =
       transform.translation.y += move.direction.y * move.speed
 
       if entity.index == 192:
-         echo "sysMove ", id, " ", isValid(entity, game.entities)
+         echo "sysMove ", game.tickId, " ", isValid(entity, game.entities)
       game.dirty.add(entity)
 
-proc sysMove*(game: var Game, id: int64) =
+proc sysMove*(game: var Game) =
    for entity, has in game.world.pairs:
       if has * Query == Query:
-         update(game, entity, id)
+         update(game, entity)

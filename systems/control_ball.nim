@@ -47,7 +47,7 @@ proc update(game: var Game, entity: Entity) =
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
          Fade(step: 0.05)
 
-proc sysControlBall*(game: var Game, id: int64) =
+proc sysControlBall*(game: var Game) =
    for entity, has in game.world.pairs:
       if has * Query == Query:
          update(game, entity)

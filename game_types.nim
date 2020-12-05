@@ -64,6 +64,7 @@ type
       entities*: Registry
       toDelete*: seq[Entity]
       dirty*: seq[Entity]
+      tickId*: int
       camera*: Entity
       isRunning*: bool
 
