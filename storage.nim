@@ -8,13 +8,13 @@ type
       packed: seq[T]
 
 proc initStorage*[T](denseCap: Natural): Storage[T] =
-   result.packed = newSeq[T](denseCap)
+   result = Storage[T](packed: newSeq[T](denseCap))
    result.sparseToPacked.fill(invalidId.EntityImpl)
    result.packedToSparse.fill(invalidId)
 
 proc contains*[T](s: Storage[T], entity: Entity): bool =
    # Returns true if the sparse is registered to a dense index.
-   result = s.sparseToPacked[entity.index] != invalidId.EntityImpl
+   s.sparseToPacked[entity.index] != invalidId.EntityImpl
 
 proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
    let entityIndex = entity.index
@@ -27,17 +27,12 @@ proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
    s.packed[packedIndex] = value
 
 proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
-   let entityIndex = entity.index
-   var packedIndex = s.sparseToPacked[entityIndex]
-   if packedIndex == invalidId.EntityImpl:
-      packedIndex = s.len.EntityImpl
-      s.packedToSparse[packedIndex] = entity
-      s.sparseToPacked[entityIndex] = packedIndex
-      s.len.inc
-   result = s.packed[packedIndex]
+   if entity notin s:
+      raise newException(KeyError, "Entity not in Storage")
+   result = s.packed[s.sparseToPacked[entity.index]]
 
 proc `[]`*[T](s: Storage[T], entity: Entity): lent T =
-   if not s.contains(entity): # should instead return default(T)
+   if entity notin s:
       raise newException(KeyError, "Entity not in Storage")
    result = s.packed[s.sparseToPacked[entity.index]]
 
@@ -47,8 +42,8 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
    if packedIndex != invalidId.EntityImpl:
       let lastIndex = s.len - 1
       let lastEntity = s.packedToSparse[lastIndex]
-      s.sparseToPacked[entityIndex] = invalidId.EntityImpl
       s.sparseToPacked[lastEntity.index] = packedIndex
+      s.sparseToPacked[entityIndex] = invalidId.EntityImpl
       s.packed[packedIndex] = s.packed[lastIndex]
       s.packed[lastIndex] = default(T)
       s.packedToSparse[packedIndex] = s.packedToSparse[lastIndex]

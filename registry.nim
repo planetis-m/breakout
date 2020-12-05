@@ -1,4 +1,4 @@
-import eminim, std/[streams, parsejson]
+import bingod, std/streams
 
 type
    EntityImpl* = uint16
@@ -29,7 +29,7 @@ proc version*(self: Entity): EntityImpl =
 proc initRegistry*(): Registry =
    result = Registry(next: invalidId)
 
-proc isValid*(r: Registry; entity: Entity): bool =
+proc isValid*(entity: Entity; r: Registry): bool =
    ## Checks if an entity identifier refers to a valid entity.
    let i = entity.index
    result = i.int < r.len and r.data[i] == entity
@@ -61,28 +61,17 @@ proc delete*(r: var Registry; entity: Entity) =
       r.data[i] = toEntity(r.next.EntityImpl, entity.version + 1)
       r.next = Entity(i)
 
-proc storeJson*(s: Stream; e: Entity) = storeJson(s, int(e))
-proc storeJson*(s: Stream; e: EntityImpl) = storeJson(s, int(e))
-proc initFromJson*(dst: var Entity; p: var JsonParser) = initFromJson(EntityImpl(dst), p)
-proc initFromJson*(dst: var EntityImpl; p: var JsonParser) = initFromJson(dst, p)
+proc storeToBin*(s: Stream; e: Entity) = storeToBin(s, EntityImpl(e))
+proc initFromBin*(dst: var Entity; s: Stream) = initFromBin(EntityImpl(dst), s)
 
-proc storeJson*(s: Stream; r: Registry) =
-   s.write "{"
-   escapeJson(s, "len")
-   s.write ":"
-   storeJson(s, r.len)
-   s.write ","
-   escapeJson(s, "next")
-   s.write ":"
-   storeJson(s, r.next)
-   s.write ","
-   escapeJson(s, "data")
-   s.write ":"
-   var comma = false
-   s.write "["
+proc storeToBin*(s: Stream; r: Registry) =
+   storeToBin(s, r.len)
+   storeToBin(s, r.next)
    for i in 0 ..< r.len:
-      if comma: s.write ","
-      else: comma = true
-      storeJson(s, r.data[i])
-   s.write "]"
-   s.write "}"
+      storeToBin(s, r.data[i])
+
+proc initFromBin*(dst: var Registry; s: Stream) =
+   initFromBin(dst.len, s)
+   initFromBin(dst.next, s)
+   for i in 0 ..< dst.len:
+      initFromBin(dst.data[i], s)

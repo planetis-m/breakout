@@ -1,103 +1,69 @@
 import
   game_types, registry, storage, sdl_private, vmath,
-  std/[parsejson, streams], eminim, eminim/jsmartptrs, fusion/smartptrs
+  std/streams, bingod, bingod/marshal_smartptrs, fusion/smartptrs
 from typetraits import distinctBase
 
-proc storeJson*[T: distinct](s: Stream; x: T) = storeJson(s, x.distinctBase)
-proc initFromJson[T: distinct](dst: var T; p: var JsonParser) =
-  initFromJson(dst.distinctBase, p)
+proc storeToBin*[T: distinct](s: Stream; x: T) = storeToBin(s, x.distinctBase)
+proc initFromBin[T: distinct](dst: var T; s: Stream) =
+  initFromBin(dst.distinctBase, s)
 # Remove once .skipped custom pragma is implemented
-proc storeJson*(s: Stream; o: Window) = discard
-proc storeJson*(s: Stream; o: Renderer) = discard
-proc storeJson*(s: Stream; o: SdlContext) = discard
-proc initFromJson*(dst: var Window; p: var JsonParser) = discard
-proc initFromJson*(dst: var Renderer; p: var JsonParser) = discard
-proc initFromJson*(dst: var SdlContext; p: var JsonParser) = discard
+proc storeToBin*(s: Stream; o: Window) = discard
+proc storeToBin*(s: Stream; o: Renderer) = discard
+proc storeToBin*(s: Stream; o: SdlContext) = discard
+proc initFromBin*(dst: var Window; s: Stream) = discard
+proc initFromBin*(dst: var Renderer; s: Stream) = discard
+proc initFromBin*(dst: var SdlContext; s: Stream) = discard
 
-proc storeJson*[T](s: Stream; a: Storage[T]) =
-   s.write "["
-   var comma = false
+proc storeToBin*[T](s: Stream; a: Storage[T]) =
+   write(s, int64(a.len))
    for e, v in a.pairs:
-      if comma: s.write ","
-      else: comma = true
-      s.write "["
-      storeJson(s, e)
-      s.write ","
-      storeJson(s, v)
-      s.write "]"
-   s.write "]"
+      storeToBin(s, e)
+      storeToBin(s, v)
 
-proc initFromJson*[T](dst: var Storage[T]; p: var JsonParser) =
-   eat(p, tkBracketLe)
-   while p.tok != tkBracketRi:
-      eat(p, tkBracketLe)
+proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
+   let len = s.readInt64()
+   for i in 0 ..< len:
       var e: Entity
-      initFromJson(e, p)
-      eat(p, tkComma)
-      var v: T
-      initFromJson(v, p)
-      dst[e] = v
-      eat(p, tkBracketRi)
-      if p.tok != tkComma: break
-      discard getTok(p)
-   eat(p, tkBracketRi)
+      initFromBin(e, s)
+      initFromBin(dst[e], s)
 
 type
    SomeComponent = Collide|Draw2d|Fade|Hierarchy|Move|Previous|Transform2d
 
-proc storeJson*(s: Stream; g: Game) =
+proc storeToBin*(s: Stream; g: Game) =
    const components = [HasCollide, HasDraw2d, HasFade, HasHierarchy,
                        HasMove, HasPrevious, HasTransform2d]
    var i = 0
-   var comma = false
-   s.write "{"
-   for k, v in g.fieldPairs:
-      if comma: s.write ","
-      else: comma = true
-      escapeJson(s, k)
-      s.write ":"
+   for v in g.fields:
       when v is seq[SomeComponent]:
-         comma = false
-         s.write "["
+         var len = 0
+         for _, has in g.world.pairs:
+            if components[i] in has: inc(len)
+         storeToBin(s, int64(len))
          for entity, has in g.world.pairs:
             if components[i] in has:
-               if comma: s.write ","
-               else: comma = true
-               s.write "["
-               storeJson(s, entity.index)
-               s.write ","
-               storeJson(s, v[entity.index])
-               s.write "]"
-         s.write "]"
+               storeToBin(s, entity.index)
+               storeToBin(s, v[entity.index])
          inc(i)
       else:
-         storeJson(s, v)
-   s.write "}"
+         storeToBin(s, v)
 
-proc initFromJson*[T: SomeComponent](dst: var seq[T]; p: var JsonParser) =
+proc initFromBin*[T: SomeComponent](dst: var seq[T]; s: Stream) =
    dst = newSeq[T](maxEntities)
-   eat(p, tkBracketLe)
-   while p.tok != tkBracketRi:
-      eat(p, tkBracketLe)
-      var i = 0
-      initFromJson(i, p)
-      eat(p, tkComma)
-      var val: T
-      initFromJson(val, p)
-      dst[i] = val
-      eat(p, tkBracketRi)
-      if p.tok != tkComma: break
-      discard getTok(p)
-   eat(p, tkBracketRi)
+   let len = readInt64(s)
+   for i in 0 ..< len:
+      var j = 0
+      initFromBin(j, s)
+      initFromBin(dst[j], s)
 
 proc save*(game: Game) =
-   let fs = newFileStream("save1.json", fmWrite)
+   let fs = newFileStream("save1.bin", fmWrite)
    if fs != nil:
-      storeJson(fs, game)
+      storeBin(fs, game)
       fs.close()
 
 proc load*(game: var Game) =
-   let fs = newFileStream("save1.json")
+   let fs = newFileStream("save1.bin")
    if fs != nil:
-      loadJson(fs, game)
+      loadBin(fs, game)
       fs.close()

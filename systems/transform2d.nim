@@ -18,7 +18,8 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity]) =
    var childId = hierarchy.head
    while childId != invalidId:
       template childHierarchy: untyped = game.hierarchy[childId.index]
-
+      if HasTransform2d notin game.world[childId]:
+        echo isValid(childId, game.entities), " ", game.world[childId]
       dirty.add(childId)
       childId = childHierarchy.next
 

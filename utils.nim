@@ -60,7 +60,10 @@ proc cleanup*(game: var Game) =
    for entity in game.toDelete.items:
       game.world.delete(entity)
       game.entities.delete(entity)
-
+      if (let f = find(game.dirty, entity); f >= 0):
+         game.dirty.delete(f)
+      if entity in game.world:
+        echo entity.index, " ", entity.version
    game.toDelete.shrink(0)
 
 proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =
