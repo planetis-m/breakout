@@ -33,8 +33,8 @@ proc update(game: var Game, entity: Entity, dirty: var seq[Entity], id: int64) =
    else:
       transform.world = local
 
-proc selectionSort(s: var openarray[Entity];
-      pred: proc(x, y: Entity): bool {.closure.}) =
+proc selectionSort(s: var openarray[Entity]; h: openarray[Hierarchy];
+      pred: proc(x, y: Entity): bool) =
    for i in 0 ..< len(s):
       var minIndex = i
       var minVal = s[i]
@@ -46,10 +46,10 @@ proc selectionSort(s: var openarray[Entity];
       swap(s[i], s[minIndex])
 
 proc sysTransform2d*(game: var Game, id: int64) =
-   template hierarchy: untyped = game.hierarchy[x.index]
+   template hierarchy: untyped = h[x.index]
+   selectionSort(game.dirty, game.hierarchy, (x, y) => hierarchy.parent == y)
 
    var dirty: seq[Entity]
-   selectionSort(game.dirty, (x, y) => hierarchy.parent == y)
    for entity in game.dirty:
       update(game, entity, dirty, id)
       if entity.index == 192:
