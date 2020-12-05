@@ -1,7 +1,8 @@
 import game_types, registry, storage
 
 proc createEntity*(game: var Game): Entity =
-   game.entities.createEntity()
+   result = game.entities.createEntity()
+   game.world[result] = {}
 
 iterator queryAll*(game: Game, parent: Entity, query: set[HasComponent]): Entity =
    var frontier: seq[Entity] = @[parent]
@@ -61,9 +62,7 @@ proc cleanup*(game: var Game) =
       game.world.delete(entity)
       game.entities.delete(entity)
       if (let f = find(game.dirty, entity); f >= 0):
-         game.dirty.delete(f)
-      if entity in game.world:
-        echo entity.index, " ", entity.version
+         game.dirty.del(f)
    game.toDelete.shrink(0)
 
 proc rmComponent*(game: var Game, entity: Entity, has: HasComponent) =

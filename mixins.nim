@@ -1,8 +1,6 @@
 import game_types, vmath, utils, registry, storage, fusion/smartptrs
 
 template mixBody(has) =
-   if entity notin game.world:
-      game.world[entity] = {}
    game.world[entity].incl has
 
 proc mixCollide*(game: var Game, entity: Entity, size = vec2(0, 0)) =
