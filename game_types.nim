@@ -77,15 +77,14 @@ type
       world*: World
 
       windowWidth*, windowHeight*: int32
-      tickId*: int
       isRunning*: bool
+      tickId*: int
 
       renderer*: Renderer
       window*: Window
       sdlContext*: SdlContext
 
-      toDelete*: seq[Entity]
       camera*: Entity
-
-      clearColor*: array[4, uint8]
+      toDelete*: seq[Entity]
       inputState*: array[Input, bool]
+      clearColor*: array[4, uint8]
