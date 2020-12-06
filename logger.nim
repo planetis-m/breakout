@@ -1,7 +1,8 @@
-import registry, std / strutils
+import registry, std / [strutils, os]
 export addf, format
 
 const
+  sourceDir = currentSourcePath().parentDir()
   stDebug = "\e[34;2m"
   stHint = "\e[32;2m"
   stWarn = "\e[33;2m"
@@ -48,7 +49,8 @@ template log*(level: Level, args: varargs[string, `$`]) =
       if comma: extra.add ", "
       extra.add("Entity not traced!")
   if keep:
-    stdout.write(format("$1$2($3)$5 $4:$5 ", stInst, module, line, level, resetCode))
+    stdout.write(format("$1$2($3)$5 $4:$5 ", stInst,
+      relativePath(module, sourceDir), line, level, resetCode))
     stdout.write(args)
     if extra.len > 0:
       stdout.write(format("  $1[$2]$3", stTraced, extra, resetCode))

@@ -25,6 +25,8 @@ proc index*(self: Entity): EntityImpl =
    result = self.EntityImpl and indexMask
 proc version*(self: Entity): EntityImpl =
    result = self.EntityImpl shr indexBits and versionMask
+proc `$`*(x: Entity): string =
+  "Entity(i: " & $x.index & ", v: " & $x.version & ")"
 
 proc initRegistry*(): Registry =
    result = Registry(next: invalidId)
