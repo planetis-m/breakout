@@ -1,38 +1,53 @@
 import std / [strutils, os]
 export format
 
-const
-  stDebug = "\e[34;2m"
-  stHint = "\e[32;2m"
-  stWarn = "\e[33;2m"
-  stError = "\e[31;2m"
-  stFatal = "\e[35;2m"
-  stInst = "\e[1m"
-  stTraced = "\e[36;21m"
-  resetCode = "\e[0m"
-  sourceDir = currentSourcePath().parentDir()
-
 type
-  Level* {.pure.} = enum
-    debug = stDebug & "Debug"
-    hint = stHint & "Hint"
-    warn = stWarn & "Warning"
-    error = stError & "Error"
-    fatal = stFatal & "Fatal"
+   LogLevel* = enum
+      lvlDebug = "Debug"
+      lvlHint = "Hint"
+      lvlWarn = "Warning"
+      lvlError = "Error"
+      lvlFatal = "Fatal"
 
-var logLevel* = Level.debug
+const
+   stDebug = "\e[34;2m"
+   stHint = "\e[32;2m"
+   stWarn = "\e[33;2m"
+   stError = "\e[31;2m"
+   stFatal = "\e[35;2m"
+   stInst = "\e[1m"
+   stTraced = "\e[36;21m"
+   resetCode = "\e[0m"
 
-template log*(level: Level, args: varargs[string, `$`], filter: bool) =
-  const
-    info = instantiationInfo(fullPaths = true)
-    module = relativePath(info.filename, sourceDir)
-  if logLevel <= level and filter:
-    stdout.write(format("$1$2($3)$5 $4:$5 ", stInst, module, info.line, level, resetCode))
-    stdout.write(args)
-    stdout.write(format("  $1[$2]$3\n", stTraced, astToStr(filter), resetCode))
+const
+   levelToStyle: array[LogLevel, string] = [
+      stDebug, stHint, stWarn, stError, stFatal
+   ]
+   sourceDir = currentSourcePath().parentDir()
 
-template debug*(args: varargs[string, `$`], filter: bool) = log(Level.debug, args, filter)
-template hint*(args: varargs[string, `$`], filter: bool) = log(Level.hint, args, filter)
-template warn*(args: varargs[string, `$`], filter: bool) = log(Level.warn, args, filter)
-template error*(args: varargs[string, `$`], filter: bool) = log(Level.error, args, filter)
-template fatal*(args: varargs[string, `$`], filter: bool) = log(Level.fatal, args, filter)
+var logLevel* = lvlDebug
+
+template log*(lvl: LogLevel, args: varargs[string, `$`], filter: bool) =
+   const
+      info = instantiationInfo(fullPaths = true)
+      module = relativePath(info.filename, sourceDir)
+      header = format("$1$2($3)$6 $4$5:$6 ", stInst, module, info.line, levelToStyle[lvl], lvl, resetCode)
+      footer = format("  $1[$2]$3\n", stTraced, astToStr(filter), resetCode)
+   if logLevel <= lvl and filter:
+      stdout.write(header)
+      stdout.write(args)
+      stdout.write(footer)
+
+template genLogger(name: untyped, lvl: untyped): untyped =
+   template name*(args: varargs[string, `$`], filter: bool): untyped =
+      log(lvl, args, filter)
+
+genLogger(debug, lvlDebug)
+genLogger(hint, lvlHint)
+genLogger(warn, lvlWarn)
+genLogger(error, lvlError)
+genLogger(fatal, lvlFatal)
+
+template fatalError*(args: varargs[string, `$`], filter: bool) =
+   fatal(args)
+   quit(QuitFailure)
