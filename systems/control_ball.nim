@@ -43,6 +43,7 @@ proc update(game: var Game, entity: Entity) =
 
    let ballFade = game.world.addBlueprint:
       translation = transform.translation
+      parent = game.camera
       with:
          Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
          Fade(step: 0.05)

@@ -24,14 +24,6 @@ proc update(world: var World, entity: Entity) =
    else:
       transform.world = local
 
-   var childId = hierarchy.head
-   while childId != invalidId:
-      template childHierarchy: untyped = world.hierarchy[childId.index]
-
-      update(world, childId)
-      childId = childHierarchy.next
-
 proc sysTransform2d*(game: var Game) =
-   for entity, has in game.world.signature.pairs:
-      if has * Query == Query:
-         update(game.world, entity)
+   for entity in queryAll(game.world, game.camera, Query):
+      update(game.world, entity)
