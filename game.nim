@@ -1,6 +1,6 @@
 import
-   std / [random, monotimes], sdl_private,
-   game_types, blueprints, registry, storage, utils, serialize,
+   std / [random, monotimes], sdlpriv, heaparray,
+   gametypes, blueprints, registry, storage, utils, serialize,
    systems / [collide, control_ball, control_brick, control_paddle, draw2d,
       fade, move, shake, transform2d, handle_events]
 
@@ -12,16 +12,16 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
    let renderer = newRenderer(window, -1, Renderer_Accelerated or Renderer_PresentVsync)
 
    let world = World(
-      signature: initStorage[set[HasComponent]](maxEntities),
+      signature: initStorage[set[HasComponent]](),
       registry: initRegistry(),
 
-      collide: newSeq[Collide](maxEntities),
-      draw2d: newSeq[Draw2d](maxEntities),
-      fade: newSeq[Fade](maxEntities),
-      hierarchy: newSeq[Hierarchy](maxEntities),
-      move: newSeq[Move](maxEntities),
-      previous: newSeq[Previous](maxEntities),
-      transform: newSeq[Transform2d](maxEntities))
+      collide: initArray[Collide](),
+      draw2d: initArray[Draw2d](),
+      fade: initArray[Fade](),
+      hierarchy: initArray[Hierarchy](),
+      move: initArray[Move](),
+      previous: initArray[Previous](),
+      transform: initArray[Transform2d]())
 
    result = Game(
       world: world,
@@ -87,7 +87,7 @@ proc run(game: var Game) =
          game.render(accumulator.float32 / skippedTicks.float32)
 
 proc main =
-   randomize(12093412)
+   randomize()
    var game = initGame(740, 555)
 
    sceneMain(game)

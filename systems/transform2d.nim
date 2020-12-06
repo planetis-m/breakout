@@ -1,4 +1,4 @@
-import ".." / [game_types, vmath, mixins, utils, registry, storage]
+import ".." / [gametypes, heaparray, vmath, mixins, utils, registry, storage]
 
 const Query = {HasTransform2d, HasHierarchy, HasDirty}
 

@@ -1,4 +1,4 @@
-import ".." / [game_types, sdl_private, serialize]
+import ".." / [gametypes, sdlpriv, serialize]
 
 proc handleEvents*(game: var Game) =
    var event: Event

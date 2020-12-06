@@ -1,18 +1,11 @@
 import
-  game_types, registry, storage, sdl_private, vmath,
+  gametypes, registry, storage, sdlpriv, vmath, heaparray,
   std/streams, bingod, bingod/marshal_smartptrs, fusion/smartptrs
 from typetraits import distinctBase
 
 proc storeToBin*[T: distinct](s: Stream; x: T) = storeToBin(s, x.distinctBase)
 proc initFromBin[T: distinct](dst: var T; s: Stream) =
   initFromBin(dst.distinctBase, s)
-
-#proc storeToBin*(s: Stream; o: Window) = discard
-#proc storeToBin*(s: Stream; o: Renderer) = discard
-#proc storeToBin*(s: Stream; o: SdlContext) = discard
-#proc initFromBin*(dst: var Window; s: Stream) = discard
-#proc initFromBin*(dst: var Renderer; s: Stream) = discard
-#proc initFromBin*(dst: var SdlContext; s: Stream) = discard
 
 proc storeToBin*[T](s: Stream; a: Storage[T]) =
    write(s, int64(a.len))
@@ -27,15 +20,12 @@ proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
       initFromBin(e, s)
       initFromBin(dst[e], s)
 
-type
-   SomeComponent = Collide|Draw2d|Fade|Hierarchy|Move|Previous|Transform2d
-
 proc storeToBin*(s: Stream; w: World) =
    const components = [HasCollide, HasDraw2d, HasFade, HasHierarchy,
                        HasMove, HasPrevious, HasTransform2d]
    var i = 0
    for v in w.fields:
-      when v is seq[SomeComponent]:
+      when v is Array:
          var len = 0
          for _, has in w.signature.pairs:
             if components[i] in has: inc(len)
@@ -48,8 +38,8 @@ proc storeToBin*(s: Stream; w: World) =
       else:
          storeToBin(s, v)
 
-proc initFromBin*[T: SomeComponent](dst: var seq[T]; s: Stream) =
-   dst = newSeq[T](maxEntities)
+proc initFromBin*[T](dst: var Array[T]; s: Stream) =
+   dst = initArray[T]()
    let len = readInt64(s)
    for i in 0 ..< len:
       var j = 0

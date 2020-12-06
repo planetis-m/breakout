@@ -1,4 +1,4 @@
-import game_types, registry, storage
+import gametypes, registry, storage, heaparray
 
 proc createEntity*(world: var World): Entity =
    result = world.registry.createEntity()

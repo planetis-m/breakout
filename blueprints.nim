@@ -1,4 +1,4 @@
-import random, math, dsl, vmath, game_types, registry
+import random, math, dsl, vmath, gametypes, registry
 
 proc getBall*(world: var World, parent: Entity, x, y: float32): Entity =
    let angle = Pi + rand(1.0) * Pi

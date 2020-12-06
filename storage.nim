@@ -1,14 +1,14 @@
-import registry, std / algorithm
+import registry, heaparray, std / algorithm
 
 type
    Storage*[T] = object
       len: int
       sparseToPacked: array[maxEntities, EntityImpl] # mapping from sparse handles to dense values
       packedToSparse: array[maxEntities, Entity] # mapping from dense values to sparse handles
-      packed: seq[T]
+      packed: Array[T]
 
-proc initStorage*[T](denseCap: Natural): Storage[T] =
-   result = Storage[T](packed: newSeq[T](denseCap))
+proc initStorage*[T](): Storage[T] =
+   result = Storage[T](packed: initArray[T]())
    result.sparseToPacked.fill(invalidId.EntityImpl)
    result.packedToSparse.fill(invalidId)
 
@@ -31,7 +31,6 @@ template get(s, entity) =
    let entityIndex = entity.index
    let packedIndex = s.sparseToPacked[entityIndex]
    if packedIndex == invalidId.EntityImpl:
-      echo entityIndex
       raise newException(KeyError, "Entity not in Storage")
    result = s.packed[packedIndex]
 

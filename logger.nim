@@ -1,5 +1,4 @@
 import std / [strutils, os]
-export format
 
 type
    LogLevel* = enum
@@ -21,7 +20,11 @@ const
 
 const
    levelToStyle: array[LogLevel, string] = [
-      stDebug, stHint, stWarn, stError, stFatal
+      lvlDebug: stDebug,
+      lvlHint: stHint,
+      lvlWarn: stWarn,
+      lvlError: stError,
+      lvlFatal: stFatal
    ]
    sourceDir = currentSourcePath().parentDir()
 
@@ -49,5 +52,5 @@ genLogger(error, lvlError)
 genLogger(fatal, lvlFatal)
 
 template fatalError*(args: varargs[string, `$`], filter: bool) =
-   fatal(args)
+   fatal(args, filter)
    quit(QuitFailure)

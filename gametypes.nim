@@ -1,4 +1,4 @@
-import sdl_private, vmath, registry, storage, fusion/smartptrs
+import sdlpriv, vmath, registry, storage, heaparray, fusion/smartptrs
 
 type
    Input* = enum
@@ -64,14 +64,14 @@ type
       signature*: Storage[set[HasComponent]]
       registry*: Registry
 
-      collide*: seq[Collide]
-      draw2d*: seq[Draw2d]
-      fade*: seq[Fade]
-      hierarchy*: seq[Hierarchy]
-      move*: seq[Move]
-      previous*: seq[Previous]
+      collide*: Array[Collide]
+      draw2d*: Array[Draw2d]
+      fade*: Array[Fade]
+      hierarchy*: Array[Hierarchy]
+      move*: Array[Move]
+      previous*: Array[Previous]
       shake*: UniquePtr[Shake]
-      transform*: seq[Transform2d]
+      transform*: Array[Transform2d]
 
    Game* = object
       world*: World
