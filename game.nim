@@ -1,6 +1,6 @@
 import
    std / [random, monotimes], sdlpriv, heaparray,
-   gametypes, blueprints, registry, storage, utils, serialize,
+   gametypes, blueprints, registry, storage, utils,
    systems / [collide, control_ball, control_brick, control_paddle, draw2d,
       fade, move, shake, transform2d, handle_events]
 
@@ -92,6 +92,5 @@ proc main =
 
    sceneMain(game)
    game.run()
-   save(game)
 
 main()

@@ -4,8 +4,7 @@ import
 from typetraits import distinctBase
 
 proc storeToBin*[T: distinct](s: Stream; x: T) = storeToBin(s, x.distinctBase)
-proc initFromBin[T: distinct](dst: var T; s: Stream) =
-  initFromBin(dst.distinctBase, s)
+proc initFromBin[T: distinct](dst: var T; s: Stream) = initFromBin(dst.distinctBase, s)
 
 proc storeToBin*[T](s: Stream; a: Storage[T]) =
    write(s, int64(a.len))
@@ -15,10 +14,13 @@ proc storeToBin*[T](s: Stream; a: Storage[T]) =
 
 proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
    let len = s.readInt64()
+   dst = initStorage[T]()
    for i in 0 ..< len:
       var e: Entity
       initFromBin(e, s)
-      initFromBin(dst[e], s)
+      var v: T
+      initFromBin(v, s)
+      dst[e] = v
 
 proc storeToBin*(s: Stream; w: World) =
    const components = [HasCollide, HasDraw2d, HasFade, HasHierarchy,
@@ -42,7 +44,7 @@ proc initFromBin*[T](dst: var Array[T]; s: Stream) =
    dst = initArray[T]()
    let len = readInt64(s)
    for i in 0 ..< len:
-      var j = 0
+      var j: EntityImpl
       initFromBin(j, s)
       initFromBin(dst[j], s)
 

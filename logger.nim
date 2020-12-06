@@ -52,5 +52,6 @@ genLogger(error, lvlError)
 genLogger(fatal, lvlFatal)
 
 template fatalError*(args: varargs[string, `$`], filter: bool) =
+   writeStackTrace()
    fatal(args, filter)
    quit(QuitFailure)
