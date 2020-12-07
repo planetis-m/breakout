@@ -1,7 +1,7 @@
 import
-   std / [random, monotimes], sdlpriv, heaparray,
-   gametypes, blueprints, registry, storage, utils,
-   systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
+   std / [random, monotimes],
+   breakout / [sdlpriv, heaparray, gametypes, blueprints, registry, storage, utils],
+   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
