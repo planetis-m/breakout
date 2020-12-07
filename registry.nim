@@ -1,4 +1,4 @@
-import bingod, std / streams
+import bingo, std / streams
 
 type
    EntityImpl* = uint16

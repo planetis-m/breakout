@@ -1,8 +1,8 @@
 import
    std / [random, monotimes], sdlpriv, heaparray,
    gametypes, blueprints, registry, storage, utils,
-   systems / [collide, control_ball, control_brick, control_paddle, draw2d,
-      fade, move, shake, transform2d, handle_events]
+   systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
+      fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
    let sdlContext = sdlInit(INIT_VIDEO or INIT_EVENTS)

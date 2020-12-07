@@ -47,6 +47,7 @@ proc delete*(game: var Game, entity: Entity) =
    for entity in queryAll(game.world, entity, {HasHierarchy}):
       removeNode(game.world, entity)
       game.toDelete.add(entity)
+   #else: game.toDelete.add(entity)
 
 proc cleanup*(game: var Game) =
    for entity in game.toDelete.items:
