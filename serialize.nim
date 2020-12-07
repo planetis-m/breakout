@@ -14,7 +14,7 @@ proc storeToBin*[T](s: Stream; a: Storage[T]) =
 
 proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
    let len = s.readInt64()
-   dst = initStorage[T]()
+   dst.clear()
    for i in 0 ..< len:
       var e: Entity
       initFromBin(e, s)
@@ -41,7 +41,6 @@ proc storeToBin*(s: Stream; w: World) =
          storeToBin(s, v)
 
 proc initFromBin*[T](dst: var Array[T]; s: Stream) =
-   dst = initArray[T]()
    let len = readInt64(s)
    for i in 0 ..< len:
       var j: EntityImpl

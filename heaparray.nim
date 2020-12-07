@@ -11,17 +11,24 @@ proc `=destroy`*[T](x: var Array[T]) =
 
 proc `=copy`*[T](dest: var Array[T], src: Array[T]) {.error.}
 
+template initImpl(result: typed) =
+   result.data = cast[typeof(result.data)](alloc(maxEntities * sizeof(T)))
+
+proc initArray*[T](): Array[T] =
+   initImpl(result)
+
 proc `[]`*[T](x: Array[T]; i: Natural): lent T =
-   assert i < maxEntities
+   when compileOption("boundChecks"):
+      assert x.data != nil and i < maxEntities, "index out of bounds"
    x.data[i]
 
 proc `[]`*[T](x: var Array[T]; i: Natural): var T =
-   assert i < maxEntities
+   when compileOption("boundChecks"):
+      assert x.data != nil and i < maxEntities, "index out of bounds"
    x.data[i]
 
 proc `[]=`*[T](x: var Array[T]; i: Natural; y: sink T) =
-   assert i < maxEntities
+   when compileOption("boundChecks"):
+      assert i < maxEntities, "index out of bounds"
+   if x.data == nil: initImpl(x)
    x.data[i] = y
-
-proc initArray*[T](): Array[T] =
-  result.data = cast[typeof(result.data)](alloc(maxEntities * sizeof(T)))
