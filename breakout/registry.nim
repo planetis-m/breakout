@@ -21,9 +21,9 @@ type
 proc `==`*(a, b: Entity): bool {.borrow.}
 proc toEntity(index, v: EntityImpl): Entity =
   result = Entity(v shl indexBits or index)
-proc index*(self: Entity): EntityImpl =
+proc index*(self: Entity): EntityImpl {.inline.} =
   result = self.EntityImpl and indexMask
-proc version*(self: Entity): EntityImpl =
+proc version*(self: Entity): EntityImpl {.inline.} =
   result = self.EntityImpl shr indexBits and versionMask
 proc `$`*(x: Entity): string =
   "Entity(i: " & $x.index & ", v: " & $x.version & ")"

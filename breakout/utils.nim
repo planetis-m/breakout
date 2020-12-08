@@ -6,15 +6,17 @@ proc createEntity*(world: var World): Entity =
 
 iterator queryAll*(world: World, parent: Entity, query: set[HasComponent]): Entity =
   template hierarchy: untyped = world.hierarchy[entity.index]
-  template childHierarchy: untyped = world.hierarchy[childId.index]
 
-  var frontier: seq[Entity] = @[parent]
+  var frontier = @[parent]
   while frontier.len > 0:
     let entity = frontier.pop()
     if world.signature[entity] * query == query:
       yield entity
+
     var childId = hierarchy.head
     while childId != invalidId:
+      template childHierarchy: untyped = world.hierarchy[childId.index]
+
       frontier.add(childId)
       childId = childHierarchy.next
 

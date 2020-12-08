@@ -76,15 +76,15 @@ type
   Game* = object
     world*: World
 
-    windowWidth*, windowHeight*: int32
+    toDelete*: seq[Entity]
+    inputState*: array[Input, bool]
+    clearColor*: array[4, uint8]
+    camera*: Entity
+
     isRunning*: bool
     tickId*: int
+    windowWidth*, windowHeight*: int32
 
     renderer*: Renderer
     window*: Window
     sdlContext*: SdlContext
-
-    camera*: Entity
-    toDelete*: seq[Entity]
-    inputState*: array[Input, bool]
-    clearColor*: array[4, uint8]
