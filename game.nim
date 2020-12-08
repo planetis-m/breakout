@@ -5,11 +5,11 @@ import
       fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
-   let sdlContext = sdlInit(INIT_VIDEO or INIT_EVENTS)
-   let window = newWindow("Breakout", SDL_WINDOWPOS_CENTERED,
-         SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN)
+   let sdlContext = sdlInit(InitVideo or InitEvents)
+   let window = newWindow("Breakout", SdlWindowPosCentered,
+         SdlWindowPosCentered, windowWidth, windowHeight, SdlWindowShown)
 
-   let renderer = newRenderer(window, -1, Renderer_Accelerated or Renderer_PresentVsync)
+   let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
 
    let world = World(
       signature: initStorage[set[HasComponent]](),

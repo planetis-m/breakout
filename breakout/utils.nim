@@ -5,17 +5,16 @@ proc createEntity*(world: var World): Entity =
    world.signature[result] = {}
 
 iterator queryAll*(world: World, parent: Entity, query: set[HasComponent]): Entity =
+   template hierarchy: untyped = world.hierarchy[entity.index]
+   template childHierarchy: untyped = world.hierarchy[childId.index]
+
    var frontier: seq[Entity] = @[parent]
    while frontier.len > 0:
       let entity = frontier.pop()
       if world.signature[entity] * query == query:
          yield entity
-
-      template hierarchy: untyped = world.hierarchy[entity.index]
       var childId = hierarchy.head
       while childId != invalidId:
-         template childHierarchy: untyped = world.hierarchy[childId.index]
-
          frontier.add(childId)
          childId = childHierarchy.next
 
@@ -53,7 +52,6 @@ proc cleanup*(game: var Game) =
    for entity in game.toDelete.items:
       game.world.signature.delete(entity)
       game.world.registry.delete(entity)
-
    game.toDelete.shrink(0)
 
 proc rmComponent*(world: var World, entity: Entity, has: HasComponent) =
