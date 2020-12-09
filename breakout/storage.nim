@@ -1,4 +1,5 @@
 import registry, heaparray, std / algorithm
+from algorithm import SortOrder
 
 type
   Storage*[T] = object
@@ -7,10 +8,13 @@ type
     packedToSparse: array[maxEntities, Entity]     # mapping from dense values to sparse handles
     packed: Array[T]
 
-proc initStorage*[T](): Storage[T] =
+template initImpl(result: typed) =
   result = Storage[T](packed: initArray[T]())
   result.sparseToPacked.fill(invalidId.EntityImpl)
   result.packedToSparse.fill(invalidId)
+
+proc initStorage*[T](): Storage[T] =
+  initImpl(result)
 
 proc contains*[T](s: Storage[T], entity: Entity): bool =
   # Returns true if the sparse is registered to a dense index.
@@ -18,6 +22,7 @@ proc contains*[T](s: Storage[T], entity: Entity): bool =
 
 proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
   ## Inserts a `(entity, value)` pair into `s`.
+  if isNil(s.packed): initImpl(s)
   let entityIndex = entity.index
   var packedIndex = s.sparseToPacked[entityIndex]
   if packedIndex == invalidId.EntityImpl:
@@ -58,13 +63,29 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
     s.packedToSparse[lastIndex] = invalidId
     s.len.dec
 
+proc sort*[T](s: var Storage[T], cmp: proc (x, y: T): int, order = SortOrder.Ascending) =
+  for i in 1 ..< s.len:
+    let x = move(s.packed[i])
+    let xEnt = s.packedToSparse[i]
+    let xSparse = s.sparseToPacked[xEnt.index]
+    var j = i - 1
+    while j >= 0 and cmp(x, s.packed[j]) * order < 0:
+      let jEnt = s.packedToSparse[j]
+      s.sparseToPacked[s.packedToSparse[j + 1].index] = s.sparseToPacked[jEnt.index]
+      s.packedToSparse[j + 1] = jEnt
+      s.packed[j + 1] = move(s.packed[j])
+      dec(j)
+    s.sparseToPacked[s.packedToSparse[j + 1].index] = xSparse
+    s.packedToSparse[j + 1] = xEnt
+    s.packed[j + 1] = x
+
 proc clear*[T](s: var Storage[T]) =
   s.sparseToPacked.fill(invalidId.EntityImpl)
   s.packedToSparse.fill(invalidId)
   s.len = 0
 
-proc len*[T](s: Storage[T]): int = s.len
-
 iterator pairs*[T](s: Storage[T]): (Entity, lent T) =
   for i in 0 ..< s.len:
     yield (s.packedToSparse[i], s.packed[i])
+
+proc len*[T](s: Storage[T]): int = s.len
