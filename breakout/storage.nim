@@ -27,9 +27,9 @@ proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
   var packedIndex = s.sparseToPacked[entityIndex]
   if packedIndex == invalidId.EntityImpl:
     packedIndex = s.len.EntityImpl
-    s.packedToSparse[packedIndex] = entity
     s.sparseToPacked[entityIndex] = packedIndex
     s.len.inc
+  s.packedToSparse[packedIndex] = entity
   s.packed[packedIndex] = value
 
 template get(s, entity) =

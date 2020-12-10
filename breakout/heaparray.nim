@@ -1,4 +1,5 @@
 import registry
+from typetraits import supportsCopyMem
 
 type
   Array*[T] = object
@@ -6,7 +7,8 @@ type
 
 proc `=destroy`*[T](x: var Array[T]) =
   if x.data != nil:
-    for i in 0..<maxEntities: `=destroy`(x[i])
+    when not supportsCopyMem(T):
+      for i in 0..<maxEntities: `=destroy`(x[i])
     dealloc(x.data)
 proc `=copy`*[T](dest: var Array[T], src: Array[T]) {.error.}
 
