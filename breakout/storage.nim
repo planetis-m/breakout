@@ -52,7 +52,7 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
   ## Deletes `entity` from sparse set `s`. Does nothing if the key does not exist.
   let entityIndex = entity.index
   let packedIndex = s.sparseToPacked[entityIndex]
-  if packedIndex != invalidId.EntityImpl:
+  if packedIndex != invalidId.EntityImpl and s.packedToSparse[packedIndex] == entity:
     let lastIndex = s.len - 1
     let lastEntity = s.packedToSparse[lastIndex]
     s.sparseToPacked[lastEntity.index] = packedIndex
