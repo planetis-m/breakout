@@ -17,7 +17,8 @@ proc initStorage*[T](): Storage[T] =
 
 proc contains*[T](s: Storage[T], entity: Entity): bool =
   # Returns true if the sparse is registered to a dense index.
-  s.sparseToPacked[entity.index] != invalidId.EntityImpl
+  let packedIndex = s.sparseToPacked[entity.index]
+  packedIndex != invalidId.EntityImpl and s.packedToSparse[packedIndex] == entity
 
 proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
   ## Inserts a `(entity, value)` pair into `s`.
@@ -34,7 +35,7 @@ proc `[]=`*[T](s: var Storage[T], entity: Entity, value: sink T) =
 template get(s, entity) =
   let entityIndex = entity.index
   let packedIndex = s.sparseToPacked[entityIndex]
-  if packedIndex == invalidId.EntityImpl:
+  if packedIndex == invalidId.EntityImpl and s.packedToSparse[packedIndex] != entity:
     raise newException(KeyError, "Entity not in Storage")
   result = s.packed[packedIndex]
 
