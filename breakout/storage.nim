@@ -1,5 +1,4 @@
 import registry, heaparray, std / algorithm
-from algorithm import SortOrder
 
 type
   Storage*[T] = object
@@ -67,7 +66,7 @@ proc sort*[T](s: var Storage[T], cmp: proc (x, y: T): int, order = SortOrder.Asc
   for i in 1 ..< s.len:
     let x = move(s.packed[i])
     let xEnt = s.packedToSparse[i]
-    let xSparse = s.sparseToPacked[xEnt.index]
+    let xIndex = s.sparseToPacked[xEnt.index]
     var j = i - 1
     while j >= 0 and cmp(x, s.packed[j]) * order < 0:
       let jEnt = s.packedToSparse[j]
@@ -75,7 +74,7 @@ proc sort*[T](s: var Storage[T], cmp: proc (x, y: T): int, order = SortOrder.Asc
       s.packedToSparse[j + 1] = jEnt
       s.packed[j + 1] = move(s.packed[j])
       dec(j)
-    s.sparseToPacked[s.packedToSparse[j + 1].index] = xSparse
+    s.sparseToPacked[s.packedToSparse[j + 1].index] = xIndex
     s.packedToSparse[j + 1] = xEnt
     s.packed[j + 1] = x
 
