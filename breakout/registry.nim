@@ -14,9 +14,9 @@ const
 
 type
   Registry* = object
-    len: int
-    data: array[maxEntities, Entity]
-    next: Entity
+    len*: int
+    data*: array[maxEntities, Entity]
+    next*: EntityImpl
 
 proc `==`*(a, b: Entity): bool {.borrow.}
 proc toEntity(index, v: EntityImpl): Entity =
@@ -29,7 +29,7 @@ proc `$`*(x: Entity): string =
   "Entity(i: " & $x.index & ", v: " & $x.version & ")"
 
 proc initRegistry*(): Registry =
-  result = Registry(next: invalidId)
+  result = Registry(next: invalidId.EntityImpl)
 
 proc isValid*(entity: Entity; r: Registry): bool =
   ## Checks if an entity identifier refers to a valid entity.
@@ -42,15 +42,15 @@ proc createEntity*(r: var Registry): Entity =
   ##
   ## Newly created ones in case no entities have been previously destroyed.
   ## Recycled ones with updated versions.
-  if r.next == invalidId:
+  if r.next == invalidId.EntityImpl:
     assert r.len < maxEntities, "No more entities available!"
     result = Entity(r.len)
     r.data[r.len] = result
     r.len.inc
   else:
-    let i = r.next.EntityImpl
+    let i = r.next
     let version = r.data[i].version
-    r.next = Entity(r.data[i].index)
+    r.next = r.data[i].index
     result = toEntity(i, version)
     r.data[i] = result
 
@@ -60,8 +60,8 @@ proc delete*(r: var Registry; entity: Entity) =
   let i = entity.index
   if i.int < r.len and r.data[i] == entity:
     # lengthens the implicit list of next entities
-    r.data[i] = toEntity(r.next.EntityImpl, entity.version + 1)
-    r.next = Entity(i)
+    r.data[i] = toEntity(r.next, entity.version + 1)
+    r.next = i
 
 proc storeToBin*(s: Stream; e: Entity) = storeToBin(s, EntityImpl(e))
 proc initFromBin*(dst: var Entity; s: Stream) = initFromBin(EntityImpl(dst), s)

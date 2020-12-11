@@ -43,6 +43,7 @@ proc `[]`*[T](s: var Storage[T], entity: Entity): var T =
   ## Retrieves the value at `s[entity]`. The value can be modified.
   ## If `entity` is not in `s`, the `KeyError` exception is raised.
   get(s, entity)
+
 proc `[]`*[T](s: Storage[T], entity: Entity): lent T =
   ## Retrieves the value at `s[entity]`.
   ## If `entity` is not in `s`, the `KeyError` exception is raised.
@@ -58,7 +59,7 @@ proc delete*[T](s: var Storage[T], entity: Entity) =
     s.sparseToPacked[lastEntity.index] = packedIndex
     s.sparseToPacked[entityIndex] = invalidId.EntityImpl
     s.packed[packedIndex] = move(s.packed[lastIndex])
-    s.packed[lastIndex] = default(T)
+    #s.packed[lastIndex] = default(T)
     s.packedToSparse[packedIndex] = s.packedToSparse[lastIndex]
     s.packedToSparse[lastIndex] = invalidId
     s.len.dec
