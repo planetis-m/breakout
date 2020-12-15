@@ -27,9 +27,8 @@ proc storeToBin*(s: Stream; w: World) =
 proc initFromBin*[T](dst: var Array[T]; s: Stream) =
   let len = readInt64(s)
   for i in 0 ..< len:
-    var j: Entity
-    initFromBin(j, s)
-    initFromBin(dst[j.idx], s)
+    let idx = readUint16(s)
+    initFromBin(dst[idx], s)
 
 proc save*(game: Game) =
   let fs = newFileStream("save1.bin", fmWrite)

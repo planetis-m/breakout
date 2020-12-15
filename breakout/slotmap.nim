@@ -93,7 +93,7 @@ proc storeToBin*(s: Stream; x: Entity) = storeToBin(s, x.uint16)
 proc initFromBin(dst: var Entity; s: Stream) = initFromBin(dst.uint16, s)
 
 proc storeToBin*[T](s: Stream; a: SlotMap[T]) =
-  write(s, int64(a.len))
+  write(s, int64(a.slots.len))
   for x in a.slots:
     storeToBin(s, x.version)
     if x.version mod 2 > 0:

@@ -35,7 +35,7 @@ template log*(lvl: LogLevel, args: varargs[string, `$`], filter: bool) =
     info = instantiationInfo(fullPaths = true)
     module = relativePath(info.filename, sourceDir)
     header = format("$1$2($3)$6 $4$5:$6 ", stInst, module, info.line, levelToStyle[lvl], lvl, resetCode)
-    footer = format("  $1[$2]$3\n", stTraced, astToStr(filter), resetCode)
+    footer = format(" $1[$2]$3\n", stTraced, astToStr(filter), resetCode)
   if logLevel <= lvl and filter:
     stdout.write(header)
     stdout.write(args)
