@@ -1,4 +1,4 @@
-import registry
+import entitytype
 from typetraits import supportsCopyMem
 
 type

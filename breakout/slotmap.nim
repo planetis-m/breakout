@@ -58,7 +58,7 @@ proc delFromSlot[T](x: var SlotMap[T], slotIdx: int) {.inline.} =
   x.data[valueIdx] = move(x.data[x.data.high])
   x.data.shrink(x.data.high)
   # Did something take our place? Update its slot to new position.
-  if x.data.len > 0:
+  if x.data.len > valueIdx:
     template slot: untyped = x.slots[kIdx]
     let kIdx = x.data[valueIdx].e.idx
     slot = toEntity(valueIdx, slot.version)

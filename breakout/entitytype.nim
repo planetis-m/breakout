@@ -7,10 +7,10 @@ const
   indexBits = sizeof(Entity) * 8 - versionBits
   indexMask = 1 shl indexBits - 1
   invalidId* = Entity(indexMask) # a sentinel value to represent an invalid entity
+  maxEntities* = indexMask
 
 template idx*(e: Entity): int = e.int and indexMask
 template version*(e: Entity): int = e.int shr indexBits and versionMask
-template maxEntities*: int = indexMask
 template toEntity*(idx, v: int): Entity = Entity(v shl indexBits or idx)
 
 proc `==`*(a, b: Entity): bool {.borrow.}
