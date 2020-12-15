@@ -1,6 +1,6 @@
 import
   std / [random, monotimes],
-  breakout / [sdlpriv, heaparray, gametypes, blueprints, registry, storage, utils],
+  breakout / [sdlpriv, heaparray, gametypes, blueprints, slotmap, utils],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
      fade, move, shake, transform2d, handleevents]
 
@@ -12,8 +12,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
   let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
 
   let world = World(
-     signature: initStorage[set[HasComponent]](),
-     registry: initRegistry(),
+     signature: initSlotMapOfCap[set[HasComponent]](maxEntities),
 
      collide: initArray[Collide](),
      draw2d: initArray[Draw2d](),

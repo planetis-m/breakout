@@ -1,11 +1,11 @@
-import ".." / [gametypes, heaparray, utils, dsl, registry, storage]
+import ".." / [gametypes, heaparray, utils, dsl, slotmap]
 
 const Query = {HasTransform2d, HasFade, HasDraw2d}
 
 proc update(game: var Game, entity: Entity) =
-  template transform: untyped = game.world.transform[entity.index]
-  template fade: untyped = game.world.fade[entity.index]
-  template draw: untyped = game.world.draw2d[entity.index]
+  template transform: untyped = game.world.transform[entity.idx]
+  template fade: untyped = game.world.fade[entity.idx]
+  template draw: untyped = game.world.draw2d[entity.idx]
 
   if draw.color[3] > 0:
     let step = 255.0 * fade.step

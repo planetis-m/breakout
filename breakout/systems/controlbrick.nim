@@ -1,10 +1,10 @@
-import ".." / [gametypes, heaparray, blueprints, registry, storage], std / random
+import ".." / [gametypes, heaparray, blueprints, slotmap], std / random
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 
 proc update(game: var Game, entity: Entity) =
-  template collide: untyped = game.world.collide[entity.index]
-  template fade: untyped = game.world.fade[entity.index]
+  template collide: untyped = game.world.collide[entity.idx]
+  template fade: untyped = game.world.fade[entity.idx]
 
   if collide.collision.other != invalidId:
     fade.step = 0.05

@@ -1,9 +1,9 @@
-import ".." / [gametypes, heaparray, vmath, registry, storage]
+import ".." / [gametypes, heaparray, vmath, slotmap]
 
 const Query = {HasMove, HasControlPaddle}
 
 proc update(game: var Game, entity: Entity) =
-  template move: untyped = game.world.move[entity.index]
+  template move: untyped = game.world.move[entity.idx]
 
   move.direction.x = 0.0
 

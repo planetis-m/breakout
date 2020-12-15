@@ -1,12 +1,12 @@
-import math, ".." / [gametypes, heaparray, vmath, registry, storage, sdlpriv]
+import math, ".." / [gametypes, heaparray, vmath, slotmap, sdlpriv]
 
 const Query = {HasDraw2d, HasPrevious, HasTransform2d}
 const Tolerance = 0.75'f32
 
 proc update(game: var Game, entity: Entity, intrpl: float32) =
-  template transform: untyped = game.world.transform[entity.index]
-  template previous: untyped = game.world.previous[entity.index]
-  template draw2d: untyped = game.world.draw2d[entity.index]
+  template transform: untyped = game.world.transform[entity.idx]
+  template previous: untyped = game.world.previous[entity.idx]
+  template draw2d: untyped = game.world.draw2d[entity.idx]
 
   let position = lerp(previous.position, transform.world.origin, intrpl)
   let rotation = lerp(previous.rotation, transform.world.rotation, intrpl)

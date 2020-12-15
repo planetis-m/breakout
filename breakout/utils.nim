@@ -1,11 +1,10 @@
-import gametypes, registry, storage, heaparray
+import gametypes, slotmap, heaparray
 
 proc createEntity*(world: var World): Entity =
-  result = world.registry.createEntity()
-  world.signature[result] = {}
+  result = world.signature.incl({})
 
 iterator queryAll*(world: World, parent: Entity, query: set[HasComponent]): Entity =
-  template hierarchy: untyped = world.hierarchy[entity.index]
+  template hierarchy: untyped = world.hierarchy[entity.idx]
 
   var frontier = @[parent]
   while frontier.len > 0:
@@ -15,16 +14,16 @@ iterator queryAll*(world: World, parent: Entity, query: set[HasComponent]): Enti
 
     var childId = hierarchy.head
     while childId != invalidId:
-      template childHierarchy: untyped = world.hierarchy[childId.index]
+      template childHierarchy: untyped = world.hierarchy[childId.idx]
 
       frontier.add(childId)
       childId = childHierarchy.next
 
 template `?=`(name, value): bool = (let name = value; name != invalidId)
 proc prepend*(world: var World, parentId, entity: Entity) =
-  template hierarchy: untyped = world.hierarchy[entity.index]
-  template parent: untyped = world.hierarchy[parentId.index]
-  template headSibling: untyped = world.hierarchy[headSiblingId.index]
+  template hierarchy: untyped = world.hierarchy[entity.idx]
+  template parent: untyped = world.hierarchy[parentId.idx]
+  template headSibling: untyped = world.hierarchy[headSiblingId.idx]
 
   hierarchy.prev = invalidId
   hierarchy.next = parent.head
@@ -34,10 +33,10 @@ proc prepend*(world: var World, parentId, entity: Entity) =
   parent.head = entity
 
 proc removeNode*(world: var World, entity: Entity) =
-  template hierarchy: untyped = world.hierarchy[entity.index]
-  template parent: untyped = world.hierarchy[parentId.index]
-  template nextSibling: untyped = world.hierarchy[nextSiblingId.index]
-  template prevSibling: untyped = world.hierarchy[prevSiblingId.index]
+  template hierarchy: untyped = world.hierarchy[entity.idx]
+  template parent: untyped = world.hierarchy[parentId.idx]
+  template nextSibling: untyped = world.hierarchy[nextSiblingId.idx]
+  template prevSibling: untyped = world.hierarchy[prevSiblingId.idx]
 
   if parentId ?= hierarchy.parent:
     if entity == parent.head: parent.head = hierarchy.next
@@ -52,8 +51,7 @@ proc delete*(game: var Game, entity: Entity) =
 
 proc cleanup*(game: var Game) =
   for entity in game.toDelete.items:
-    game.world.signature.delete(entity)
-    game.world.registry.delete(entity)
+    game.world.signature.del(entity)
   game.toDelete.shrink(0)
 
 proc rmComponent*(world: var World, entity: Entity, has: HasComponent) =

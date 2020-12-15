@@ -1,12 +1,12 @@
-import ".." / [gametypes, heaparray, vmath, blueprints, dsl, registry, storage],
+import ".." / [gametypes, heaparray, vmath, blueprints, dsl, slotmap],
     fusion/smartptrs
 
 const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}
 
 proc update(game: var Game, entity: Entity) =
-  template collide: untyped = game.world.collide[entity.index]
-  template move: untyped = game.world.move[entity.index]
-  template transform: untyped = game.world.transform[entity.index]
+  template collide: untyped = game.world.collide[entity.idx]
+  template move: untyped = game.world.move[entity.idx]
+  template transform: untyped = game.world.transform[entity.idx]
 
   if collide.min.x < 0.0:
     transform.translation.x = collide.size.x / 2.0

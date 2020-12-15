@@ -1,4 +1,4 @@
-import macros, gametypes, registry, utils, mixins
+import macros, gametypes, utils, mixins
 export mixins
 
 proc blueprintImpl(world, entity, transform, hierarchy, n: NimNode): NimNode

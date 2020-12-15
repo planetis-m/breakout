@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, vmath, registry, storage], math
+import ".." / [gametypes, heaparray, vmath, slotmap], math
 
 const Query = {HasTransform2d, HasCollide}
 
@@ -29,8 +29,8 @@ proc sysCollide*(game: var Game) =
   var allColliders: seq[Entity]
   for colliderId, has in game.world.signature.pairs:
     if has * Query == Query:
-      template transform: untyped = game.world.transform[colliderId.index]
-      template collider: untyped = game.world.collide[colliderId.index]
+      template transform: untyped = game.world.transform[colliderId.idx]
+      template collider: untyped = game.world.collide[colliderId.idx]
 
       collider.collision.other = invalidId
       computeAabb(transform, collider)
@@ -38,11 +38,11 @@ proc sysCollide*(game: var Game) =
 
   for i in 0 ..< allColliders.len:
     let colliderId = allColliders[i]
-    template collider: untyped = game.world.collide[colliderId.index]
+    template collider: untyped = game.world.collide[colliderId.idx]
 
     for j in i + 1 ..< allColliders.len:
       let otherId = allColliders[j]
-      template other: untyped = game.world.collide[otherId.index]
+      template other: untyped = game.world.collide[otherId.idx]
 
       if intersectAabb(collider, other):
         let hit = penetrateAabb(collider, other)

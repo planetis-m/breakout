@@ -1,11 +1,11 @@
-import ".." / [gametypes, heaparray, vmath, mixins, utils, registry, storage]
+import ".." / [gametypes, heaparray, vmath, mixins, utils, slotmap]
 
 const Query = {HasTransform2d, HasHierarchy, HasDirty}
 
 proc update(world: var World, entity: Entity) =
   template `?=`(name, value): bool = (let name = value; name != invalidId)
-  template transform: untyped = world.transform[entity.index]
-  template hierarchy: untyped = world.hierarchy[entity.index]
+  template transform: untyped = world.transform[entity.idx]
+  template hierarchy: untyped = world.hierarchy[entity.idx]
 
   if HasFresh notin world.signature[entity]:
     let position = transform.world.origin
@@ -19,7 +19,7 @@ proc update(world: var World, entity: Entity) =
 
   let local = compose(transform.scale, transform.rotation, transform.translation)
   if parentId ?= hierarchy.parent:
-    template parentTransform: untyped = world.transform[parentId.index]
+    template parentTransform: untyped = world.transform[parentId.idx]
     transform.world = parentTransform.world * local
   else:
     transform.world = local

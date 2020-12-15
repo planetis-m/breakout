@@ -1,18 +1,18 @@
 import
-  gametypes, registry, storage, sdlpriv, vmath, heaparray,
-  std/streams, bingo, bingo/marshal_smartptrs, fusion/smartptrs
+  gametypes, slotmap, vmath, heaparray, std/streams,
+  bingo, bingo/marshal_smartptrs, fusion/smartptrs
 from typetraits import distinctBase
 
 proc storeToBin*[T: distinct](s: Stream; x: T) = storeToBin(s, x.distinctBase)
 proc initFromBin[T: distinct](dst: var T; s: Stream) = initFromBin(dst.distinctBase, s)
-
-proc storeToBin*[T](s: Stream; a: Storage[T]) =
+#[
+proc storeToBin*[T](s: Stream; a: SlotMap[T]) =
   write(s, int64(a.len))
   for e, v in a.pairs:
     storeToBin(s, e)
     storeToBin(s, v)
 
-proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
+proc initFromBin*[T](dst: var SlotMap[T]; s: Stream) =
   let len = s.readInt64()
   dst.clear()
   for i in 0 ..< len:
@@ -20,7 +20,7 @@ proc initFromBin*[T](dst: var Storage[T]; s: Stream) =
     initFromBin(e, s)
     var v: T
     initFromBin(v, s)
-    dst[e] = v
+    dst[e] = v]#
 
 proc storeToBin*(s: Stream; w: World) =
   const components = [HasCollide, HasDraw2d, HasFade, HasHierarchy,
@@ -34,8 +34,8 @@ proc storeToBin*(s: Stream; w: World) =
       storeToBin(s, int64(len))
       for entity, has in w.signature.pairs:
         if components[i] in has:
-          storeToBin(s, entity.index)
-          storeToBin(s, v[entity.index])
+          storeToBin(s, entity.idx)
+          storeToBin(s, v[entity.idx])
       inc(i)
     else:
       storeToBin(s, v)
@@ -43,9 +43,9 @@ proc storeToBin*(s: Stream; w: World) =
 proc initFromBin*[T](dst: var Array[T]; s: Stream) =
   let len = readInt64(s)
   for i in 0 ..< len:
-    var j: EntityImpl
+    var j: Entity
     initFromBin(j, s)
-    initFromBin(dst[j], s)
+    initFromBin(dst[j.idx], s)
 
 proc save*(game: Game) =
   let fs = newFileStream("save1.bin", fmWrite)
