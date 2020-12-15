@@ -32,4 +32,9 @@ proc `[]=`*[T](x: var Array[T]; i: Natural; y: sink T) =
   if x.data == nil: initImpl(x)
   x.data[i] = y
 
+proc clear*[T](x: Array[T]) =
+  when not supportsCopyMem(T):
+    if x.data != nil:
+      for i in 0..<maxEntities: reset(x[i])
+
 proc isNil*[T](x: Array[T]): bool = x.data == nil

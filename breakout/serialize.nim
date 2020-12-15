@@ -15,10 +15,10 @@ proc storeToBin*(s: Stream; w: World) =
       var len = 0
       for _, has in w.signature.pairs:
         if components[i] in has: inc(len)
-      storeToBin(s, int64(len))
+      write(s, int64(len))
       for entity, has in w.signature.pairs:
         if components[i] in has:
-          storeToBin(s, entity.idx.uint16)
+          write(s, entity.idx.uint16)
           storeToBin(s, v[entity.idx])
       inc(i)
     else:
@@ -26,6 +26,7 @@ proc storeToBin*(s: Stream; w: World) =
 
 proc initFromBin*[T](dst: var Array[T]; s: Stream) =
   let len = readInt64(s)
+  dst.clear()
   for i in 0 ..< len:
     let idx = readUint16(s)
     initFromBin(dst[idx], s)

@@ -89,13 +89,10 @@ iterator pairs*[T](x: SlotMap[T]): Entry[T] =
     yield x.data[i]
 
 # Serialization
-proc storeToBin*(s: Stream; x: Entity) = storeToBin(s, x.uint16)
-proc initFromBin(dst: var Entity; s: Stream) = initFromBin(dst.uint16, s)
-
 proc storeToBin*[T](s: Stream; a: SlotMap[T]) =
   write(s, int64(a.slots.len))
   for x in a.slots:
-    storeToBin(s, x.version)
+    write(s, x.version)
     if x.version mod 2 > 0:
       storeToBin(s, a.data[x.idx].value)
 
@@ -104,11 +101,9 @@ proc initFromBin*[T](dst: var SlotMap[T]; s: Stream) =
   dst.clear()
   var nextFree = len.int
   for i in 0 ..< len:
-    var version: uint16
-    initFromBin(version, s)
+    let version = readUint16(s)
     if version mod 2 > 0:
-      var value: T
-      initFromBin(value, s)
+      let value = binTo(s, T)
       dst.data.add((e: toEntity(i.uint16, version), value: value))
       dst.slots.add(toEntity(dst.data.high.uint16, version))
     else:
