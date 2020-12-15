@@ -1,4 +1,4 @@
-import entitytype, heaparray
+import entitytype, heaparray, bingo, std/streams
 
 type
   Entry*[T] = tuple
@@ -30,16 +30,14 @@ proc incl*[T](x: var SlotMap[T], value: T): Entity =
   if idx < x.slots.len:
     template slot: untyped = x.slots[idx]
     let occupiedVersion = slot.version or 1
-    result = toEntity(idx, occupiedVersion)
-    # Push value before adjusting slots/freelist in case f panics.
+    result = toEntity(idx.uint16, occupiedVersion)
     x.data.add((e: result, value: value))
     x.freeHead = slot.idx
-    slot = toEntity(x.data.len - 1, occupiedVersion)
+    slot = toEntity(x.data.high.uint16, occupiedVersion)
   else:
-    result = toEntity(idx, 1)
-    # Push value before adjusting slots/freelist in case f panics.
+    result = toEntity(idx.uint16, 1)
     x.data.add((e: result, value: value))
-    x.slots.add(toEntity(x.data.len - 1, 1))
+    x.slots.add(toEntity(x.data.high.uint16, 1))
     x.freeHead = x.slots.len
 
 proc freeSlot[T](x: var SlotMap[T], slotIdx: int): int {.inline.} =
@@ -47,7 +45,7 @@ proc freeSlot[T](x: var SlotMap[T], slotIdx: int): int {.inline.} =
   # was stored in the slot.
   template slot: untyped = x.slots[slotIdx]
   result = slot.idx
-  slot = toEntity(x.freeHead, slot.version + 1)
+  slot = toEntity(x.freeHead.uint16, slot.version + 1)
   x.freeHead = slotIdx
 
 proc delFromSlot[T](x: var SlotMap[T], slotIdx: int) {.inline.} =
@@ -61,7 +59,7 @@ proc delFromSlot[T](x: var SlotMap[T], slotIdx: int) {.inline.} =
   if x.data.len > valueIdx:
     template slot: untyped = x.slots[kIdx]
     let kIdx = x.data[valueIdx].e.idx
-    slot = toEntity(valueIdx, slot.version)
+    slot = toEntity(valueIdx.uint16, slot.version)
 
 proc del*[T](x: var SlotMap[T], e: Entity) =
   if x.contains(e):
@@ -89,3 +87,31 @@ proc `[]`*[T](x: var SlotMap[T], e: Entity): var T =
 iterator pairs*[T](x: SlotMap[T]): Entry[T] =
   for i in 0 ..< x.len:
     yield x.data[i]
+
+# Serialization
+proc storeToBin*(s: Stream; x: Entity) = storeToBin(s, x.uint16)
+proc initFromBin(dst: var Entity; s: Stream) = initFromBin(dst.uint16, s)
+
+proc storeToBin*[T](s: Stream; a: SlotMap[T]) =
+  write(s, int64(a.len))
+  for x in a.slots:
+    storeToBin(s, x.version)
+    if x.version mod 2 > 0:
+      storeToBin(s, a.data[x.idx].value)
+
+proc initFromBin*[T](dst: var SlotMap[T]; s: Stream) =
+  let len = s.readInt64()
+  dst.clear()
+  var nextFree = len.int
+  for i in 0 ..< len:
+    var version: uint16
+    initFromBin(version, s)
+    if version mod 2 > 0:
+      var value: T
+      initFromBin(value, s)
+      dst.data.add((e: toEntity(i.uint16, version), value: value))
+      dst.slots.add(toEntity(dst.data.high.uint16, version))
+    else:
+      dst.slots.add(toEntity(nextFree.uint16, version))
+      nextFree = i.int
+  dst.freeHead = nextFree
