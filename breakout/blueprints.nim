@@ -24,8 +24,7 @@ proc getExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
   let step = (Pi * 2.0) / explosions.float
   let fadeStep = 0.05
   result = world.addBlueprint(explosion):
-    with:
-      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
+    with(Transform2d(translation: Vec2(x: x, y: y), parent: parent))
     children:
       for i in 0 ..< explosions:
         blueprint:

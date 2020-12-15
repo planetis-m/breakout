@@ -36,7 +36,7 @@ proc transformChildren(world, entity, parent, n: NimNode): NimNode =
 proc blueprintImpl(world, entity, parent, n: NimNode): NimNode =
   proc mixinCall(world, entity, n: NimNode): NimNode =
     expectMinLen n, 1
-    result = newCall("mix" & n[0].strVal, world, entity)
+    result = newCall("mix" & $n[0], world, entity)
     if n.kind == nnkObjConstr:
       for i in 1 ..< n.len:
         result.add newTree(nnkExprEqExpr, n[i][0], n[i][1])

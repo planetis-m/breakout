@@ -8,13 +8,13 @@ These are explained below.
 ## Entity management was redesigned
 
 The original codebase when updating a system or creating a new entity, it iterates up
-to ``MAX_ENTITIES``. This was eliminated by using two special data structures.
+to ``MAX_ENTITIES``. This was eliminated by using a special data structure.
 
-For entity management (creation, deletion) a ``slotmap`` data structure is used, as explained
-in [ECS back and forth part 3](https://skypjack.github.io/2019-05-06-ecs-baf-part-3/).
-
-For iterating over all entities, a sparse set that contains a ``set[HasComponent]`` is used.
-There are still improvements to be made in this aspect.
+For entity management (creation, deletion) a ``slotmap`` data structure is used. It also holds
+a dense sequence of ``set[HasComponent]`` which is the "signature" for each entity.
+A signature is a bit-set describing the component composition of an entity.
+This is used for iterating over all entities, skipping the ones that don't match a system's registered components.
+These are encoded as `Query`, another bit-set and the check performed is: `signature * Query == Query`.
 
 ## Fixed timestep with interpolation
 
@@ -34,12 +34,7 @@ I changed the implementation of ``children: [Option<usize>; MAX_CHILDREN]``
 with the design described at
 [skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/).
 Now it is a seperate ``Hierarchy`` component following the unconstrained model.
-
-### Sorting for hierachies
-
-Implemented using selection sort over `dirty: seq[Entities]`. Followed the idea in
-[bitquid](http://bitsquid.blogspot.com/2014/10/building-data-oriented-entity-system.html)
-blog. Might worth switching to immediate updates in the future.
+Immediate updates are implemented by traversing this hierarchy using dfs traversal.
 
 ## Custom vector math library
 
@@ -48,84 +43,83 @@ used to prohibit operations that have no physical meaning, such as adding two po
 
 ```nim
 type
-   Rad* = distinct float32
+  Rad* = distinct float32
 
 func lerp*(a, b: Rad, t: float32): Rad =
-   # interpolates angles
+  # interpolates angles
 
 type
-   Vec2* = object
-      x*, y*: float32
+  Vec2* = object
+    x*, y*: float32
 
-   Point2* {.borrow: `.`.} = distinct Vec2
+  Point2* {.borrow: `.`.} = distinct Vec2
 
 func `+`*(a, b: Vec2): Vec2
 func `-`*(a, b: Point2): Vec2
 func `+`*(p: Point2, v: Vec2): Point2
 func `-`*(p: Point2, v: Vec2): Point2
 func `+`*(a, b: Point2): Point2 {.
-      error: "Adding 2 Point2s doesn't make physical sense".}
+    error: "Adding 2 Point2s doesn't make physical sense".}
 ```
 
 ## Blueprints DSL
 
 ``addBlueprint`` is a macro that allows you to declaratively specify an entity and its components.
-It produces ``mixin`` proc calls that register the components for the entity (with the arguments specified).
+It produces ``mixin`` proc calls that register the components for the entity with the arguments specified.
 The macro also supports nested entities (children in the hierarchical scene graph) and composes perfectly
-with user-made procedures (these must have a specific signature and tagged with ``entity``).
+with user-made procedures. These must have signature ``proc (w: World, e: Entity, ...): Entity``
+and tagged with ``entity``.
 
 ### Examples
 
-1) Creates a new entity, with these components, returns the entity handle.
+1. Creates a new entity, with these components, returns the entity handle.
 
 ```nim
-let ent1 = game.addBlueprint(with Fade(step: 0.5), Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
+let ent1 = game.addBlueprint(with Transform2d(), Fade(step: 0.5), Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
 ```
 
-Note: ``Transform2d`` and ``Hierarchy`` components are always implied.
-
-2) Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop
-(it composes with all of Nim's control flow constructs).
+2. Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop.
+The `addBlueprint` macro composes with all of Nim's control flow constructs.
 
 ```nim
-proc getExplosion*(game: var Game, parent = game.camera, x, y: float32): Entity =
-   let explosions = 32
-   let step = (Pi * 2.0) / explosions.float
-   let fadeStep = 0.05
-   result = game.addBlueprint:
-      translation = Vec2(x: x, y: y)
-      parent = parent
-      children:
-         for i in 0 ..< explosions:
-            blueprint:
-               with:
-                  Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255])
-                  Fade(step: fadeStep)
-                  Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 800.0)
+proc getExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
+  let explosions = 32
+  let step = (Pi * 2.0) / explosions.float
+  let fadeStep = 0.05
+  result = world.addBlueprint(explosion):
+    with:
+      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
+    children:
+      for i in 0 ..< explosions:
+        blueprint:
+          with:
+            Transform2d(parent: explosion)
+            Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255])
+            Fade(step: fadeStep)
+            Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 20.0)
 ```
 
 It expands to:
 
 ```
-let blueprintResult_13135030 = createEntity(game)
-mixTransform2d(game, blueprintResult_13135030, Vec2(x: x, y: y), 0.0, vec2(1, 1))
-mixHierarchy(game, blueprintResult_13135030, parent)
-mixDirty(game, blueprintResult_13135030)
+let explosion = createEntity(world)
+mixTransform2d(world, explosion, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1),
+               parent)
 for i in 0 ..< explosions:
-   let :tmp_13135040 = createEntity(game)
-   mixTransform2d(game, :tmp_13135040, vec2(0, 0), 0.0, vec2(1, 1))
-   mixHierarchy(game, :tmp_13135040, blueprintResult_13135030)
-   mixDirty(game, :tmp_13135040)
-   mixDraw2d(game, :tmp_13135040, 20, 20, [255'u8, 255, 255, 255])
-   mixFade(game, :tmp_13135040, fadeStep)
-   mixMove(game, :tmp_13135040,
-         Vec2(x: sin(step * float(i)), y: cos(step * float(i))), 800.0)
-blueprintResult_13135030
+  let :tmp_1493172298 = createEntity(world)
+  mixTransform2d(world, :tmp_1493172298, mat2d(), vec2(0, 0), Rad(0),
+                 vec2(1, 1), explosion)
+  mixDraw2d(world, :tmp_1493172298, 20, 20, [255'u8, 255, 255, 255])
+  mixFade(world, :tmp_1493172298, fadeStep)
+  mixMove(world, :tmp_1493172298,
+          Vec2(x: sin(step * float(i)), y: cos(step * float(i))), 20.0)
+explosion
 ```
 
 ## Acknowledgments
 
 - [Fixed-Time-Step Implementation](http://lspiroengine.com/?p=378)
+- [bitquid](http://bitsquid.blogspot.com/2014/10/building-data-oriented-entity-system.html)
 - [Goodluck](https://github.com/piesku/goodluck) A hackable template for creating small and fast browser games.
 - [rs-breakout](https://github.com/michalbe/rs-breakout)
 - [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial)
