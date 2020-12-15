@@ -53,7 +53,10 @@ proc mixShake*(world: var World, entity: Entity, duration = 1.0, strength = 0.0)
   world.shake = newUniquePtr(Shake(duration: duration, strength: strength))
 
 proc mixTransform2d*(world: var World, entity: Entity, trworld = mat2d(), translation = vec2(0, 0),
-      rotation = 0.Rad, scale = vec2(1, 1)) =
+      rotation = 0.Rad, scale = vec2(1, 1), parent = invalidId) =
   mixBody HasTransform2d
   world.transform[entity.idx] = Transform2D(world: trworld, translation: translation,
         rotation: rotation, scale: scale)
+  mixHierarchy(world, entity, parent)
+  mixDirty(world, entity)
+  mixFresh(world, entity)

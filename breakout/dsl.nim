@@ -1,19 +1,14 @@
 import macros, gametypes, utils, mixins
 export mixins
 
-proc blueprintImpl(world, entity, transform, hierarchy, n: NimNode): NimNode
+proc blueprintImpl(world, entity, parent, n: NimNode): NimNode
 
 proc transformBlueprint(result, world, entity, parent, n: NimNode) =
-  let transform = newCall(bindSym"mixTransform2d", world, entity)
-  let hierarchy = newCall(bindSym"mixHierarchy", world, entity)
-  let resBody = blueprintImpl(world, entity, transform, hierarchy, n)
+  let resBody = blueprintImpl(world, entity, parent, n)
+  result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", world))
+  result.add resBody
 
-  if parent.kind != nnkNone and hierarchy.len == 3: hierarchy.add parent
-  result.add(newLetStmt(entity, newCall(bindSym"createEntity", world)),
-        transform, hierarchy, newCall(bindSym"mixDirty", world, entity),
-        newCall(bindSym"mixFresh", world, entity), resBody)
-
-proc transformChildren(world, entity, n: NimNode): NimNode =
+proc transformChildren(world, entity, parent, n: NimNode): NimNode =
   proc foreignCall(n, world, entity: NimNode): NimNode =
     expectMinLen n, 1
     result = copyNimNode(n)
@@ -21,7 +16,6 @@ proc transformChildren(world, entity, n: NimNode): NimNode =
     result.add world
     result.add entity
     for i in 1 ..< n.len: result.add n[i]
-
   if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
     case $n[0]
     of "blueprint":
@@ -35,26 +29,23 @@ proc transformChildren(world, entity, n: NimNode): NimNode =
       let temp = genSym(nskTemp)
       result = newLetStmt(temp, foreignCall(n[1], world, entity))
       return
-
   result = copyNimNode(n)
   for i in 0 ..< n.len:
-    result.add transformChildren(world, entity, n[i])
+    result.add transformChildren(world, entity, parent, n[i])
 
-proc blueprintImpl(world, entity, transform, hierarchy, n: NimNode): NimNode =
+proc blueprintImpl(world, entity, parent, n: NimNode): NimNode =
   proc mixinCall(world, entity, n: NimNode): NimNode =
     expectMinLen n, 1
     result = newCall("mix" & n[0].strVal, world, entity)
     if n.kind == nnkObjConstr:
       for i in 1 ..< n.len:
         result.add newTree(nnkExprEqExpr, n[i][0], n[i][1])
-
   proc handleStmtList(result, world, entity, n: NimNode) =
     for a in n:
       if a.kind in {nnkStmtList, nnkStmtListExpr}:
         handleStmtList(result, world, entity, a)
       else:
         result.add mixinCall(world, entity, a)
-
   if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
     case $n[0]
     of "with":
@@ -67,26 +58,19 @@ proc blueprintImpl(world, entity, transform, hierarchy, n: NimNode): NimNode =
       return
     of "children":
       expectLen n, 2
-      result = transformChildren(world, entity, n[1])
+      result = transformChildren(world, entity, parent, n[1])
       return
-  elif n.kind == nnkAsgn and n[0].kind == nnkIdent:
-    case $n[0]
-    of "translation", "rotation", "scale":
-      transform.add newTree(nnkExprEqExpr, n[0], n[1])
-      result = newTree(nnkNone) # tmps here? / copy the ast
-      return
-    of "parent":
-      hierarchy.add newTree(nnkExprEqExpr, n[0], n[1])
-      result = newTree(nnkNone)
-      return
-
   result = copyNimNode(n)
   for i in 0 ..< n.len:
-    let t = blueprintImpl(world, entity, transform, hierarchy, n[i])
-    if t.kind != nnkNone: result.add t
+    result.add blueprintImpl(world, entity, parent, n[i])
 
 macro addBlueprint*(world: World, body: untyped): Entity =
   result = newTree(nnkStmtListExpr)
   let entity = genSym(nskLet, "blueprintResult")
+  transformBlueprint(result, world, entity, newTree(nnkNone), body)
+  result.add entity
+
+macro addBlueprint*(world: World, entity, body: untyped): Entity =
+  result = newTree(nnkStmtListExpr)
   transformBlueprint(result, world, entity, newTree(nnkNone), body)
   result.add entity

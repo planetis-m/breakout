@@ -3,9 +3,8 @@ import random, math, dsl, vmath, gametypes
 proc getBall*(world: var World, parent: Entity, x, y: float32): Entity =
   let angle = Pi + rand(1.0) * Pi
   result = world.addBlueprint:
-    translation = Vec2(x: x, y: y)
-    parent = parent
     with:
+      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
       Collide(size: Vec2(x: 20.0, y: 20.0))
       ControlBall()
       Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
@@ -13,9 +12,8 @@ proc getBall*(world: var World, parent: Entity, x, y: float32): Entity =
 
 proc getBrick*(world: var World, parent: Entity, x, y: float32, width, height: int32): Entity =
   result = world.addBlueprint:
-    translation = Vec2(x: x, y: y)
-    parent = parent
     with:
+      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
       Collide(size: Vec2(x: width.float32, y: height.float32))
       ControlBrick()
       Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255])
@@ -25,22 +23,22 @@ proc getExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
   let explosions = 32
   let step = (Pi * 2.0) / explosions.float
   let fadeStep = 0.05
-  result = world.addBlueprint:
-    translation = Vec2(x: x, y: y)
-    parent = parent
+  result = world.addBlueprint(explosion):
+    with:
+      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
     children:
       for i in 0 ..< explosions:
         blueprint:
           with:
+            Transform2d(parent: explosion)
             Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255])
             Fade(step: fadeStep)
             Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 20.0)
 
 proc getPaddle*(world: var World, parent: Entity, x, y: float32): Entity =
   result = world.addBlueprint:
-    translation = Vec2(x: x, y: y)
-    parent = parent
     with:
+      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
       Collide(size: Vec2(x: 100.0, y: 20.0))
       ControlPaddle()
       Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255])
@@ -58,7 +56,9 @@ proc sceneMain*(game: var Game) =
   let startingY = 50
 
   game.camera = game.world.addBlueprint:
-    with(Shake(duration: 0.0, strength: 10.0))
+    with:
+      Transform2d()
+      Shake(duration: 0.0, strength: 10.0)
     children:
       entity getPaddle(float32(game.windowWidth / 2),
             float32(game.windowHeight - 30))
