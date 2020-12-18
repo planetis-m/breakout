@@ -1,76 +1,118 @@
-import macros, gametypes, utils, mixins
+import macros, gametypes, utils, mixins, std/strutils
 export mixins
 
-proc blueprintImpl(world, entity, parent, n: NimNode): NimNode
+const
+  StmtContext = ["[]=", "add", "inc", "echo", "dec", "!"]
 
-proc transformBlueprint(result, world, entity, parent, n: NimNode) =
-  let resBody = blueprintImpl(world, entity, parent, n)
-  result.add newLetStmt(entity, newTree(nnkCall, bindSym"createEntity", world))
-  result.add resBody
+proc getName(n: NimNode): string =
+  case n.kind
+  of nnkStrLit..nnkTripleStrLit, nnkIdent, nnkSym:
+    result = n.strVal
+  of nnkDotExpr:
+    result = getName(n[1])
+  of nnkAccQuoted, nnkOpenSymChoice, nnkClosedSymChoice:
+    result = getName(n[0])
+  else:
+    expectKind(n, nnkIdent)
 
-proc transformChildren(world, entity, parent, n: NimNode): NimNode =
-  proc foreignCall(n, world, entity: NimNode): NimNode =
+proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
+  proc foreignCall(n, world, tmpContext: NimNode): NimNode =
     expectMinLen n, 1
     result = copyNimNode(n)
     result.add n[0]
     result.add world
-    result.add entity
+    result.add tmpContext
     for i in 1 ..< n.len: result.add n[i]
-  if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
-    case $n[0]
-    of "blueprint":
-      expectLen n, 2
-      result = newTree(nnkStmtList)
-      let temp = genSym(nskTemp)
-      transformBlueprint(result, world, temp, entity, n[1])
-      return
-    of "entity":
-      expectLen n, 2
-      let temp = genSym(nskTemp)
-      result = newLetStmt(temp, foreignCall(n[1], world, entity))
-      return
-  result = copyNimNode(n)
-  for i in 0 ..< n.len:
-    result.add transformChildren(world, entity, parent, n[i])
 
-proc blueprintImpl(world, entity, parent, n: NimNode): NimNode =
-  proc mixinCall(world, entity, n: NimNode): NimNode =
-    expectMinLen n, 1
-    result = newCall("mix" & $n[0], world, entity)
-    if n.kind == nnkObjConstr:
+  case n.kind
+  of nnkLiterals, nnkIdent, nnkSym, nnkDotExpr, nnkBracketExpr:
+    result = n
+  of nnkForStmt, nnkIfExpr, nnkElifExpr, nnkElseExpr,
+      nnkOfBranch, nnkElifBranch, nnkExceptBranch, nnkElse,
+      nnkConstDef, nnkWhileStmt, nnkIdentDefs, nnkVarTuple:
+    # recurse for the last son:
+    result = copyNimTree(n)
+    let len = n.len
+    if len > 0:
+      result[len-1] = tBlueprint(result[len-1], world, tmpContext, isMixin)
+  of nnkStmtList, nnkStmtListExpr, nnkWhenStmt, nnkIfStmt, nnkTryStmt,
+      nnkFinally:
+    # recurse for every child:
+    result = copyNimNode(n)
+    for x in n:
+      result.add tBlueprint(x, world, tmpContext, isMixin)
+  of nnkCaseStmt:
+    # recurse for children, but don't add call for case ident
+    result = copyNimNode(n)
+    result.add n[0]
+    for i in 1 ..< n.len:
+      result.add tBlueprint(n[i], world, tmpContext, isMixin)
+  of nnkProcDef, nnkVarSection, nnkLetSection, nnkConstSection:
+    result = n
+  of nnkObjConstr:
+    if tmpContext != nil and isMixin:
+      result = newCall("mix" & $n[0], world, tmpContext)
       for i in 1 ..< n.len:
         result.add newTree(nnkExprEqExpr, n[i][0], n[i][1])
-  proc handleStmtList(result, world, entity, n: NimNode) =
-    for a in n:
-      if a.kind in {nnkStmtList, nnkStmtListExpr}:
-        handleStmtList(result, world, entity, a)
-      else:
-        result.add mixinCall(world, entity, a)
-  if n.kind in nnkCallKinds and n[0].kind == nnkIdent:
-    case $n[0]
+    else:
+      result = n
+  of nnkCallKinds:
+    let op = normalize(getName(n[0]))
+    case op
+    of "blueprint":
+      let tmp = genSym(nskLet, "tmp")
+      let call = newTree(nnkCall, bindSym"createEntity", world)
+      result = newTree(
+        if tmpContext == nil: nnkStmtListExpr else: nnkStmtList,
+        newLetStmt(tmp, call))
+      for i in 1 ..< n.len:
+        let x = n[i]
+        if x.kind == nnkExprEqExpr:
+          let key = normalize(getName(x[0]))
+          if key == "id":
+            result.add newLetStmt(x[1], tmp)
+          else: error("Unsupported attribute: " & key, x)
+        else:
+          result.add tBlueprint(x, world, tmp, false)
+      if tmpContext == nil:
+        result.add tmp
+      else: discard
     of "with":
-      result = newStmtList()
-      if n.len == 2 and n[1].kind in {nnkStmtList, nnkStmtListExpr}:
-        handleStmtList(result, world, entity, n[1])
-      else:
-        for i in 1 ..< n.len:
-          result.add mixinCall(world, entity, n[i])
-      return
+      result = newTree(nnkStmtList)
+      for i in 1 ..< n.len:
+        result.add tBlueprint(n[i], world, tmpContext, true)
     of "children":
       expectLen n, 2
-      result = transformChildren(world, entity, parent, n[1])
-      return
-  result = copyNimNode(n)
-  for i in 0 ..< n.len:
-    result.add blueprintImpl(world, entity, parent, n[i])
+      result = tBlueprint(n[1], world, tmpContext, false)
+    elif tmpContext != nil and op notin StmtContext:
+      if isMixin:
+        result = newCall("mix" & $n[0], world, tmpContext)
+        for i in 1 ..< n.len: result.add n[i]
+      else:
+        result = newTree(nnkDiscardStmt, foreignCall(n, world, tmpContext))
+    elif op == "!" and n.len == 2:
+      result = n[1]
+    else:
+      result = n
+  else:
+    result = n
 
-macro addBlueprint*(world: World, body: untyped): Entity =
-  result = newTree(nnkStmtListExpr)
-  let entity = genSym(nskLet, "blueprintResult")
-  transformBlueprint(result, world, entity, newTree(nnkNone), body)
-  result.add entity
+macro build*(world: World, children: untyped): Entity =
+  let kids = newProc(procType=nnkDo, body=children)
+  expectKind kids, nnkDo
+  result = tBlueprint(body(kids), world, nil, false)
+  when defined(debugBlueprint):
+    echo repr(result)
 
-macro addBlueprint*(world: World, entity, body: untyped): Entity =
-  result = newTree(nnkStmtListExpr)
-  transformBlueprint(result, world, entity, newTree(nnkNone), body)
-  result.add entity
+macro build*(world: World, node, children: untyped): Entity =
+  let kids = newProc(procType=nnkDo, body=children)
+  expectKind kids, nnkDo
+  var call: NimNode
+  if node.kind in nnkCallKinds:
+    call = node
+  else:
+    call = newCall(node)
+  call.add body(kids)
+  result = tBlueprint(call, world, nil, false)
+  when defined(debugBlueprint):
+    echo repr(result)

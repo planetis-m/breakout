@@ -8,12 +8,12 @@ These are explained below.
 ## Entity management was redesigned
 
 The original codebase when updating a system or creating a new entity, it iterates up
-to ``MAX_ENTITIES``. This was eliminated by using a special data structure.
+to ``MAX_ENTITIES``. This was eliminated by using a specialized data structure.
 
-For entity management (creation, deletion) a ``slotmap`` data structure is used. It also holds
+For entity management (creation, deletion) a ``SlotMap`` is used. It also holds
 a dense sequence of ``set[HasComponent]`` which is the "signature" for each entity.
 A signature is a bit-set describing the component composition of an entity.
-This is used for iterating over all entities, skipping the ones that don't match a system's registered components.
+This is used for iterating over all entities, skipping the ones that don't match a system's "registered" components.
 These are encoded as `Query`, another bit-set and the check performed is: `signature * Query == Query`.
 
 ## Fixed timestep with interpolation
@@ -75,7 +75,8 @@ and tagged with ``entity``.
 1. Creates a new entity, with these components, returns the entity handle.
 
 ```nim
-let ent1 = game.addBlueprint(with Transform2d(), Fade(step: 0.5), Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
+let ent1 = game.addBlueprint(with Transform2d(), Fade(step: 0.5),
+    Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
 ```
 
 2. Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop.

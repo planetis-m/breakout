@@ -18,7 +18,7 @@ proc storeToBin*(s: Stream; w: World) =
       write(s, int64(len))
       for entity, has in w.signature.pairs:
         if components[i] in has:
-          write(s, entity.idx.uint16)
+          write(s, entity.idx.EntityImpl)
           storeToBin(s, v[entity.idx])
       inc(i)
     else:
@@ -28,7 +28,8 @@ proc initFromBin*[T](dst: var Array[T]; s: Stream) =
   let len = readInt64(s)
   dst.clear()
   for i in 0 ..< len:
-    let idx = readUint16(s)
+    var idx: EntityImpl
+    read(s, idx)
     initFromBin(dst[idx], s)
 
 proc save*(game: Game) =

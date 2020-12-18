@@ -39,10 +39,10 @@ proc update(game: var Game, entity: Entity) =
       transform.translation.y += collision.hit.y
       move.direction.y *= -1.0
 
-    discard game.world.getExplosion(game.camera, transform.translation.x,
+    discard game.world.createExplosion(game.camera, transform.translation.x,
           transform.translation.y)
 
-  let ballFade = game.world.addBlueprint:
+  let ballFade = game.world.build(blueprint):
     with:
       Transform2d(translation: transform.translation, parent: game.camera)
       Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
