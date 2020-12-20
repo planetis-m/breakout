@@ -26,6 +26,6 @@ proc update(game: var Game, entity: Entity) =
       game.clearColor[2] = 0
 
 proc sysShake*(game: var Game) =
-  let has = game.world.signature[game.camera]
-  if has * Query == Query:
+  let signature = game.world.signature[game.camera]
+  if signature * Query == Query:
     update(game, game.camera)

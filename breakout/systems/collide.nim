@@ -27,8 +27,8 @@ proc penetrateAabb(a, b: Collide): Vec2 =
 
 proc sysCollide*(game: var Game) =
   var allColliders: seq[Entity]
-  for colliderId, has in game.world.signature.pairs:
-    if has * Query == Query:
+  for colliderId, signature in game.world.signature.pairs:
+    if signature * Query == Query:
       template transform: untyped = game.world.transform[colliderId.idx]
       template collider: untyped = game.world.collide[colliderId.idx]
 

@@ -14,6 +14,6 @@ proc update(game: var Game, entity: Entity) =
     move.direction.x += 1.0
 
 proc sysControlPaddle*(game: var Game) =
-  for entity, has in game.world.signature.pairs:
-    if has * Query == Query:
+  for entity, signature in game.world.signature.pairs:
+    if signature * Query == Query:
       update(game, entity)

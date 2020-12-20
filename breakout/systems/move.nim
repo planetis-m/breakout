@@ -13,6 +13,6 @@ proc update(game: var Game, entity: Entity) =
     game.world.mixDirty(entity)
 
 proc sysMove*(game: var Game) =
-  for entity, has in game.world.signature.pairs:
-    if has * Query == Query:
+  for entity, signature in game.world.signature.pairs:
+    if signature * Query == Query:
       update(game, entity)

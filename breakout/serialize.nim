@@ -13,11 +13,11 @@ proc storeToBin*(s: Stream; w: World) =
   for v in w.fields:
     when v is Array:
       var len = 0
-      for _, has in w.signature.pairs:
-        if components[i] in has: inc(len)
+      for _, signature in w.signature.pairs:
+        if components[i] in signature: inc(len)
       write(s, int64(len))
-      for entity, has in w.signature.pairs:
-        if components[i] in has:
+      for entity, signature in w.signature.pairs:
+        if components[i] in signature:
           write(s, entity.idx.EntityImpl)
           storeToBin(s, v[entity.idx])
       inc(i)
