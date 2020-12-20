@@ -78,16 +78,17 @@ proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
         result.add tmp
       else: discard
     of "with":
+      assert tmpContext != nil
       result = newTree(nnkStmtList)
       for i in 1 ..< n.len:
         result.add tBlueprint(n[i], world, tmpContext, true)
     of "children":
-      expectLen n, 2
+      assert tmpContext != nil
       result = tBlueprint(n[1], world, tmpContext, false)
     elif tmpContext != nil and op notin StmtContext:
       if isMixin:
+        expectLen(n, 1)
         result = newCall("mix" & $n[0], world, tmpContext)
-        for i in 1 ..< n.len: result.add n[i]
       else:
         result = newTree(nnkDiscardStmt, foreignCall(n, world, tmpContext))
     elif op == "!" and n.len == 2:
@@ -97,14 +98,14 @@ proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
   else:
     result = n
 
-macro build*(world: World, children: untyped): Entity =
+macro build*(world: World, children: untyped): untyped =
   let kids = newProc(procType=nnkDo, body=children)
   expectKind kids, nnkDo
   result = tBlueprint(body(kids), world, nil, false)
   when defined(debugBlueprint):
     echo repr(result)
 
-macro build*(world: World, node, children: untyped): Entity =
+macro build*(world: World, node, children: untyped): untyped =
   let kids = newProc(procType=nnkDo, body=children)
   expectKind kids, nnkDo
   var call: NimNode

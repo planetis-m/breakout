@@ -61,7 +61,6 @@ proc sceneMain*(game: var Game) =
     children:
       createPaddle(float32(game.windowWidth / 2), float32(game.windowHeight - 30))
       createBall(float32(game.windowWidth / 2), float32(game.windowHeight - 60))
-
       for row in 0 ..< rowCount:
         let y = startingY + row * (brickHeight + margin) + brickHeight div 2
         for col in 0 ..< columnCount:
