@@ -1,4 +1,4 @@
-import macros, gametypes, utils, mixins, std/strutils
+import macros, gametypes, utils, mixins
 export mixins
 
 const
@@ -57,9 +57,8 @@ proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
     else:
       result = n
   of nnkCallKinds:
-    let op = normalize(getName(n[0]))
-    case op
-    of "blueprint":
+    let op = getName(n[0])
+    if eqIdent(op, "blueprint"):
       let tmp = genSym(nskLet, "tmp")
       let call = newTree(nnkCall, bindSym"createEntity", world)
       result = newTree(
@@ -68,8 +67,8 @@ proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
       for i in 1 ..< n.len:
         let x = n[i]
         if x.kind == nnkExprEqExpr:
-          let key = normalize(getName(x[0]))
-          if key == "id":
+          let key = getName(x[0])
+          if eqIdent(key, "id"):
             result.add newLetStmt(x[1], tmp)
           else: error("Unsupported attribute: " & key, x)
         else:
@@ -77,12 +76,12 @@ proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
       if tmpContext == nil:
         result.add tmp
       else: discard
-    of "with":
+    elif eqIdent(op, "with"):
       assert tmpContext != nil
       result = newTree(nnkStmtList)
       for i in 1 ..< n.len:
         result.add tBlueprint(n[i], world, tmpContext, true)
-    of "children":
+    elif eqIdent(op, "children"):
       assert tmpContext != nil
       result = tBlueprint(n[1], world, tmpContext, false)
     elif tmpContext != nil and op notin StmtContext:

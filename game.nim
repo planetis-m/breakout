@@ -1,6 +1,6 @@
 import
   std / [random, monotimes],
-  breakout / [sdlpriv, heaparray, gametypes, blueprints, slotmap, utils],
+  breakout / [sdlpriv, heaparray, gametypes, blueprints, slotmap, utils, loadasset],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
      fade, move, shake, transform2d, handleevents]
 
@@ -89,7 +89,7 @@ proc main =
   randomize()
   var game = initGame(740, 555)
 
-  sceneMain(game)
+  loadScene(game, "scene_main.json")
   game.run()
 
 main()
