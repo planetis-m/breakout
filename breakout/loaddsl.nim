@@ -30,27 +30,28 @@ template readFields(parser, varSection, body) =
     discard getTok(parser)
   eat(parser, tkCurlyRi)
 
-macro dispatch*(dst: World; entity: Entity; parser: JsonParser, body: untyped): untyped =
+macro dispatch*(world: World; entity: Entity; parser: JsonParser, body: untyped): untyped =
   let has = genSym(nskVar, "has")
   let caseHas = nnkCaseStmt.newTree(has)
   for n in body:
     expectKind(n, nnkProcDef)
-    let varSection = newNimNode(nnkVarSection)
-    let name = substr($n[0], len("on"))
-    let mixCall = newCall("mix" & name, dst, entity)
-    let caseField = caseANormalized()
-    for i in 1..<n[3].len:
-      let param = n[3][i]
-      varSection.add param
-      for j in 0 ..< param.len-2:
-        mixCall.add newTree(nnkExprEqExpr, param[j], param[j])
-        caseField.add nnkOfBranch.newTree(newLit(nimIdentNormalize($param[j])),
-            getAst(getFieldValue(parser, param[j])))
-    caseField.add nnkElse.newTree(getAst(raiseWrongKey(parser)))
     let inner = newStmtList()
-    if n[3].len > 1:
+    let comp = substr($n.name, len("on"))
+    let mixCall = newCall("mix" & comp, world, entity)
+    if n.params.len > 1:
+      let varSection = newNimNode(nnkVarSection)
+      let caseField = caseANormalized()
+      for i in 1..<n.params.len:
+        let param = n.params[i]
+        expectKind(param, nnkIdentDefs)
+        varSection.add param
+        for j in 0 ..< param.len-2:
+          mixCall.add newTree(nnkExprEqExpr, param[j], param[j])
+          caseField.add nnkOfBranch.newTree(newLit(nimIdentNormalize($param[j])),
+              getAst(getFieldValue(parser, param[j])))
+      caseField.add nnkElse.newTree(getAst(raiseWrongKey(parser)))
       inner.add getAst(readFields(parser, varSection, caseField))
     inner.add mixCall
-    caseHas.add nnkOfBranch.newTree(ident("Has" & name), inner)
+    caseHas.add nnkOfBranch.newTree(ident("Has" & comp), inner)
   caseHas.add nnkElse.newTree(newTree(nnkDiscardStmt, newNimNode(nnkEmpty)))
   result = getAst(readTuple(parser, has, caseHas))
