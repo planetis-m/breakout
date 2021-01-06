@@ -1,6 +1,6 @@
 import
   std/[streams, times, monotimes, strutils, os],
-  serialize, gametypes, slottables, ".."/logger,
+  serialize, gametypes, slottables,
   bingo, bingo/marshal_smartptrs, fusion/smartptrs
 
 const
@@ -11,7 +11,7 @@ const
   filename = "snapshot"
   # Used when loading snapshots
   maxRetries = 3
-  expiration = initDuration(seconds = 30)
+  expiration = initDuration(seconds = 20)
 
 type
   SnapshotError = object of CatchableError
@@ -27,7 +27,6 @@ proc save(x: World; savefile: string) =
     storeBin(fs, cookie)
     # Write time
     let time = getTime()
-    debug("Saving snapshot at ", time, true)
     write(fs, time.toUnix)
     # Serialize
     storeBin(fs, x)
@@ -45,7 +44,6 @@ proc load(x: var World; savefile: string) =
       raiseSnapshotError("Invalid snapshot file: header mismatch")
     # Discard lastTime
     let unix = readInt64(fs)
-    hint("Loading from snapshot created at ", initTime(unix, 0), true)
     # Deserialize
     loadBin(fs, x)
   finally:
@@ -81,10 +79,9 @@ proc persist*(game: Game; handler: var SnaphotHandler) =
       handler.lastTime = now
       handler.retries = 0
     except:
-      error("Persist failed, current retries: ", handler.retries, ", msg: ", getCurrentExceptionMsg(), true)
       # If still failing after `maxRetries`, independently of the time past
       if handler.retries >= maxRetries:
-        fatalError("Persist failed, maximum retries exceeded.", true)
+        quit("Persist failed, maximum retries exceeded." & getCurrentExceptionMsg())
       handler.retries.inc
 
 proc restore*(game: var Game; handler: SnaphotHandler) =
@@ -93,4 +90,4 @@ proc restore*(game: var Game; handler: SnaphotHandler) =
     load(game.world, handler.savefile)
   except:
     # Quit immedietely if the database can't be loaded
-    fatalError("Restore failed: ", getCurrentExceptionMsg(), true)
+    quit("Restore failed: " & getCurrentExceptionMsg())
