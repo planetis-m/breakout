@@ -1,5 +1,5 @@
 import
-  gametypes, slotmap, vmath, heaparray, std/streams,
+  gametypes, slottables, vmath, heaparrays, std/streams,
   bingo, bingo/marshal_smartptrs, fusion/smartptrs
 from typetraits import distinctBase
 
@@ -31,13 +31,3 @@ proc initFromBin*[T](dst: var Array[T]; s: Stream) =
     var idx: EntityImpl
     read(s, idx)
     initFromBin(dst[idx], s)
-
-proc save*(game: Game) =
-  let fs = newFileStream("save1.bin", fmWrite)
-  if fs != nil:
-    try: storeBin(fs, game.world) finally: fs.close()
-
-proc load*(game: var Game) =
-  let fs = newFileStream("save1.bin")
-  if fs != nil:
-    try: loadBin(fs, game.world) finally: fs.close()

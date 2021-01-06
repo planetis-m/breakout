@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, vmath, dsl, slotmap], fusion / smartptrs, std / random
+import ".."/[gametypes, heaparrays, vmath, builddsl, slottables], fusion/smartptrs, std/random
 
 const Query = {HasTransform2d, HasShake}
 

@@ -1,5 +1,5 @@
-import sdlpriv, vmath, entitytype, slotmap, heaparray, fusion/smartptrs
-export entitytype
+import sdlpriv, vmath, entities, slottables, heaparrays, fusion/smartptrs
+export entities
 
 type
   Input* = enum
@@ -62,7 +62,7 @@ type
     scale*: Vec2       # local scale relative to the parent
 
   World* = object
-    signature*: SlotMap[set[HasComponent]]
+    signature*: SlotTable[set[HasComponent]]
 
     collide*: Array[Collide]
     draw2d*: Array[Draw2d]

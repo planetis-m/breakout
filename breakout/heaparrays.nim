@@ -1,4 +1,4 @@
-import entitytype
+import entities
 from typetraits import supportsCopyMem
 
 type

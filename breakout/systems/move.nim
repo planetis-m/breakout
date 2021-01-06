@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, vmath, dsl, slotmap]
+import ".."/[gametypes, heaparrays, vmath, builddsl, slottables]
 
 const Query = {HasTransform2d, HasMove}
 

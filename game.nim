@@ -1,6 +1,6 @@
 import
-  std / [random, monotimes],
-  breakout / [sdlpriv, heaparray, gametypes, blueprints, slotmap, utils, loadasset],
+  std / [random, monotimes, os],
+  breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, saves],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
      fade, move, shake, transform2d, handleevents]
 
@@ -12,7 +12,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
   let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
 
   let world = World(
-     signature: initSlotMapOfCap[set[HasComponent]](maxEntities),
+     signature: initSlotTableOfCap[set[HasComponent]](maxEntities),
 
      collide: initArray[Collide](),
      draw2d: initArray[Draw2d](),
@@ -58,7 +58,7 @@ proc render(game: var Game, intrpl: float32) =
   sysDraw2d(game, intrpl)
   game.renderer.impl.present()
 
-proc run(game: var Game) =
+proc run(game: var Game; snapshot: var SnaphotHandler) =
   const
     ticksPerSec = 25
     skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
@@ -70,6 +70,7 @@ proc run(game: var Game) =
 
   while true:
     handleEvents(game)
+    persist(game, snapshot)
     if not game.isRunning: break
 
     let now = getMonoTime().ticks
@@ -88,8 +89,10 @@ proc run(game: var Game) =
 proc main =
   randomize()
   var game = initGame(740, 555)
-
-  loadScene(game, "scene_main.json")
-  game.run()
+  var snapshot = initSnaphotHandler()
+  if fileExists(snapshot.savefile):
+    restore(game, snapshot)
+  else: createScene(game)
+  run(game, snapshot)
 
 main()

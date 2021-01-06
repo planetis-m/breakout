@@ -1,4 +1,4 @@
-import macros, gametypes, utils, mixins
+import std/macros, gametypes, utils, mixins
 export mixins
 
 const

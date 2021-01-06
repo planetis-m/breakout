@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, vmath, blueprints, dsl, slotmap],
+import ".."/[gametypes, heaparrays, vmath, blueprints, builddsl, slottables],
     fusion/smartptrs
 
 const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}

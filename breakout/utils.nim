@@ -1,4 +1,4 @@
-import gametypes, slotmap, heaparray
+import gametypes, slottables, heaparrays
 
 proc createEntity*(world: var World): Entity =
   result = world.signature.incl({})

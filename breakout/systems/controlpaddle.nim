@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, vmath, slotmap]
+import ".."/[gametypes, heaparrays, vmath, slottables]
 
 const Query = {HasMove, HasControlPaddle}
 

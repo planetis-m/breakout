@@ -15,6 +15,10 @@ type
 var
   isSdlContextAlive: bool
 
+proc raiseSdl*(msg: string) {.noreturn.} =
+  ## Raises a `SdlException` exception with message `msg`.
+  raise newException(SdlException, msg)
+
 proc `=destroy`(context: var SdlContext) =
   if isSdlContextAlive:
     sdl2.quit()
@@ -41,18 +45,18 @@ proc sdlInit*(flags: cint): SdlContext =
       isSdlContextAlive = true
       result = SdlContext()
     else:
-      raise newException(SdlException, $getError())
+      raiseSdl($getError())
 
 proc newWindow*(title: string; x, y, w, h: cint; flags: uint32): Window =
   let impl = createWindow(title, x, y, w, h, flags)
   if impl != nil:
     result = Window(impl: impl)
   else:
-    raise newException(SdlException, $getError())
+    raiseSdl($getError())
 
 proc newRenderer*(window: Window; index: cint; flags: cint): Renderer =
   let impl = createRenderer(window.impl, index, flags)
   if impl != nil:
     result = Renderer(impl: impl)
   else:
-    raise newException(SdlException, $getError())
+    raiseSdl($getError())

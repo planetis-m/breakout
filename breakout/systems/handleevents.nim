@@ -1,4 +1,4 @@
-import ".." / [gametypes, sdlpriv, serialize]
+import ".."/[gametypes, sdlpriv]
 
 proc handleEvents*(game: var Game) =
   var event: Event
@@ -12,10 +12,6 @@ proc handleEvents*(game: var Game) =
         game.inputState[Left] = true
       of SdlScancodeRight, SdlScancodeD:
         game.inputState[Right] = true
-      of SdlScancodeS:
-        save(game)
-      of SdlScancodeL:
-        load(game)
       else: discard
     elif event.kind == KeyUp and not event.key.repeat:
       case event.key.keysym.scancode

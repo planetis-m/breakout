@@ -1,4 +1,4 @@
-import random, math, dsl, vmath, gametypes
+import std/[random, math], builddsl, vmath, gametypes
 
 proc createBall*(world: var World, parent: Entity, x, y: float32): Entity =
   let angle = Pi + rand(1.0) * Pi
@@ -43,7 +43,7 @@ proc createPaddle*(world: var World, parent: Entity, x, y: float32): Entity =
       Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255])
       Move(speed: 20.0)
 
-proc sceneMain*(game: var Game) =
+proc createScene*(game: var Game) =
   let columnCount = 10
   let rowCount = 10
   let brickWidth = 50

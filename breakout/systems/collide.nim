@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, vmath, slotmap], math
+import ".."/[gametypes, heaparrays, vmath, slottables], std/math
 
 const Query = {HasTransform2d, HasCollide}
 

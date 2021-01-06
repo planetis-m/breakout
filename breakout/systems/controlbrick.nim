@@ -1,4 +1,4 @@
-import ".." / [gametypes, heaparray, blueprints, slotmap], std / random
+import ".."/[gametypes, heaparrays, blueprints, slottables], std/random
 
 const Query = {HasControlBrick, HasCollide, HasFade}
 

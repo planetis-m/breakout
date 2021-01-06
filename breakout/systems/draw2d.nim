@@ -1,4 +1,4 @@
-import math, ".." / [gametypes, heaparray, vmath, slotmap, sdlpriv]
+import math, ".."/[gametypes, heaparrays, vmath, slottables, sdlpriv]
 
 const Query = {HasDraw2d, HasPrevious, HasTransform2d}
 const Tolerance = 0.75'f32
