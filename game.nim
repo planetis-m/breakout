@@ -1,6 +1,6 @@
 import
   std / [random, monotimes, os],
-  breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, saves],
+  breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, snapshots],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
      fade, move, shake, transform2d, handleevents]
 
@@ -58,7 +58,7 @@ proc render(game: var Game, intrpl: float32) =
   sysDraw2d(game, intrpl)
   game.renderer.impl.present()
 
-proc run(game: var Game; snapshot: var SnaphotHandler) =
+proc run(game: var Game; snapshot: var SnapHandler) =
   const
     ticksPerSec = 25
     skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
@@ -89,7 +89,7 @@ proc run(game: var Game; snapshot: var SnaphotHandler) =
 proc main =
   randomize()
   var game = initGame(740, 555)
-  var snapshot = initSnaphotHandler()
+  var snapshot = initSnapHandler()
   if fileExists(snapshot.savefile):
     restore(game, snapshot)
   else: createScene(game)
