@@ -54,6 +54,9 @@ proc snapshotDir(): string =
   if not dirExists(result):
     createDir(result)
 
+proc snapExists*(snapshot: SnapHandler): bool =
+  result = fileExists(snapshot.savefile)
+
 proc initSnapHandler*(): SnapHandler =
   let savefile = snapshotDir() / filename & SnapExt
   result = SnapHandler(savefile: savefile, lastTime: getMonoTime())
@@ -77,9 +80,6 @@ proc persist*(game: var Game) =
       if game.snapshot.retries >= maxRetries:
         quit("Persist failed, maximum retries exceeded." & getCurrentExceptionMsg())
       game.snapshot.retries.inc
-
-proc snapExists*(game: Game): bool =
-  result = fileExists(game.snapshot.savefile)
 
 proc restore*(game: var Game) =
   ## Load the world from the savefile.

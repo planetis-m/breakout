@@ -1,5 +1,5 @@
 import
-  std / [random, monotimes],
+  std / [random, monotimes, os],
   breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, snapshots],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
@@ -24,7 +24,6 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
   result = Game(
     world: world,
-    snapshot: initSnapHandler(),
 
     camera: invalidId,
     isRunning: true,
@@ -91,8 +90,9 @@ proc run(game: var Game) =
 proc main =
   randomize()
   var game = initGame(740, 555)
+  game.snapshot = initSnapHandler()
   # Restore previous snapshot of the World
-  if snapExists(game):
+  if snapExists(game.snapshot):
     restore(game)
   else: createScene(game)
 
