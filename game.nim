@@ -2,39 +2,40 @@ import
   std / [random, monotimes],
   breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, snapshots],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
-     fade, move, shake, transform2d, handleevents]
+      fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
   let sdlContext = sdlInit(InitVideo or InitEvents)
   let window = newWindow("Breakout", SdlWindowPosCentered,
-        SdlWindowPosCentered, windowWidth, windowHeight, SdlWindowShown)
+      SdlWindowPosCentered, windowWidth, windowHeight, SdlWindowShown)
 
   let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
 
   let world = World(
-     signature: initSlotTableOfCap[set[HasComponent]](maxEntities),
+    signature: initSlotTableOfCap[set[HasComponent]](maxEntities),
 
-     collide: initArray[Collide](),
-     draw2d: initArray[Draw2d](),
-     fade: initArray[Fade](),
-     hierarchy: initArray[Hierarchy](),
-     move: initArray[Move](),
-     previous: initArray[Previous](),
-     transform: initArray[Transform2d]())
+    collide: initArray[Collide](),
+    draw2d: initArray[Draw2d](),
+    fade: initArray[Fade](),
+    hierarchy: initArray[Hierarchy](),
+    move: initArray[Move](),
+    previous: initArray[Previous](),
+    transform: initArray[Transform2d]())
 
   result = Game(
-     world: world,
-     snapshot: initSnapHandler(),
+    world: world,
+    snapshot: initSnapHandler(),
 
-     windowWidth: windowWidth,
-     windowHeight: windowHeight,
-     isRunning: true,
+    camera: invalidId,
+    isRunning: true,
+    windowWidth: windowWidth,
+    windowHeight: windowHeight,
 
-     renderer: renderer,
-     window: window,
-     sdlContext: sdlContext,
+    renderer: renderer,
+    window: window,
+    sdlContext: sdlContext,
 
-     clearColor: [0'u8, 0, 0, 255])
+    clearColor: [0'u8, 0, 0, 255])
 
 proc update(game: var Game) =
   # The Game engine that consist of these systems
@@ -91,9 +92,8 @@ proc main =
   randomize()
   var game = initGame(740, 555)
   # Restore previous snapshot of the World
-  if snapExists(game.snapshot):
+  if snapExists(game):
     restore(game)
-    game.camera = toEntity(0, 1) #hack
   else: createScene(game)
 
   run(game)

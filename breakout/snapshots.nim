@@ -1,6 +1,6 @@
 import
   std/[streams, times, monotimes, strutils, os],
-  serialize, gametypes, slottables,
+  serialize, gametypes, slottables, entities,
   bingo, bingo/marshal_smartptrs, fusion/smartptrs
 
 const
@@ -54,9 +54,6 @@ proc snapshotDir(): string =
   if not dirExists(result):
     createDir(result)
 
-proc snapExists*(snapshot: SnapHandler): bool =
-  result = fileExists(snapshot.savefile)
-
 proc initSnapHandler*(): SnapHandler =
   let savefile = snapshotDir() / filename & SnapExt
   result = SnapHandler(savefile: savefile, lastTime: getMonoTime())
@@ -81,10 +78,14 @@ proc persist*(game: var Game) =
         quit("Persist failed, maximum retries exceeded." & getCurrentExceptionMsg())
       game.snapshot.retries.inc
 
+proc snapExists*(game: Game): bool =
+  result = fileExists(game.snapshot.savefile)
+
 proc restore*(game: var Game) =
   ## Load the world from the savefile.
   try:
     load(game.world, game.snapshot.savefile)
+    game.camera = toEntity(0, 1) #hack
   except:
     # Quit immedietely if the world can't be loaded
     quit("Restore failed: " & getCurrentExceptionMsg())
