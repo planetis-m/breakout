@@ -24,6 +24,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
   result = Game(
      world: world,
+     snapshot: initSnapHandler(),
 
      windowWidth: windowWidth,
      windowHeight: windowHeight,
@@ -58,7 +59,7 @@ proc render(game: var Game, intrpl: float32) =
   sysDraw2d(game, intrpl)
   game.renderer.impl.present()
 
-proc run(game: var Game; snapshot: var SnapHandler) =
+proc run(game: var Game) =
   const
     ticksPerSec = 25
     skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
@@ -70,7 +71,7 @@ proc run(game: var Game; snapshot: var SnapHandler) =
 
   while true:
     handleEvents(game)
-    persist(game, snapshot)
+    persist(game)
     if not game.isRunning: break
 
     let now = getMonoTime().ticks
@@ -89,11 +90,12 @@ proc run(game: var Game; snapshot: var SnapHandler) =
 proc main =
   randomize()
   var game = initGame(740, 555)
-  var snapshot = initSnapHandler()
-  if snapExists(snapshot):
-    restore(game, snapshot)
+  # Restore previous snapshot of the World
+  if snapExists(game.snapshot):
+    restore(game)
     game.camera = toEntity(0, 1) #hack
   else: createScene(game)
-  run(game, snapshot)
+
+  run(game)
 
 main()

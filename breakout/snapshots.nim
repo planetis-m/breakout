@@ -54,12 +54,6 @@ proc snapshotDir(): string =
   if not dirExists(result):
     createDir(result)
 
-type
-  SnapHandler* = object
-    savefile: string
-    lastTime: MonoTime
-    retries: int
-
 proc snapExists*(snapshot: SnapHandler): bool =
   result = fileExists(snapshot.savefile)
 
@@ -67,30 +61,30 @@ proc initSnapHandler*(): SnapHandler =
   let savefile = snapshotDir() / filename & SnapExt
   result = SnapHandler(savefile: savefile, lastTime: getMonoTime())
 
-proc persist*(game: Game; snapshot: var SnapHandler) =
+proc persist*(game: var Game) =
   ## Write to a single save per application run. An expiration timer is used
   ## so that it doesn't constantly save to disk.
   let now = getMonoTime()
-  if now - snapshot.lastTime >= expiration:
+  if now - game.snapshot.lastTime >= expiration:
     try:
       # Reset expiration timer
-      snapshot.lastTime = now
+      game.snapshot.lastTime = now
       # Save to a temporary file
       let tmp = snapshotDir() / filename & SnapExt & ".new"
       save(game.world, tmp)
       # Upon success overwrite previous snapshot
-      moveFile(tmp, snapshot.savefile)
+      moveFile(tmp, game.snapshot.savefile)
       # Reset retry counter
-      snapshot.retries = 0
+      game.snapshot.retries = 0
     except:
-      if snapshot.retries >= maxRetries:
+      if game.snapshot.retries >= maxRetries:
         quit("Persist failed, maximum retries exceeded." & getCurrentExceptionMsg())
-      snapshot.retries.inc
+      game.snapshot.retries.inc
 
-proc restore*(game: var Game; snapshot: SnapHandler) =
+proc restore*(game: var Game) =
   ## Load the world from the savefile.
   try:
-    load(game.world, snapshot.savefile)
+    load(game.world, game.snapshot.savefile)
   except:
     # Quit immedietely if the world can't be loaded
     quit("Restore failed: " & getCurrentExceptionMsg())

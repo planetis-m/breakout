@@ -1,4 +1,4 @@
-import sdlpriv, vmath, entities, slottables, heaparrays, fusion/smartptrs
+import sdlpriv, vmath, entities, slottables, heaparrays, fusion/smartptrs, std/monotimes
 export entities
 
 type
@@ -73,8 +73,14 @@ type
     shake*: UniquePtr[Shake]
     transform*: Array[Transform2d]
 
+  SnapHandler* = object
+    savefile*: string
+    lastTime*: MonoTime
+    retries*: int
+
   Game* = object
     world*: World
+    snapshot*: SnapHandler
 
     toDelete*: seq[Entity]
     inputState*: array[Input, bool]
