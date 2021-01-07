@@ -94,7 +94,7 @@ proc storeBin*[T](s: Stream; a: SlotTable[T]) =
   for x in a.slots:
     write(s, x.version)
     if x.version mod 2 > 0:
-      storeToBin(s, a.data[x.idx].value)
+      storeBin(s, a.data[x.idx].value)
 
 proc initFromBin*[T](dst: var SlotTable[T]; s: Stream) =
   let len = s.readInt64()

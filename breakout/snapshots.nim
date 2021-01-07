@@ -22,7 +22,7 @@ proc raiseSnapError(msg: string) {.noinline, noreturn.} =
 proc save(x: World; savefile: string) =
   var fs: FileStream
   try:
-    fs = openFileStream(savefile, fmReadWrite)
+    fs = openFileStream(savefile, fmWrite)
     # Store header
     storeBin(fs, cookie)
     # Write time
@@ -49,45 +49,48 @@ proc load(x: var World; savefile: string) =
   finally:
     if fs != nil: fs.close()
 
-proc snapshotsDir(): string =
+proc snapshotDir(): string =
   result = getAppDir() / "snapshots"
   if not dirExists(result):
     createDir(result)
 
 type
   SnapHandler* = object
-    savefile*: string
+    savefile: string
     lastTime: MonoTime
     retries: int
 
+proc snapExists*(snapshot: SnapHandler): bool =
+  result = fileExists(snapshot.savefile)
+
 proc initSnapHandler*(): SnapHandler =
-  let savefile = snapshotsDir() / filename & SnapExt
+  let savefile = snapshotDir() / filename & SnapExt
   result = SnapHandler(savefile: savefile, lastTime: getMonoTime())
 
-proc persist*(game: Game; handler: var SnapHandler) =
+proc persist*(game: Game; snapshot: var SnapHandler) =
   ## Write to a single save per application run. An expiration timer is used
   ## so that it doesn't constantly save to disk.
   let now = getMonoTime()
-  if now - handler.lastTime >= expiration:
+  if now - snapshot.lastTime >= expiration:
     try:
+      # Reset expiration timer
+      snapshot.lastTime = now
       # Save to a temporary file
-      let tmp = snapshotsDir() / filename & SnapExt & ".new"
+      let tmp = snapshotDir() / filename & SnapExt & ".new"
       save(game.world, tmp)
       # Upon success overwrite previous snapshot
-      moveFile(tmp, handler.savefile)
-      # Reset retry counter and expiration timer
-      handler.lastTime = now
-      handler.retries = 0
+      moveFile(tmp, snapshot.savefile)
+      # Reset retry counter
+      snapshot.retries = 0
     except:
-      # If still failing after `maxRetries`, independently of the time past
-      if handler.retries >= maxRetries:
+      if snapshot.retries >= maxRetries:
         quit("Persist failed, maximum retries exceeded." & getCurrentExceptionMsg())
-      handler.retries.inc
+      snapshot.retries.inc
 
-proc restore*(game: var Game; handler: SnapHandler) =
-  ## Load the database from the savefile.
+proc restore*(game: var Game; snapshot: SnapHandler) =
+  ## Load the world from the savefile.
   try:
-    load(game.world, handler.savefile)
+    load(game.world, snapshot.savefile)
   except:
-    # Quit immedietely if the database can't be loaded
+    # Quit immedietely if the world can't be loaded
     quit("Restore failed: " & getCurrentExceptionMsg())

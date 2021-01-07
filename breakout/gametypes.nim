@@ -82,8 +82,8 @@ type
     camera*: Entity
 
     isRunning*: bool
-    tickId*: int
     windowWidth*, windowHeight*: int32
+    tickId*: int
 
     renderer*: Renderer
     window*: Window

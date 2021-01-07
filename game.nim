@@ -1,5 +1,5 @@
 import
-  std / [random, monotimes, os],
+  std / [random, monotimes],
   breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, snapshots],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
      fade, move, shake, transform2d, handleevents]
@@ -90,8 +90,9 @@ proc main =
   randomize()
   var game = initGame(740, 555)
   var snapshot = initSnapHandler()
-  if fileExists(snapshot.savefile):
+  if snapExists(snapshot):
     restore(game, snapshot)
+    game.camera = toEntity(0, 1) #hack
   else: createScene(game)
   run(game, snapshot)
 

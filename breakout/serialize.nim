@@ -3,10 +3,10 @@ import
   bingo, bingo/marshal_smartptrs, fusion/smartptrs
 from typetraits import distinctBase
 
-proc storeToBin*[T: distinct](s: Stream; x: T) = storeToBin(s, x.distinctBase)
+proc storeBin*[T: distinct](s: Stream; x: T) = storeBin(s, x.distinctBase)
 proc initFromBin[T: distinct](dst: var T; s: Stream) = initFromBin(dst.distinctBase, s)
 
-proc storeToBin*(s: Stream; w: World) =
+proc storeBin*(s: Stream; w: World) =
   const components = [HasCollide, HasDraw2d, HasFade, HasHierarchy,
                       HasMove, HasPrevious, HasTransform2d]
   var i = 0
@@ -19,10 +19,10 @@ proc storeToBin*(s: Stream; w: World) =
       for entity, signature in w.signature.pairs:
         if components[i] in signature:
           write(s, entity.idx.EntityImpl)
-          storeToBin(s, v[entity.idx])
+          storeBin(s, v[entity.idx])
       inc(i)
     else:
-      storeToBin(s, v)
+      storeBin(s, v)
 
 proc initFromBin*[T](dst: var Array[T]; s: Stream) =
   let len = readInt64(s)
