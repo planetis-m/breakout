@@ -24,6 +24,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
   result = Game(
     world: world,
+    snapshot: initSnapHandler(),
 
     camera: invalidId,
     isRunning: true,
@@ -90,7 +91,6 @@ proc run(game: var Game) =
 proc main =
   randomize()
   var game = initGame(740, 555)
-  game.snapshot = initSnapHandler()
   # Restore previous snapshot of the World
   if snapExists(game.snapshot):
     restore(game)

@@ -38,6 +38,7 @@ macro dispatch*(world: World; entity: Entity; parser: JsonParser, body: untyped)
         let mixCall = buildAst(call(ident("mix" & comp), world, entity)):
           for i in 1..<n.params.len:
             let param = n.params[i]
+            expectKind(param, nnkIdentDefs)
             for j in 0 ..< param.len-2:
               exprEqExpr(param[j], param[j])
 
@@ -46,7 +47,6 @@ macro dispatch*(world: World; entity: Entity; parser: JsonParser, body: untyped)
               dotExpr(parser, ident"a")))):
             for i in 1..<n.params.len:
               let param = n.params[i]
-              expectKind(param, nnkIdentDefs)
               for j in 0 ..< param.len-2:
                 ofBranch(newLit(nimIdentNormalize($param[j]))):
                   getAst(getFieldValue(parser, param[j]))

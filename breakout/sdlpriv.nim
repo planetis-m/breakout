@@ -3,7 +3,7 @@ export sdl2
 
 type
   SdlContext* = object
-
+    notMoved: bool
   Window* = object
     impl*: WindowPtr
   Renderer* = object
@@ -20,7 +20,7 @@ proc raiseSdl*(msg: string) {.noreturn.} =
   raise newException(SdlException, msg)
 
 proc `=destroy`(context: var SdlContext) =
-  if isSdlContextAlive:
+  if isSdlContextAlive and context.notMoved:
     sdl2.quit()
     isSdlContextAlive = false
 proc `=copy`(context: var SdlContext; original: SdlContext) {.error.}
@@ -43,7 +43,7 @@ proc sdlInit*(flags: cint): SdlContext =
     if sdl2.init(flags) == SdlSuccess:
       # Initialize SDL without any explicit subsystems (flags = 0).
       isSdlContextAlive = true
-      result = SdlContext()
+      result = SdlContext(notMoved: true)
     else:
       raiseSdl($getError())
 
