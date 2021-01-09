@@ -1,5 +1,5 @@
 import
-  std / [random, monotimes, os],
+  std / [random, monotimes],
   breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils, snapshots],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]

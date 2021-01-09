@@ -1,4 +1,4 @@
-import entities, heaparrays, bingo, std/streams
+import entities, bingo, std/streams
 
 type
   Entry*[T] = tuple
