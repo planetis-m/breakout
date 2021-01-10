@@ -7,44 +7,47 @@ proc storeBin*[T: distinct](s: Stream; x: T) = storeBin(s, x.distinctBase)
 proc initFromBin[T: distinct](dst: var T; s: Stream) = initFromBin(dst.distinctBase, s)
 
 type
-  WrongSection = object of CatchableError
-  GameSection* = enum
-    secSignature = -1
-    secCollide = HasCollide
-    secDraw2d = HasDraw2d
-    secFade = HasFade
-    secHierarchy = HasHierarchy
-    secMove = HasMove
-    secPrevious = HasPrevious
-    secShake = HasShake
-    secTransform2d = HasTransform2d
+  SectionKind = enum
+    secUnknown
+    secSlotMap
+    secSparseSet
+    secSingleton
+    secArray
 
-proc raiseWrongSection*(section, expected: GameSection) {.noreturn.} =
+  WrongSection = object of CatchableError
+
+proc raiseWrongSection*(section, expected: SectionKind) {.noreturn.} =
   raise newException(WrongSection, "Got '" & $section & "', but expected '" & $expected & "'")
 
-template storeSection(section, data) =
-  storeBin(s, section)
+template storeSlotSection(data) =
+  storeBin(s, secSlotMap)
+  storeBin(s, data)
+
+template storeSingleSection(data) =
+  storeBin(s, secSingleton)
+  storeBin(s, data)
+
+template storeArrSection(component, data) =
+  storeBin(s, secArray)
   var len = 0
   for _, signature in w.signature.pairs:
-    if section.HasComponent in signature: inc(len)
+    if component in signature: inc(len)
   write(s, int64(len))
   for entity, signature in w.signature.pairs:
-    if section.HasComponent in signature:
+    if component in signature:
       write(s, entity.idx.EntityImpl)
       storeBin(s, data[entity.idx])
 
 proc storeBin*(s: Stream; w: World) =
-  storeBin(s, secSignature)
-  storeBin(s, w.signature)
-  storeSection secCollide, w.collide
-  storeSection secDraw2d, w.draw2d
-  storeSection secFade, w.fade
-  storeSection secHierarchy, w.hierarchy
-  storeSection secMove, w.move
-  storeSection secPrevious, w.previous
-  storeBin(s, secShake)
-  storeBin(s, w.shake)
-  storeSection secTransform2d, w.transform
+  storeSlotSection w.signature
+  storeArrSection HasCollide, w.collide
+  storeArrSection HasDraw2d, w.draw2d
+  storeArrSection HasFade, w.fade
+  storeArrSection HasHierarchy, w.hierarchy
+  storeArrSection HasMove, w.move
+  storeArrSection HasPrevious, w.previous
+  storeSingleSection w.shake
+  storeArrSection HasTransform2d, w.transform
 
 proc initFromBin*[T](dst: var Array[T]; s: Stream) =
   let len = readInt64(s)
@@ -54,25 +57,30 @@ proc initFromBin*[T](dst: var Array[T]; s: Stream) =
     read(s, idx)
     initFromBin(dst[idx], s)
 
-proc loadSeperator*(s: Stream, expected: GameSection) =
-  let section = binTo(s, GameSection)
+proc loadSeperator*(s: Stream, expected: SectionKind) =
+  let section = binTo(s, SectionKind)
   if section != expected:
     raiseWrongSection(section, expected)
 
-template loadSection(section, data) =
-  loadSeperator(s, section)
-  loadBin(s, data)
+template loadArrSection(dst) =
+  loadSeperator(s, secArray)
+  loadBin(s, dst)
+
+template loadSlotSection(dst) =
+  loadSeperator(s, secSlotMap)
+  loadBin(s, dst)
+
+template loadSingleSection(dst) =
+  loadSeperator(s, secSingleton)
+  loadBin(s, dst)
 
 proc initFromBin*(dst: var World; s: Stream) =
-  var currentSection: GameSection
-  loadSeperator(s, secSignature)
-  loadBin(s, dst.signature)
-  loadSection secCollide, dst.collide
-  loadSection secDraw2d, dst.draw2d
-  loadSection secFade, dst.fade
-  loadSection secHierarchy, dst.hierarchy
-  loadSection secMove, dst.move
-  loadSection secPrevious, dst.previous
-  loadSeperator(s, secShake)
-  loadBin(s, dst.shake)
-  loadSection secTransform2d, dst.transform
+  loadSlotSection dst.signature
+  loadArrSection dst.collide
+  loadArrSection dst.draw2d
+  loadArrSection dst.fade
+  loadArrSection dst.hierarchy
+  loadArrSection dst.move
+  loadArrSection dst.previous
+  loadSingleSection dst.shake
+  loadArrSection dst.transform
