@@ -27,5 +27,5 @@ proc update(game: var Game, entity: Entity) =
 
 proc sysShake*(game: var Game) =
   let signature = game.world.signature[game.camera]
-  if signature * Query == Query:
+  if Query <= signature:
     update(game, game.camera)

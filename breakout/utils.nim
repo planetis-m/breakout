@@ -9,7 +9,7 @@ iterator queryAll*(world: World, parent: Entity, query: set[HasComponent]): Enti
   var frontier = @[parent]
   while frontier.len > 0:
     let entity = frontier.pop()
-    if world.signature[entity] * query == query:
+    if query <= world.signature[entity]:
       yield entity
 
     var childId = hierarchy.head

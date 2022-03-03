@@ -50,5 +50,5 @@ proc update(game: var Game, entity: Entity) =
 
 proc sysControlBall*(game: var Game) =
   for entity, signature in game.world.signature.pairs:
-    if signature * Query == Query:
+    if Query <= signature:
       update(game, entity)
