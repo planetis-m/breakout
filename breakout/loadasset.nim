@@ -3,6 +3,9 @@ import
   std/[parsejson, streams, strutils], eminim, eminim/jsmartptrs
 from typetraits import distinctBase
 
+#proc hasCustomSerializer*[T: distinct](t: typedesc[T]): bool =
+  #hasCustomSerializer(t.distinctBase)
+
 proc initFromJson*[T: distinct](dst: var T; p: var JsonParser) =
   initFromJson(dst.distinctBase, p)
 

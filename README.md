@@ -64,7 +64,7 @@ func `+`*(a, b: Point2): Point2 {.
 
 ## Blueprints DSL
 
-``addBlueprint`` is a macro that allows you to declaratively specify an entity and its components.
+``build`` is a macro that allows you to declaratively specify an entity and its components.
 It produces ``mixin`` proc calls that register the components for the entity with the arguments specified.
 The macro also supports nested entities (children in the hierarchical scene graph) and composes perfectly
 with user-made procedures. These must have signature ``proc (w: World, e: Entity, ...): Entity``
@@ -75,21 +75,20 @@ and tagged with ``entity``.
 1. Creates a new entity, with these components, returns the entity handle.
 
 ```nim
-let ent1 = game.addBlueprint(with Transform2d(), Fade(step: 0.5),
-    Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0))
+let ent1 = game.build(blueprint(with Transform2d(), Fade(step: 0.5),
+    Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0)))
 ```
 
 2. Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop.
-The `addBlueprint` macro composes with all of Nim's control flow constructs.
+The `build` macro composes with all of Nim's control flow constructs.
 
 ```nim
-proc getExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
+proc createExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
   let explosions = 32
-  let step = (Pi * 2.0) / explosions.float
+  let step = Tau / explosions.float
   let fadeStep = 0.05
-  result = world.addBlueprint(explosion):
-    with:
-      Transform2d(translation: Vec2(x: x, y: y), parent: parent)
+  result = world.build(blueprint(id = explosion)):
+    with(Transform2d(translation: Vec2(x: x, y: y), parent: parent))
     children:
       for i in 0 ..< explosions:
         blueprint:
@@ -102,7 +101,7 @@ proc getExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
 
 It expands to:
 
-```
+```nim
 let explosion = createEntity(world)
 mixTransform2d(world, explosion, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1),
                parent)

@@ -11,7 +11,7 @@ const
   maxEntities* = indexMask
 
 template idx*(e: Entity): int = e.int and indexMask
-template version*(e: Entity): EntityImpl = e.EntityImpl shr indexBits and versionMask
+template version*(e: Entity): EntityImpl = e.EntityImpl shr indexBits
 template toEntity*(idx, v: EntityImpl): Entity = Entity(v shl indexBits or idx)
 
 proc `==`*(a, b: Entity): bool {.borrow.}
