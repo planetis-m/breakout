@@ -1,6 +1,6 @@
 import
   gametypes, utils, mixins, vmath, loaddsl,
-  std/[parsejson, streams, strutils], eminim, eminim/jsmartptrs
+  std/[parsejson, streams, strutils], eminim
 from typetraits import distinctBase
 
 #proc hasCustomSerializer*[T: distinct](t: typedesc[T]): bool =
