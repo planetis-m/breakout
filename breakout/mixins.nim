@@ -1,4 +1,4 @@
-import gametypes, heaparrays, vmath, utils, slottables, fusion/smartptrs
+import gametypes, heaparrays, vmath, utils, slottables
 
 template mixBody(has) =
   world.signature[entity].incl has
@@ -50,7 +50,7 @@ proc mixPrevious*(world: var World, entity: Entity, position = point2(0, 0),
 
 proc mixShake*(world: var World, entity: Entity, duration = 1'f32, strength = 0'f32) =
   mixBody HasShake
-  world.shake = newUniquePtr(Shake(duration: duration, strength: strength))
+  world.shake = (ref Shake)(duration: duration, strength: strength)
 
 proc mixTransform2d*(world: var World, entity: Entity, trworld = mat2d(), translation = vec2(0, 0),
       rotation = 0.Rad, scale = vec2(1, 1), parent = invalidId) =

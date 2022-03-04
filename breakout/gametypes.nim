@@ -1,4 +1,4 @@
-import sdlpriv, vmath, entities, slottables, heaparrays, fusion/smartptrs, std/monotimes
+import sdlpriv, vmath, entities, slottables, heaparrays, std/monotimes
 export entities
 
 type
@@ -70,7 +70,7 @@ type
     hierarchy*: Array[Hierarchy]
     move*: Array[Move]
     previous*: Array[Previous]
-    shake*: UniquePtr[Shake]
+    shake*: ref Shake
     transform*: Array[Transform2d]
 
   SnapHandler* = object
