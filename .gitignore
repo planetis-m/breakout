@@ -10,3 +10,10 @@
 # Exclude source code files in subdirectories
 !/*/*.nim
 !/*/*.txt
+# Exclude root subdirectories
+!/*/*/
+# Include all files in sub-subdirectories
+/*/*/*
+# Exclude source code files in sub-subdirectories
+!/*/*/*.nim
+!/*/*/*.txt

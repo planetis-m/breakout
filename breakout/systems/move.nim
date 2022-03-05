@@ -6,7 +6,7 @@ proc update(game: var Game, entity: Entity) =
   template transform: untyped = game.world.transform[entity.idx]
   template move: untyped = game.world.move[entity.idx]
 
-  if move.direction.x != 0.0 or move.direction.y != 0.0:
+  if move.direction.x != 0 or move.direction.y != 0:
     transform.translation.x += move.direction.x * move.speed
     transform.translation.y += move.direction.y * move.speed
 
