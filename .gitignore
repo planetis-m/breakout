@@ -2,6 +2,7 @@
 /*
 # Exclude readme file
 !/*.md
+!/*.rst
 !/*.nim
 # Exclude root directories
 !/*/

@@ -8,14 +8,14 @@ proc update(game: var Game, entity: Entity) =
   template draw: untyped = game.world.draw2d[entity.idx]
 
   if draw.color[3] > 0:
-    let step = 255.0 * fade.step
+    let step = 255 * fade.step
     draw.color[3] = draw.color[3] - step.uint8
     transform.scale.x -= fade.step
     transform.scale.y -= fade.step
 
     game.world.mixDirty(entity)
 
-    if transform.scale.x <= 0.0:
+    if transform.scale.x <= 0:
       game.delete(entity)
 
 proc sysFade*(game: var Game) =

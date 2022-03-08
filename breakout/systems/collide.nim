@@ -4,8 +4,8 @@ const Query = {HasTransform2d, HasCollide}
 
 proc computeAabb(transform: Transform2d, collide: var Collide) =
   collide.center = transform.world.origin
-  collide.min = collide.center - collide.size / 2.0
-  collide.max = collide.center + collide.size / 2.0
+  collide.min = collide.center - collide.size / 2
+  collide.max = collide.center + collide.size / 2
 
 proc intersectAabb(a, b: Collide): bool =
   a.min.x < b.max.x and
@@ -15,10 +15,10 @@ proc intersectAabb(a, b: Collide): bool =
 
 proc penetrateAabb(a, b: Collide): Vec2 =
   let distanceX = a.center.x - b.center.x
-  let penetrationX = a.size.x / 2.0 + b.size.x / 2.0 - abs(distanceX)
+  let penetrationX = a.size.x / 2 + b.size.x / 2 - abs(distanceX)
 
   let distanceY = a.center.y - b.center.y
-  let penetrationY = a.size.y / 2.0 + b.size.y / 2.0 - abs(distanceY)
+  let penetrationY = a.size.y / 2 + b.size.y / 2 - abs(distanceY)
 
   if penetrationX < penetrationY:
     result = vec2(penetrationX * sgn(distanceX).float32, 0)

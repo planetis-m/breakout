@@ -79,7 +79,7 @@ proc persist*(game: var Game) =
     except:
       if game.snapshot.retries >= maxRetries:
         quit("Persist failed, maximum retries exceeded." & getCurrentExceptionMsg())
-      game.snapshot.retries.inc
+      inc(game.snapshot.retries)
 
 proc restore*(game: var Game) =
   ## Load the world from the savefile.
