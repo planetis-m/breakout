@@ -36,7 +36,7 @@ proc tBlueprint(n, world, tmpContext: NimNode, isMixin: bool): NimNode =
     if len > 0:
       result[len-1] = tBlueprint(result[len-1], world, tmpContext, isMixin)
   of nnkStmtList, nnkStmtListExpr, nnkWhenStmt, nnkIfStmt, nnkTryStmt,
-      nnkFinally:
+      nnkFinally, nnkBlockStmt, nnkBlockExpr:
     # recurse for every child:
     result = copyNimNode(n)
     for x in n:

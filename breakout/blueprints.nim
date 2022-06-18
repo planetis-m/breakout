@@ -1,14 +1,14 @@
 import std/[random, math], builddsl, vmath, gametypes
 
 proc createBall*(world: var World, parent: Entity, x, y: float32): Entity =
-  let angle = Pi + rand(1.0) * Pi
+  let angle = Pi.float32 + rand(1.0'f32) * Pi.float32
   result = world.build(blueprint):
     with:
       Transform2d(translation: Vec2(x: x, y: y), parent: parent)
       Collide(size: Vec2(x: 20.0, y: 20.0))
       ControlBall()
       Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
-      Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14.0)
+      Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14)
 
 proc createBrick*(world: var World, parent: Entity, x, y: float32, width, height: int32): Entity =
   result = world.build(blueprint):
@@ -32,16 +32,16 @@ proc createExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
             Transform2d(parent: explosion)
             Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255])
             Fade(step: fadeStep)
-            Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 20.0)
+            Move(direction: Vec2(x: sin(step * i.float32), y: cos(step * i.float32)), speed: 20)
 
 proc createPaddle*(world: var World, parent: Entity, x, y: float32): Entity =
   result = world.build(blueprint):
     with:
       Transform2d(translation: Vec2(x: x, y: y), parent: parent)
-      Collide(size: Vec2(x: 100.0, y: 20.0))
+      Collide(size: Vec2(x: 100, y: 20))
       ControlPaddle()
       Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255])
-      Move(speed: 20.0)
+      Move(speed: 20)
 
 proc createScene*(game: var Game) =
   let columnCount = 10
@@ -57,7 +57,7 @@ proc createScene*(game: var Game) =
   game.camera = game.world.build(blueprint):
     with:
       Transform2d()
-      Shake(duration: 0.0, strength: 10.0)
+      Shake(duration: 0, strength: 10)
     children:
       createPaddle(float32(game.windowWidth / 2), float32(game.windowHeight - 30))
       createBall(float32(game.windowWidth / 2), float32(game.windowHeight - 60))

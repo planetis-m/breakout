@@ -39,7 +39,7 @@ proc update(game: var Game, entity: Entity) =
       move.direction.y *= -1
 
     discard game.world.createExplosion(game.camera, transform.translation.x,
-          transform.translation.y)
+        transform.translation.y)
 
   let ballFade = game.world.build(blueprint):
     with:

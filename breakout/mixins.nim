@@ -6,7 +6,7 @@ template mixBody(has) =
 proc mixCollide*(world: var World, entity: Entity, size = vec2(0, 0)) =
   mixBody HasCollide
   world.collide[entity.idx] = Collide(size: size,
-        collision: Collision(other: invalidId))
+      collision: Collision(other: invalidId))
 
 proc mixControlBall*(world: var World, entity: Entity) =
   mixBody HasControlBall
@@ -35,7 +35,7 @@ proc mixFresh*(world: var World, entity: Entity) =
 proc mixHierarchy*(world: var World, entity: Entity, parent = invalidId) =
   mixBody HasHierarchy
   world.hierarchy[entity.idx] = Hierarchy(head: invalidId, prev: invalidId,
-        next: invalidId, parent: parent)
+      next: invalidId, parent: parent)
   if parent != invalidId: prepend(world, parent, entity)
 
 proc mixMove*(world: var World, entity: Entity, direction = vec2(0, 0), speed = 10'f32) =
@@ -46,7 +46,7 @@ proc mixPrevious*(world: var World, entity: Entity, position = point2(0, 0),
       rotation = 0.Rad, scale = vec2(1, 1)) =
   mixBody HasPrevious
   world.previous[entity.idx] = Previous(position: position,
-        rotation: rotation, scale: scale)
+      rotation: rotation, scale: scale)
 
 proc mixShake*(world: var World, entity: Entity, duration = 1'f32, strength = 0'f32) =
   mixBody HasShake
@@ -56,7 +56,7 @@ proc mixTransform2d*(world: var World, entity: Entity, trworld = mat2d(), transl
       rotation = 0.Rad, scale = vec2(1, 1), parent = invalidId) =
   mixBody HasTransform2d
   world.transform[entity.idx] = Transform2D(world: trworld, translation: translation,
-        rotation: rotation, scale: scale)
+      rotation: rotation, scale: scale)
   mixHierarchy(world, entity, parent)
   mixDirty(world, entity)
   mixFresh(world, entity)

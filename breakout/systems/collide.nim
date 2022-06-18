@@ -9,9 +9,9 @@ proc computeAabb(transform: Transform2d, collide: var Collide) =
 
 proc intersectAabb(a, b: Collide): bool =
   a.min.x < b.max.x and
-     a.max.x > b.min.x and
-     a.min.y < b.max.y and
-     a.max.y > b.min.y
+    a.max.x > b.min.x and
+    a.min.y < b.max.y and
+    a.max.y > b.min.y
 
 proc penetrateAabb(a, b: Collide): Vec2 =
   let distanceX = a.center.x - b.center.x
@@ -47,7 +47,7 @@ proc sysCollide*(game: var Game) =
       if intersectAabb(collider, other):
         let hit = penetrateAabb(collider, other)
         collider.collision = Collision(
-           other: otherId, hit: hit)
+          other: otherId, hit: hit)
 
         other.collision = Collision(
-           other: colliderId, hit: -hit)
+          other: colliderId, hit: -hit)

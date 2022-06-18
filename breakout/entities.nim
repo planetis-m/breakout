@@ -4,7 +4,6 @@ type
 
 const
   versionBits = 3
-  versionMask = 1 shl versionBits - 1
   indexBits = sizeof(Entity) * 8 - versionBits
   indexMask = 1 shl indexBits - 1
   invalidId* = Entity(indexMask) # a sentinel value to represent an invalid entity
