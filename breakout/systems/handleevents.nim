@@ -9,7 +9,7 @@ template setInputState(val) =
   else: discard
 
 proc handleEvents*(game: var Game) =
-  var event: Event
+  var event = defaultEvent
   while pollEvent(event):
     if event.kind == QuitEvent or (event.kind == KeyDown and
           event.key.keysym.scancode == SdlScancodeEscape):

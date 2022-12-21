@@ -80,7 +80,7 @@ type
 
   Game* = object
     world*: World
-    snapshot*: SnapHandler
+    # snapshot*: SnapHandler
 
     toDelete*: seq[Entity]
     inputState*: array[Input, bool]

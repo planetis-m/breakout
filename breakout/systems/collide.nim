@@ -8,10 +8,8 @@ proc computeAabb(transform: Transform2d, collide: var Collide) =
   collide.max = collide.center + collide.size / 2
 
 proc intersectAabb(a, b: Collide): bool =
-  a.min.x < b.max.x and
-    a.max.x > b.min.x and
-    a.min.y < b.max.y and
-    a.max.y > b.min.y
+  a.min.x < b.max.x and a.min.y < b.max.y and
+      a.max.x > b.min.x and a.max.y > b.min.y
 
 proc penetrateAabb(a, b: Collide): Vec2 =
   let distanceX = a.center.x - b.center.x
@@ -26,7 +24,7 @@ proc penetrateAabb(a, b: Collide): Vec2 =
     result = vec2(0, penetrationY * sgn(distanceY).float32)
 
 proc sysCollide*(game: var Game) =
-  var allColliders: seq[Entity]
+  var allColliders: seq[Entity] = @[]
   for colliderId, signature in game.world.signature.pairs:
     if Query <= signature:
       template transform: untyped = game.world.transform[colliderId.idx]
