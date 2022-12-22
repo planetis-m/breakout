@@ -28,7 +28,7 @@ proc initArray*[T](): Array[T] =
       result.p = cast[typeof(result.p)](alloc(maxEntities * sizeof(T)))
 
 template get(x, i) =
-  rangeCheck x.p != nil and i < maxEntities
+  rangeCheck i < maxEntities
   x.p[i]
 
 proc `[]`*[T](x: Array[T]; i: Natural): lent T =
@@ -37,7 +37,7 @@ proc `[]`*[T](x: var Array[T]; i: Natural): var T =
   get(x, i)
 
 proc `[]=`*[T](x: var Array[T]; i: Natural; y: sink T) =
-  rangeCheck x.p != nil and i < maxEntities
+  rangeCheck i < maxEntities
   x.p[i] = y
 
 proc clear*[T](x: Array[T]) =

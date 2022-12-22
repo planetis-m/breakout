@@ -73,10 +73,10 @@ type
     shake*: ref Shake
     transform*: Array[Transform2d]
 
-  SnapHandler* = object
-    savefile*: string
-    lastTime*: MonoTime
-    retries*: int
+  # SnapHandler* = object
+  #   savefile*: string
+  #   lastTime*: MonoTime
+  #   retries*: int
 
   Game* = object
     world*: World

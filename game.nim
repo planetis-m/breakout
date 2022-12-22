@@ -20,7 +20,8 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
     hierarchy: initArray[Hierarchy](),
     move: initArray[Move](),
     previous: initArray[Previous](),
-    transform: initArray[Transform2d]())
+    transform: initArray[Transform2d]()
+  )
 
   result = Game(
     world: world,
@@ -35,7 +36,8 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
     window: window,
     sdlContext: sdlContext,
 
-    clearColor: [0'u8, 0, 0, 255])
+    clearColor: [0'u8, 0, 0, 255]
+  )
 
 proc update(game: var Game) =
   # The Game engine that consist of these systems
