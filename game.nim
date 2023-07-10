@@ -98,6 +98,32 @@ proc run(game: var Game) =
       if sleepTime > 0:
         sleep(sleepTime)
 
+# proc run(game: var Game) =
+#   const
+#     TickRate = 1_000_000_000 div 25
+#     MaxDelta = TickRate * 2
+#
+#   var
+#     timeDelta = 0
+#     timeCurr = getMonoTime().ticks
+#     timeDelay = 0
+#     timeLeft = 0
+#
+#   while true:
+#     handleEvents(game)
+#     if not game.isRunning: break
+#     let timeNew = getMonoTime().ticks # Real "now" at the start of this frame
+#     timeDelta = (timeNew-timeCurr).min(MaxDelta) # Find total time that needs to be simulated to catch up to real "now"
+#     timeCurr = timeNew # Update the current time
+#     timeDelay += timeDelta # Find how far the clock is compared to the real "now"
+#     # Update the game, one fixed step at a time, until the clock is sync
+#     while timeDelay >= Tickrate:
+#       game.update()
+#       timeLeft += Tickrate # Time left of this frame after this tick
+#       timeDelay -= Tickrate # How far the clock is after this step
+#     let factor = timeDelay.float32 / Tickrate # Find how far we are from the real time (range[0-1])
+#     game.render(factor) # Render the interpolated moment in time
+
 proc main =
   randomize()
   var game = initGame(740, 555)
