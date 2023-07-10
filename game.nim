@@ -12,7 +12,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
   let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
 
   let world = World(
-    signature: initSlotTableOfCap[set[HasComponent]](maxEntities),
+    signature: initSlotTableOfCap[set[HasComponent]](MaxEntities),
 
     collide: initArray[Collide](),
     draw2d: initArray[Draw2d](),
@@ -27,7 +27,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
     world: world,
     #snapshot: initSnapHandler(),
 
-    camera: invalidId,
+    camera: InvalidId,
     isRunning: true,
     windowWidth: windowWidth,
     windowHeight: windowHeight,
@@ -64,11 +64,11 @@ proc render(game: var Game, intrpl: float32) =
 
 proc run(game: var Game) =
   const
-    ticksPerSec = 25
-    skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
-    maxFramesSkipped = 5 # 20% of ticksPerSec
-    # targetFrameRate = 60 # desired frames per second
-    # targetFrameTime = 1_000_000_000 div targetFrameRate # desired nanosecs per frame
+    TickRate = 25
+    TickDuration = 1_000_000_000 div TickRate # to nanosecs per tick
+    MaxTicksSkipped = 5 # 20% of tickRate
+    FrameRate = 60 # desired frames per second
+    FrameDuration = 1_000_000_000 div FrameRate # desired nanosecs per frame
 
   var
     lastTime = getMonoTime().ticks
@@ -76,52 +76,26 @@ proc run(game: var Game) =
 
   while true:
     handleEvents(game)
-    #persist(game)
     if not game.isRunning: break
 
     let now = getMonoTime().ticks
     accumulator += now - lastTime
     lastTime = now
 
-    var framesSkipped = 0
-    while accumulator >= skippedTicks and framesSkipped < maxFramesSkipped:
+    var ticksSkipped = 0
+    while accumulator >= TickDuration and ticksSkipped < MaxTicksSkipped:
       game.update()
-      accumulator -= skippedTicks
-      framesSkipped.inc
+      accumulator -= TickDuration
+      inc ticksSkipped
 
-    if framesSkipped > 0:
-      let alpha = accumulator.float32 / skippedTicks / 1_000_000_000
+    if ticksSkipped > 0:
+      let alpha = accumulator.float32 / TickDuration / 1_000_000_000
       game.render(alpha)
-      # # calculate the ideal sleep time based on the target frame rate and the actual frame time
-      # let frameTime = getMonoTime().ticks - now
-      # let sleepTime = (targetFrameTime - frameTime) div 1_000_000
-      # if sleepTime > 0:
-      #   sleep(sleepTime)
-
-# proc run(game: var Game) =
-#   const
-#     ticksPerSec = 25
-#     skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
-#     maxDelta = skippedTicks * 2
-#
-#   var
-#     lastTime = getMonoTime().ticks
-#     accumulator = 0
-#
-#   while true:
-#     handleEvents(game)
-#     if not game.isRunning: break
-#
-#     let now = getMonoTime().ticks
-#     accumulator += min(now - lastTime, maxDelta)
-#     lastTime = now
-#
-#     while accumulator >= skippedTicks:
-#       game.update()
-#       accumulator -= skippedTicks
-#
-#     let alpha = accumulator.float32 / skippedTicks / 1_000_000_000
-#     game.render(alpha)
+      # calculate the ideal sleep time based on the target frame rate and the actual frame time
+      let actualFrameDuration = getMonoTime().ticks - now
+      let sleepTime = (FrameDuration - actualFrameDuration) div 1_000_000
+      if sleepTime > 0:
+        sleep(sleepTime)
 
 proc main =
   randomize()

@@ -3,7 +3,7 @@ import ".." / [gametypes, heaparrays, vmath, mixins, utils, slottables]
 const Query = {HasTransform2d, HasHierarchy, HasDirty}
 
 proc update(world: var World, entity: Entity) =
-  template `?=`(name, value): bool = (let name = value; name != invalidId)
+  template `?=`(name, value): bool = (let name = value; name != InvalidId)
   template transform: untyped = world.transform[entity.idx]
   template hierarchy: untyped = world.hierarchy[entity.idx]
 

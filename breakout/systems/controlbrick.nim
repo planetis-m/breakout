@@ -6,7 +6,7 @@ proc update(game: var Game, entity: Entity) =
   template collide: untyped = game.world.collide[entity.idx]
   template fade: untyped = game.world.fade[entity.idx]
 
-  if collide.collision.other != invalidId:
+  if collide.collision.other != InvalidId:
     fade.step = 0.05
 
     if rand(1.0) > 0.98:

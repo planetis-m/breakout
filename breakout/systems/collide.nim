@@ -30,7 +30,7 @@ proc sysCollide*(game: var Game) =
       template transform: untyped = game.world.transform[colliderId.idx]
       template collider: untyped = game.world.collide[colliderId.idx]
 
-      collider.collision.other = invalidId
+      collider.collision.other = InvalidId
       computeAabb(transform, collider)
       allColliders.add(colliderId)
 

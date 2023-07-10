@@ -23,7 +23,7 @@ proc update(game: var Game, entity: Entity) =
     transform.translation.y = game.windowHeight.float32 - collide.size.y / 2
     move.direction.y *= -1
 
-  if collide.collision.other != invalidId:
+  if collide.collision.other != InvalidId:
     let collision = collide.collision
     if HasShake in game.world.signature[game.camera]:
       template cameraShake: untyped = game.world.shake[]

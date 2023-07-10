@@ -13,22 +13,22 @@ iterator queryAll*(world: World, parent: Entity, query: set[HasComponent]): Enti
       yield entity
 
     var childId = hierarchy.head
-    while childId != invalidId:
+    while childId != InvalidId:
       template childHierarchy: untyped = world.hierarchy[childId.idx]
 
       frontier.add(childId)
       childId = childHierarchy.next
 
-template `?=`(name, value): bool = (let name = value; name != invalidId)
+template `?=`(name, value): bool = (let name = value; name != InvalidId)
 proc prepend*(world: var World, parentId, entity: Entity) =
   template hierarchy: untyped = world.hierarchy[entity.idx]
   template parent: untyped = world.hierarchy[parentId.idx]
   template headSibling: untyped = world.hierarchy[headSiblingId.idx]
 
-  hierarchy.prev = invalidId
+  hierarchy.prev = InvalidId
   hierarchy.next = parent.head
   if headSiblingId ?= parent.head:
-    assert headSibling.prev == invalidId
+    assert headSibling.prev == InvalidId
     headSibling.prev = entity
   parent.head = entity
 

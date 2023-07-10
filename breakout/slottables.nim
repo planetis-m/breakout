@@ -24,7 +24,7 @@ proc contains*[T](x: SlotTable[T], e: Entity): bool =
       x.slots[e.idx].version == e.version
 
 proc incl*[T](x: var SlotTable[T], value: T): Entity =
-  if x.len + 1 == maxEntities:
+  if x.len + 1 == MaxEntities:
     raise newException(RangeDefect, "SlotTable number of elements overflow")
   let idx = x.freeHead
   if idx < x.slots.len:
