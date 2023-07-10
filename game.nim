@@ -66,7 +66,9 @@ proc run(game: var Game) =
   const
     ticksPerSec = 25
     skippedTicks = 1_000_000_000 div ticksPerSec # to nanosecs per tick
-    maxFramesSkipped = 5                         # 20% of ticksPerSec
+    maxFramesSkipped = 5 # 20% of ticksPerSec
+    targetFrameRate = 60 # desired frames per second
+    targetFrameTime = 1_000_000_000 div targetFrameRate # desired nanosecs per frame
 
   var
     lastTime = getMonoTime().ticks
@@ -88,10 +90,13 @@ proc run(game: var Game) =
       framesSkipped.inc
 
     if framesSkipped > 0:
+      # use interpolation to render the game state at a fraction of a time step
       game.render(accumulator.float32 / skippedTicks.float32)
-      # Calculate the sleep time based on the skipped ticks and the accumulator
-      let sleepTime = (skippedTicks * framesSkipped - accumulator) div 1_000_000
-      sleep(sleepTime)
+      # calculate the ideal sleep time based on the target frame rate and the actual frame time
+      let frameTime = getMonoTime().ticks - now
+      let sleepTime = (targetFrameTime - frameTime) div 1_000_000
+      if sleepTime > 0:
+        sleep(sleepTime)
 
 proc main =
   randomize()
