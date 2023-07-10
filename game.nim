@@ -1,5 +1,5 @@
 import
-  std / [random, monotimes],
+  std / [random, monotimes, os],
   breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
@@ -89,6 +89,9 @@ proc run(game: var Game) =
 
     if framesSkipped > 0:
       game.render(accumulator.float32 / skippedTicks.float32)
+      # Calculate the sleep time based on the skipped ticks and the accumulator
+      let sleepTime = (skippedTicks * framesSkipped - accumulator) div 1_000_000
+      sleep(sleepTime)
 
 proc main =
   randomize()
