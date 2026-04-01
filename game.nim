@@ -82,13 +82,14 @@ proc run(game: var Game) =
       accumulator -= TickDuration
       inc ticks
 
-    let alpha = accumulator.float32 / TickDuration.float32
-    game.render(alpha)
+    if ticks > 0:
+      let alpha = accumulator.float32 / TickDuration.float32
+      game.render(alpha)
 
-    let actualFrameDuration = getMonoTime().ticks - now
-    let sleepTime = FrameDuration - actualFrameDuration
-    if sleepTime > 0:
-      waitTime(sleepTime.float64 / 1_000_000_000.0)
+      let actualFrameDuration = getMonoTime().ticks - now
+      let sleepTime = FrameDuration - actualFrameDuration
+      if sleepTime > 0:
+        waitTime(sleepTime.float64 / 1_000_000_000.0)
 
 proc main =
   randomize()
