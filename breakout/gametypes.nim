@@ -1,4 +1,3 @@
-import std/assertions
 import raylib, vmath, pools
 export pools
 
@@ -20,14 +19,14 @@ type
     ParticleKind,
     TrailKind
 
-  ActorIdx* = distinct int
-  TransformIdx* = distinct int
-  HierarchyIdx* = distinct int
-  PreviousIdx* = distinct int
-  CollideIdx* = distinct int
-  Draw2dIdx* = distinct int
-  FadeIdx* = distinct int
-  MoveIdx* = distinct int
+  ActorIdx* = distinct int32
+  TransformIdx* = distinct int32
+  HierarchyIdx* = distinct int32
+  PreviousIdx* = distinct int32
+  CollideIdx* = distinct int32
+  Draw2dIdx* = distinct int32
+  FadeIdx* = distinct int32
+  MoveIdx* = distinct int32
 
   Collision* = object
     flags*: set[CollisionFlag]
@@ -107,14 +106,14 @@ type
     raylib*: RaylibContext
 
 const
-  NoActorIdx* = ActorIdx(-1)
-  NoTransformIdx* = TransformIdx(-1)
-  NoHierarchyIdx* = HierarchyIdx(-1)
-  NoPreviousIdx* = PreviousIdx(-1)
-  NoCollideIdx* = CollideIdx(-1)
-  NoDraw2dIdx* = Draw2dIdx(-1)
-  NoFadeIdx* = FadeIdx(-1)
-  NoMoveIdx* = MoveIdx(-1)
+  NoActorIdx* = ActorIdx(-1'i32)
+  NoTransformIdx* = TransformIdx(-1'i32)
+  NoHierarchyIdx* = HierarchyIdx(-1'i32)
+  NoPreviousIdx* = PreviousIdx(-1'i32)
+  NoCollideIdx* = CollideIdx(-1'i32)
+  NoDraw2dIdx* = Draw2dIdx(-1'i32)
+  NoFadeIdx* = FadeIdx(-1'i32)
+  NoMoveIdx* = MoveIdx(-1'i32)
 
 proc `==`*(a, b: ActorIdx): bool {.borrow.}
 proc `==`*(a, b: TransformIdx): bool {.borrow.}
@@ -132,13 +131,13 @@ func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
   (a * b) != {}
 
 func hierarchyIdx*(idx: TransformIdx): HierarchyIdx {.inline.} =
-  HierarchyIdx(idx.int)
+  HierarchyIdx(idx.int32)
 
 func previousIdx*(idx: TransformIdx): PreviousIdx {.inline.} =
-  PreviousIdx(idx.int)
+  PreviousIdx(idx.int32)
 
 func transformIdx*(idx: HierarchyIdx): TransformIdx {.inline.} =
-  TransformIdx(idx.int)
+  TransformIdx(idx.int32)
 
 proc parent*(game: Game; idx: TransformIdx): TransformIdx =
   let parentHierarchyIdx = game.hierarchies[idx.hierarchyIdx].parent
@@ -220,8 +219,6 @@ proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
   let transformIdx = game.transforms.alloc(transform)
   let hierarchyIdx = game.hierarchies.alloc(hierarchy)
   let previousIdx = game.previous.alloc(previous)
-  assert hierarchyIdx.int == transformIdx.int
-  assert previousIdx.int == transformIdx.int
   result = transformIdx
 
   if parent != NoTransformIdx:
@@ -284,7 +281,7 @@ proc addActor*(game: var Game; kind: ActorKind; transform: TransformIdx;
     fade: fade,
     move: move
   )
-  result = ActorIdx(game.actors.len)
+  result = ActorIdx(game.actors.len.int32)
   game.actors.add(actor)
 
 proc freeActorResources*(game: var Game; actor: Actor) =
@@ -298,7 +295,7 @@ proc removeActor*(game: var Game; idx: ActorIdx) =
   if idx == NoActorIdx:
     return
 
-  let lastIdx = ActorIdx(game.actors.high)
+  let lastIdx = ActorIdx(game.actors.high.int32)
   if game.paddle == idx:
     game.paddle = NoActorIdx
   elif idx != lastIdx and game.paddle == lastIdx:
