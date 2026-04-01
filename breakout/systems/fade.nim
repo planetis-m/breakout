@@ -1,7 +1,7 @@
 import ".."/gametypes
 
 proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
-    fadeIdx: FadeIdx; alive: var bool) =
+    fadeIdx: FadeIdx; flags: var set[ActorFlag]) =
   template transform: untyped = game.transforms[transformIdx.int]
   template draw: untyped = game.drawables[drawIdx.int]
   let fade = game.fades[fadeIdx.int]
@@ -11,10 +11,10 @@ proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx
     draw.color[3] = draw.color[3] - step.uint8
     transform.scale.x -= fade.step
     transform.scale.y -= fade.step
-    transform.dirty = true
+    transform.flags.incl(Dirty)
 
     if transform.scale.x <= 0:
-      alive = false
+      flags.excl(Alive)
 
 proc freeBall(game: var Game; ball: Ball) =
   game.freeTransform(ball.transform)
@@ -41,34 +41,34 @@ proc freeTrail(game: var Game; trail: Trail) =
 
 proc cleanupDead*(game: var Game) =
   for i in countdown(game.balls.high, 0):
-    if not game.balls[i].alive:
+    if Alive notin game.balls[i].flags:
       game.freeBall(game.balls[i])
       game.balls.del(i)
 
   for i in countdown(game.bricks.high, 0):
-    if not game.bricks[i].alive:
+    if Alive notin game.bricks[i].flags:
       game.freeBrick(game.bricks[i])
       game.bricks.del(i)
 
   for i in countdown(game.particles.high, 0):
-    if not game.particles[i].alive:
+    if Alive notin game.particles[i].flags:
       game.freeParticle(game.particles[i])
       game.particles.del(i)
 
   for i in countdown(game.trails.high, 0):
-    if not game.trails[i].alive:
+    if Alive notin game.trails[i].flags:
       game.freeTrail(game.trails[i])
       game.trails.del(i)
 
 proc sysFade*(game: var Game) =
   for brick in mitems(game.bricks):
-    if brick.alive:
-      game.updateFading(brick.transform, brick.draw2d, brick.fade, brick.alive)
+    if Alive in brick.flags:
+      game.updateFading(brick.transform, brick.draw2d, brick.fade, brick.flags)
 
   for particle in mitems(game.particles):
-    if particle.alive:
-      game.updateFading(particle.transform, particle.draw2d, particle.fade, particle.alive)
+    if Alive in particle.flags:
+      game.updateFading(particle.transform, particle.draw2d, particle.fade, particle.flags)
 
   for trail in mitems(game.trails):
-    if trail.alive:
-      game.updateFading(trail.transform, trail.draw2d, trail.fade, trail.alive)
+    if Alive in trail.flags:
+      game.updateFading(trail.transform, trail.draw2d, trail.fade, trail.flags)

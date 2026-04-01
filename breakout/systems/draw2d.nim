@@ -6,7 +6,7 @@ const Tolerance = 0.75'f32
 proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
     intrpl: float32) =
   let transform = game.transforms[transformIdx.int]
-  if not transform.hasPrevious:
+  if HasPrevious notin transform.flags:
     return
 
   let position = lerp(transform.previousPosition, transform.world.origin, intrpl)
@@ -36,17 +36,17 @@ proc sysDraw2d*(game: var Game; intrpl: float32) =
   game.drawTransform(game.paddle.transform, game.paddle.draw2d, intrpl)
 
   for ball in game.balls.items:
-    if ball.alive:
+    if Alive in ball.flags:
       game.drawTransform(ball.transform, ball.draw2d, intrpl)
 
   for brick in game.bricks.items:
-    if brick.alive:
+    if Alive in brick.flags:
       game.drawTransform(brick.transform, brick.draw2d, intrpl)
 
   for particle in game.particles.items:
-    if particle.alive:
+    if Alive in particle.flags:
       game.drawTransform(particle.transform, particle.draw2d, intrpl)
 
   for trail in game.trails.items:
-    if trail.alive:
+    if Alive in trail.flags:
       game.drawTransform(trail.transform, trail.draw2d, intrpl)

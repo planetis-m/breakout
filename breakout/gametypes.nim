@@ -4,6 +4,15 @@ type
   Input* = enum
     Right, Left
 
+  CollisionFlag* = enum
+    Hit
+
+  TransformFlag* = enum
+    Dirty, Fresh, HasPrevious
+
+  ActorFlag* = enum
+    Alive
+
   TransformIdx* = distinct int
   CollideIdx* = distinct int
   Draw2dIdx* = distinct int
@@ -11,8 +20,14 @@ type
   MoveIdx* = distinct int
 
   Collision* = object
-    hasHit*: bool
+    flags*: set[CollisionFlag]
     hit*: Vec2
+
+  Hierarchy* = object
+    head*: TransformIdx
+    prev*: TransformIdx
+    next*: TransformIdx
+    parent*: TransformIdx
 
   Collide* = object
     size*: Vec2
@@ -39,10 +54,7 @@ type
     previousPosition*: Point2
     previousRotation*: Rad
     previousScale*: Vec2
-    parent*: TransformIdx
-    dirty*: bool
-    fresh*: bool
-    hasPrevious*: bool
+    flags*: set[TransformFlag]
 
   Shake* = object
     duration*: float32
@@ -59,28 +71,28 @@ type
     move*: MoveIdx
 
   Ball* = object
-    alive*: bool
+    flags*: set[ActorFlag]
     transform*: TransformIdx
     collide*: CollideIdx
     draw2d*: Draw2dIdx
     move*: MoveIdx
 
   Brick* = object
-    alive*: bool
+    flags*: set[ActorFlag]
     transform*: TransformIdx
     collide*: CollideIdx
     draw2d*: Draw2dIdx
     fade*: FadeIdx
 
   Particle* = object
-    alive*: bool
+    flags*: set[ActorFlag]
     transform*: TransformIdx
     draw2d*: Draw2dIdx
     fade*: FadeIdx
     move*: MoveIdx
 
   Trail* = object
-    alive*: bool
+    flags*: set[ActorFlag]
     transform*: TransformIdx
     draw2d*: Draw2dIdx
     fade*: FadeIdx
@@ -94,6 +106,7 @@ type
     trails*: seq[Trail]
 
     transforms*: seq[Transform2d]
+    hierarchies*: seq[Hierarchy]
     colliders*: seq[Collide]
     drawables*: seq[Draw2d]
     fades*: seq[Fade]
@@ -127,6 +140,45 @@ proc `==`*(a, b: Draw2dIdx): bool {.borrow.}
 proc `==`*(a, b: FadeIdx): bool {.borrow.}
 proc `==`*(a, b: MoveIdx): bool {.borrow.}
 
+func containsAll*[K: enum](mask, required: set[K]): bool {.inline.} =
+  required <= mask
+
+func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
+  (a * b) != {}
+
+proc prependChild(game: var Game; parent, child: TransformIdx) =
+  template hierarchy: untyped = game.hierarchies[child.int]
+  template parentHierarchy: untyped = game.hierarchies[parent.int]
+
+  hierarchy.parent = parent
+  hierarchy.prev = NoTransformIdx
+  hierarchy.next = parentHierarchy.head
+  if parentHierarchy.head != NoTransformIdx:
+    game.hierarchies[parentHierarchy.head.int].prev = child
+  parentHierarchy.head = child
+
+proc removeNode(game: var Game; node: TransformIdx) =
+  template hierarchy: untyped = game.hierarchies[node.int]
+
+  let parent = hierarchy.parent
+  let prev = hierarchy.prev
+  let next = hierarchy.next
+  let head = hierarchy.head
+
+  if parent != NoTransformIdx and game.hierarchies[parent.int].head == node:
+    game.hierarchies[parent.int].head = next
+  if prev != NoTransformIdx:
+    game.hierarchies[prev.int].next = next
+  if next != NoTransformIdx:
+    game.hierarchies[next.int].prev = prev
+
+  hierarchy = Hierarchy(
+    head: head,
+    prev: NoTransformIdx,
+    next: NoTransformIdx,
+    parent: NoTransformIdx
+  )
+
 proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
     scale = vec2(1, 1); parent = NoTransformIdx): TransformIdx =
   let value = Transform2d(
@@ -137,21 +189,31 @@ proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
     previousPosition: point2(0, 0),
     previousRotation: 0.Rad,
     previousScale: vec2(1, 1),
-    parent: parent,
-    dirty: true,
-    fresh: true,
-    hasPrevious: false
+    flags: {Dirty, Fresh}
+  )
+  let hierarchy = Hierarchy(
+    head: NoTransformIdx,
+    prev: NoTransformIdx,
+    next: NoTransformIdx,
+    parent: NoTransformIdx
   )
   if game.freeTransforms.len > 0:
     result = game.freeTransforms.pop()
     game.transforms[result.int] = value
+    game.hierarchies[result.int] = hierarchy
   else:
     result = TransformIdx(game.transforms.len)
     game.transforms.add(value)
+    game.hierarchies.add(hierarchy)
+
+  if parent != NoTransformIdx:
+    game.prependChild(parent, result)
 
 proc freeTransform*(game: var Game; idx: TransformIdx) =
   if idx != NoTransformIdx:
+    game.removeNode(idx)
     game.transforms[idx.int] = default(Transform2d)
+    game.hierarchies[idx.int] = default(Hierarchy)
     game.freeTransforms.add(idx)
 
 proc allocCollide*(game: var Game; size = vec2(0, 0)): CollideIdx =
@@ -160,7 +222,7 @@ proc allocCollide*(game: var Game; size = vec2(0, 0)): CollideIdx =
     min: point2(0, 0),
     max: point2(0, 0),
     center: point2(0, 0),
-    collision: Collision(hasHit: false, hit: vec2(0, 0))
+    collision: Collision(flags: {}, hit: vec2(0, 0))
   )
   if game.freeColliders.len > 0:
     result = game.freeColliders.pop()
@@ -219,4 +281,4 @@ proc freeMove*(game: var Game; idx: MoveIdx) =
 
 proc markDirty*(game: var Game; idx: TransformIdx) =
   if idx != NoTransformIdx:
-    game.transforms[idx.int].dirty = true
+    game.transforms[idx.int].flags.incl(Dirty)

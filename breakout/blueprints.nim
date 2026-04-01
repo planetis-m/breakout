@@ -8,7 +8,7 @@ proc createBall*(game: var Game; x, y: float32) =
     parent = game.camera.transform
   )
   let ball = Ball(
-    alive: true,
+    flags: {Alive},
     transform: transform,
     collide: game.allocCollide(vec2(20, 20)),
     draw2d: game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
@@ -18,7 +18,7 @@ proc createBall*(game: var Game; x, y: float32) =
 
 proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
   let brick = Brick(
-    alive: true,
+    flags: {Alive},
     transform: game.allocTransform(
       translation = vec2(x, y),
       scale = vec2(1, 1),
@@ -36,7 +36,7 @@ proc createExplosion*(game: var Game; x, y: float32) =
   let fadeStep = 0.05
   for i in 0..<explosions:
     let particle = Particle(
-      alive: true,
+      flags: {Alive},
       transform: game.allocTransform(
         translation = vec2(x, y),
         scale = vec2(1, 1),
@@ -53,7 +53,7 @@ proc createExplosion*(game: var Game; x, y: float32) =
 
 proc createTrail*(game: var Game; x, y: float32) =
   let trail = Trail(
-    alive: true,
+    flags: {Alive},
     transform: game.allocTransform(
       translation = vec2(x, y),
       scale = vec2(1, 1),

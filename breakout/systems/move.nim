@@ -6,15 +6,15 @@ proc updateTransform(game: var Game; transformIdx: TransformIdx; moveIdx: MoveId
     template transform: untyped = game.transforms[transformIdx.int]
     transform.translation.x += move.direction.x * move.speed
     transform.translation.y += move.direction.y * move.speed
-    transform.dirty = true
+    transform.flags.incl(Dirty)
 
 proc sysMove*(game: var Game) =
   game.updateTransform(game.paddle.transform, game.paddle.move)
 
   for ball in game.balls.items:
-    if ball.alive:
+    if Alive in ball.flags:
       game.updateTransform(ball.transform, ball.move)
 
   for particle in game.particles.items:
-    if particle.alive:
+    if Alive in particle.flags:
       game.updateTransform(particle.transform, particle.move)

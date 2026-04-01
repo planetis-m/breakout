@@ -2,7 +2,7 @@ import ".."/[blueprints, gametypes]
 
 proc sysControlBall*(game: var Game) =
   for ball in mitems(game.balls):
-    if ball.alive:
+    if Alive in ball.flags:
       template collide: untyped = game.colliders[ball.collide.int]
       template move: untyped = game.moves[ball.move.int]
       template transform: untyped = game.transforms[ball.transform.int]
@@ -23,7 +23,7 @@ proc sysControlBall*(game: var Game) =
         transform.translation.y = game.windowHeight.float32 - collide.size.y / 2
         move.direction.y *= -1
 
-      if collide.collision.hasHit:
+      if Hit in collide.collision.flags:
         game.camera.shake.duration = 0.1
 
         if collide.collision.hit.x != 0:
@@ -36,5 +36,5 @@ proc sysControlBall*(game: var Game) =
 
         game.createExplosion(transform.translation.x, transform.translation.y)
 
-      transform.dirty = true
+      transform.flags.incl(Dirty)
       game.createTrail(transform.translation.x, transform.translation.y)

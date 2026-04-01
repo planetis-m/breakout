@@ -24,7 +24,7 @@ proc penetrateAabb(a, b: Collide): Vec2 =
 
 proc prepareCollider(game: var Game; transformIdx: TransformIdx; collideIdx: CollideIdx) =
   template collider: untyped = game.colliders[collideIdx.int]
-  collider.collision = Collision(hasHit: false, hit: vec2(0, 0))
+  collider.collision = Collision(flags: {}, hit: vec2(0, 0))
   computeAabb(game.transforms[transformIdx.int], collider)
 
 proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
@@ -32,23 +32,23 @@ proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
   let b = game.colliders[bIdx.int]
   if intersectAabb(a, b):
     let hit = penetrateAabb(a, b)
-    game.colliders[aIdx.int].collision = Collision(hasHit: true, hit: hit)
-    game.colliders[bIdx.int].collision = Collision(hasHit: true, hit: -hit)
+    game.colliders[aIdx.int].collision = Collision(flags: {Hit}, hit: hit)
+    game.colliders[bIdx.int].collision = Collision(flags: {Hit}, hit: -hit)
 
 proc sysCollide*(game: var Game) =
   game.prepareCollider(game.paddle.transform, game.paddle.collide)
 
   for ball in game.balls.items:
-    if ball.alive:
+    if Alive in ball.flags:
       game.prepareCollider(ball.transform, ball.collide)
 
   for brick in game.bricks.items:
-    if brick.alive:
+    if Alive in brick.flags:
       game.prepareCollider(brick.transform, brick.collide)
 
   for ball in game.balls.items:
-    if ball.alive:
+    if Alive in ball.flags:
       game.updateCollision(ball.collide, game.paddle.collide)
       for brick in game.bricks.items:
-        if brick.alive:
+        if Alive in brick.flags:
           game.updateCollision(ball.collide, brick.collide)

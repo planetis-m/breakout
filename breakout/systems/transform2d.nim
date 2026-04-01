@@ -3,46 +3,37 @@ import ".."/[gametypes, vmath]
 proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
   template transform: untyped = game.transforms[idx.int]
 
-  let shouldUpdate = force or transform.dirty or transform.fresh
+  let shouldUpdate = force or transform.flags.intersects({Dirty, Fresh})
   if shouldUpdate:
-    if not transform.fresh:
+    if transform.flags.containsAll({Fresh}):
+      transform.flags.excl(Fresh)
+    else:
       let position = transform.world.origin
       let rotation = transform.world.rotation
       let scale = transform.world.scale
       transform.previousPosition = position
       transform.previousRotation = rotation
       transform.previousScale = scale
-      transform.hasPrevious = true
-      transform.dirty = false
-    else:
-      transform.fresh = false
+      transform.flags.incl(HasPrevious)
+      transform.flags.excl(Dirty)
 
     let local = compose(transform.scale, transform.rotation, transform.translation)
-    if transform.parent != NoTransformIdx:
-      let parentTransform = game.transforms[transform.parent.int]
+    let parent = game.hierarchies[idx.int].parent
+    if parent != NoTransformIdx:
+      let parentTransform = game.transforms[parent.int]
       transform.world = parentTransform.world * local
     else:
       transform.world = local
 
+proc updateTransformTree(game: var Game; idx: TransformIdx; force = false) =
+  let subtreeDirty = force or game.transforms[idx.int].flags.intersects({Dirty, Fresh})
+
+  game.updateTransformWorld(idx, force)
+
+  var child = game.hierarchies[idx.int].head
+  while child != NoTransformIdx:
+    game.updateTransformTree(child, subtreeDirty)
+    child = game.hierarchies[child.int].next
+
 proc sysTransform2d*(game: var Game) =
-  let cameraDirty = game.transforms[game.camera.transform.int].dirty or
-    game.transforms[game.camera.transform.int].fresh
-
-  game.updateTransformWorld(game.camera.transform)
-  game.updateTransformWorld(game.paddle.transform, cameraDirty)
-
-  for ball in game.balls.items:
-    if ball.alive:
-      game.updateTransformWorld(ball.transform, cameraDirty)
-
-  for brick in game.bricks.items:
-    if brick.alive:
-      game.updateTransformWorld(brick.transform, cameraDirty)
-
-  for particle in game.particles.items:
-    if particle.alive:
-      game.updateTransformWorld(particle.transform, cameraDirty)
-
-  for trail in game.trails.items:
-    if trail.alive:
-      game.updateTransformWorld(trail.transform, cameraDirty)
+  game.updateTransformTree(game.camera.transform)
