@@ -9,8 +9,9 @@ proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
   if HasPrevious notin transform.flags:
     return
 
-  let position = lerp(transform.previousPosition, transform.world.origin, intrpl)
-  let scale = lerp(transform.previousScale, transform.world.scale, intrpl)
+  let previous = game.previous[game.transformPrevious[transformIdx.int].int]
+  let position = lerp(previous.position, transform.world.origin, intrpl)
+  let scale = lerp(previous.scale, transform.world.scale, intrpl)
   let draw2d = game.drawables[drawIdx.int]
 
   let width = int32(draw2d.width.float32 * scale.x)

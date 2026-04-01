@@ -2,25 +2,24 @@ import ".."/[gametypes, vmath]
 
 proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
   template transform: untyped = game.transforms[idx.int]
+  template previous: untyped = game.previous[game.transformPrevious[idx.int].int]
 
   let shouldUpdate = force or transform.flags.intersects({Dirty, Fresh})
   if shouldUpdate:
     if transform.flags.containsAll({Fresh}):
       transform.flags.excl(Fresh)
     else:
-      let position = transform.world.origin
-      let rotation = transform.world.rotation
-      let scale = transform.world.scale
-      transform.previousPosition = position
-      transform.previousRotation = rotation
-      transform.previousScale = scale
+      previous.position = transform.world.origin
+      previous.rotation = transform.world.rotation
+      previous.scale = transform.world.scale
       transform.flags.incl(HasPrevious)
       transform.flags.excl(Dirty)
 
     let local = compose(transform.scale, transform.rotation, transform.translation)
-    let parent = game.hierarchies[idx.int].parent
-    if parent != NoTransformIdx:
-      let parentTransform = game.transforms[parent.int]
+    let hierarchyIdx = game.transformHierarchy[idx.int]
+    let parent = game.hierarchies[hierarchyIdx.int].parent
+    if parent != NoHierarchyIdx:
+      let parentTransform = game.transforms[game.hierarchyTransform[parent.int].int]
       transform.world = parentTransform.world * local
     else:
       transform.world = local
@@ -30,9 +29,10 @@ proc updateTransformTree(game: var Game; idx: TransformIdx; force = false) =
 
   game.updateTransformWorld(idx, force)
 
-  var child = game.hierarchies[idx.int].head
-  while child != NoTransformIdx:
-    game.updateTransformTree(child, subtreeDirty)
+  let hierarchyIdx = game.transformHierarchy[idx.int]
+  var child = game.hierarchies[hierarchyIdx.int].head
+  while child != NoHierarchyIdx:
+    game.updateTransformTree(game.hierarchyTransform[child.int], subtreeDirty)
     child = game.hierarchies[child.int].next
 
 proc sysTransform2d*(game: var Game) =
