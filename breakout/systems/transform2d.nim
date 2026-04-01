@@ -1,7 +1,7 @@
 import ".."/[gametypes, vmath]
 
 proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
-  var transform = addr game.transforms[idx.int]
+  template transform: untyped = game.transforms[idx.int]
 
   let shouldUpdate = force or transform.dirty or transform.fresh
   if shouldUpdate:

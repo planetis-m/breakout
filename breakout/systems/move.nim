@@ -3,7 +3,7 @@ import ".."/[gametypes, vmath]
 proc updateTransform(game: var Game; transformIdx: TransformIdx; moveIdx: MoveIdx) =
   let move = game.moves[moveIdx.int]
   if move.direction.x != 0 or move.direction.y != 0:
-    var transform = addr game.transforms[transformIdx.int]
+    template transform: untyped = game.transforms[transformIdx.int]
     transform.translation.x += move.direction.x * move.speed
     transform.translation.y += move.direction.y * move.speed
     transform.dirty = true

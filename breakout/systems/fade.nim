@@ -2,8 +2,8 @@ import ".."/gametypes
 
 proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
     fadeIdx: FadeIdx; alive: var bool) =
-  var transform = addr game.transforms[transformIdx.int]
-  var draw = addr game.drawables[drawIdx.int]
+  template transform: untyped = game.transforms[transformIdx.int]
+  template draw: untyped = game.drawables[drawIdx.int]
   let fade = game.fades[fadeIdx.int]
 
   if draw.color[3] > 0:

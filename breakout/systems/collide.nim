@@ -23,9 +23,9 @@ proc penetrateAabb(a, b: Collide): Vec2 =
     result = vec2(0, penetrationY * sgn(distanceY).float32)
 
 proc prepareCollider(game: var Game; transformIdx: TransformIdx; collideIdx: CollideIdx) =
-  var collider = addr game.colliders[collideIdx.int]
+  template collider: untyped = game.colliders[collideIdx.int]
   collider.collision = Collision(hasHit: false, hit: vec2(0, 0))
-  computeAabb(game.transforms[transformIdx.int], collider[])
+  computeAabb(game.transforms[transformIdx.int], collider)
 
 proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
   let a = game.colliders[aIdx.int]
