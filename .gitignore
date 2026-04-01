@@ -7,11 +7,13 @@
 !/*.h
 # Exclude root directories
 !/*/
+!/.github/
 # Include all files in subdirectories
 /*/*
 # Exclude source code files in subdirectories
 !/*/*.nim
 !/*/*.txt
+!/.github/*
 # Exclude root subdirectories
 !/*/*/
 # Include all files in sub-subdirectories
@@ -19,3 +21,4 @@
 # Exclude source code files in sub-subdirectories
 !/*/*/*.nim
 !/*/*/*.txt
+!/.github/*/*.yml

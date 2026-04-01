@@ -3,14 +3,14 @@ import std/os
 const ProjectRoot = currentSourcePath.parentDir.parentDir
 
 when defined(linux):
-  {.passc: "-I" & ProjectRoot.}
-  {.passl: "-L" & ProjectRoot & " -lraylib -Wl,-rpath,\\$ORIGIN".}
+  {.passc: "-I\"" & ProjectRoot & "\"".}
+  {.passl: "-L\"" & ProjectRoot & "\" -lraylib -Wl,-rpath,\\$ORIGIN".}
 elif defined(macosx):
-  {.passc: "-I" & ProjectRoot.}
-  {.passl: "-L" & ProjectRoot & " -lraylib".}
+  {.passc: "-I\"" & ProjectRoot & "\"".}
+  {.passl: "-L\"" & ProjectRoot & "\" -lraylib".}
 elif defined(windows):
-  {.passc: "-I" & ProjectRoot.}
-  {.passl: "-L" & ProjectRoot & " -lraylib".}
+  {.passc: "-I\"" & ProjectRoot & "\"".}
+  {.passl: "/LIBPATH:\"" & ProjectRoot & "\" raylib.lib user32.lib gdi32.lib winmm.lib shell32.lib".}
 else:
   {.error: "Unsupported platform".}
 

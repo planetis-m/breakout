@@ -8,4 +8,3 @@ license       = "MIT"
 # Dependencies
 
 requires "nim >= 1.5.0"
-requires "fusion#head"

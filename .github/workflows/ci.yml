@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          repo-token: ${{ github.token }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            git \
+            libasound2-dev \
+            libegl1-mesa-dev \
+            libgl1-mesa-dev \
+            libwayland-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            libxkbcommon-dev \
+            libxi-dev \
+            libxrandr-dev \
+            make \
+            wayland-protocols
+
+      - name: Build raylib
+        run: |
+          git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+          make -C /tmp/raylib/src \
+            PLATFORM=PLATFORM_DESKTOP \
+            GLFW_LINUX_ENABLE_WAYLAND=TRUE \
+            GLFW_LINUX_ENABLE_X11=TRUE \
+            RAYLIB_LIBTYPE=SHARED
+          cp /tmp/raylib/src/raylib.h .
+          cp /tmp/raylib/src/libraylib.so* .
+
+      - name: Build game
+        run: nim c -d:release game.nim
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          repo-token: ${{ github.token }}
+
+      - name: Install build tools
+        run: brew install make
+
+      - name: Build raylib
+        run: |
+          git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+          make -C /tmp/raylib/src \
+            PLATFORM=PLATFORM_DESKTOP \
+            RAYLIB_LIBTYPE=SHARED
+          cp /tmp/raylib/src/raylib.h .
+          find /tmp/raylib/src -maxdepth 1 -name 'libraylib*.dylib' -exec cp {} . \;
+
+      - name: Build game
+        run: nim c -d:release game.nim
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          repo-token: ${{ github.token }}
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build raylib
+        shell: pwsh
+        run: |
+          git clone --depth 1 https://github.com/raysan5/raylib.git $env:TEMP\raylib
+          cmake -S $env:TEMP\raylib -B $env:TEMP\raylib\build `
+            -DBUILD_SHARED_LIBS=ON `
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build $env:TEMP\raylib\build --config Release
+          Copy-Item $env:TEMP\raylib\src\raylib.h .\raylib.h -Force
+          Copy-Item $env:TEMP\raylib\build\raylib\Release\raylib.dll .\raylib.dll -Force
+          Copy-Item $env:TEMP\raylib\build\raylib\Release\raylib.lib .\raylib.lib -Force
+
+      - name: Build game
+        shell: pwsh
+        run: |
+          $env:PATH = "$pwd;$env:PATH"
+          nim c --cc:vcc -d:release game.nim
