@@ -1,5 +1,5 @@
 import
-  std / [random, monotimes, os],
+  std / [random, monotimes],
   breakout / [raylib, heaparrays, gametypes, blueprints, slottables, utils],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
@@ -54,14 +54,15 @@ proc render(game: var Game, intrpl: float32) =
   beginDrawing()
   sysDraw2d(game, intrpl)
   endDrawing()
+  swapScreenBuffer()
 
 proc run(game: var Game) =
   const
     TickRate = 25
-    TickDuration = 1_000_000_000 div TickRate # to nanosecs per tick
+    TickDuration = 1_000_000_000 div TickRate
     MaxTicks = 5 # 20% of tickRate
     FrameRate = 60 # desired frames per second
-    FrameDuration = 1_000_000_000 div FrameRate # desired nanosecs per frame
+    FrameDuration = 1_000_000_000 div FrameRate
 
   var
     lastTime = getMonoTime().ticks
@@ -81,14 +82,13 @@ proc run(game: var Game) =
       accumulator -= TickDuration
       inc ticks
 
-    if ticks > 0:
-      let alpha = accumulator.float32 / TickDuration / 1_000_000_000
-      game.render(alpha)
-      # calculate the ideal sleep time based on the target frame rate and the actual frame time
-      let actualFrameDuration = getMonoTime().ticks - now
-      let sleepTime = (FrameDuration - actualFrameDuration) div 1_000_000
-      if sleepTime > 0:
-        sleep(sleepTime)
+    let alpha = accumulator.float32 / TickDuration.float32
+    game.render(alpha)
+
+    let actualFrameDuration = getMonoTime().ticks - now
+    let sleepTime = FrameDuration - actualFrameDuration
+    if sleepTime > 0:
+      waitTime(sleepTime.float64 / 1_000_000_000.0)
 
 proc main =
   randomize()

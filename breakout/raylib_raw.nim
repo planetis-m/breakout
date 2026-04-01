@@ -1,7 +1,8 @@
 import std/os
 
 const ProjectRoot = currentSourcePath.parentDir.parentDir
-const VcpkgRoot {.strdefine.} = ""
+
+{.passc: "-DSUPPORT_CUSTOM_FRAME_CONTROL=1".}
 
 when defined(linux):
   {.passc: "-I\"" & ProjectRoot & "\"".}
@@ -10,10 +11,11 @@ elif defined(macosx):
   {.passc: "-I\"" & ProjectRoot & "\"".}
   {.passl: "-L\"" & ProjectRoot & "\" -lraylib".}
 elif defined(windows):
+  const VcpkgRoot {.strdefine.} = ""
   when VcpkgRoot.len == 0:
     {.error: "Define VcpkgRoot for Windows builds (for example: -d:VcpkgRoot=%VCPKG_ROOT%)".}
   {.passc: "-I\"" & ProjectRoot & "\" -I\"" & VcpkgRoot / "include" & "\"".}
-  {.passl: "/LIBPATH:\"" & VcpkgRoot / "lib" & "\" raylib.lib user32.lib gdi32.lib winmm.lib shell32.lib".}
+  {.passl: "/link /LIBPATH:\"" & VcpkgRoot / "lib" & "\" raylib.lib user32.lib gdi32.lib winmm.lib shell32.lib".}
 else:
   {.error: "Unsupported platform".}
 
@@ -42,6 +44,12 @@ proc setExitKeyRaw*(key: cint) {.
     importc: "SetExitKey", cdecl, header: "raylib.h".}
 proc pollInputEventsRaw*() {.
     importc: "PollInputEvents", cdecl, header: "raylib.h".}
+proc swapScreenBufferRaw*() {.
+    importc: "SwapScreenBuffer", cdecl, header: "raylib.h".}
+proc waitTimeRaw*(seconds: cdouble) {.
+    importc: "WaitTime", cdecl, header: "raylib.h".}
+proc getTimeRaw*(): cdouble {.
+    importc: "GetTime", cdecl, header: "raylib.h".}
 proc beginDrawingRaw*() {.
     importc: "BeginDrawing", cdecl, header: "raylib.h".}
 proc endDrawingRaw*() {.

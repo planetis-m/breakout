@@ -34,6 +34,15 @@ proc initRaylib*(title: string; width, height: int32): RaylibContext =
 proc pollInput*() =
   pollInputEventsRaw()
 
+proc swapScreenBuffer*() =
+  swapScreenBufferRaw()
+
+proc waitTime*(seconds: float64) =
+  waitTimeRaw(seconds.cdouble)
+
+proc getTime*(): float64 =
+  getTimeRaw().float64
+
 proc windowShouldClose*(): bool =
   windowShouldCloseRaw()
 
