@@ -23,17 +23,17 @@ proc penetrateAabb(a, b: Collide): Vec2 =
     result = vec2(0, penetrationY * sgn(distanceY).float32)
 
 proc prepareCollider(game: var Game; transformIdx: TransformIdx; collideIdx: CollideIdx) =
-  template collider: untyped = game.colliders[collideIdx.int]
+  template collider: untyped = game.colliders[collideIdx]
   collider.collision = Collision(flags: {}, hit: vec2(0, 0))
-  computeAabb(game.transforms[transformIdx.int], collider)
+  computeAabb(game.transforms[transformIdx], collider)
 
 proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
-  let a = game.colliders[aIdx.int]
-  let b = game.colliders[bIdx.int]
+  let a = game.colliders[aIdx]
+  let b = game.colliders[bIdx]
   if intersectAabb(a, b):
     let hit = penetrateAabb(a, b)
-    game.colliders[aIdx.int].collision = Collision(flags: {Hit}, hit: hit)
-    game.colliders[bIdx.int].collision = Collision(flags: {Hit}, hit: -hit)
+    game.colliders[aIdx].collision = Collision(flags: {Hit}, hit: hit)
+    game.colliders[bIdx].collision = Collision(flags: {Hit}, hit: -hit)
 
 proc sysCollide*(game: var Game) =
   game.prepareCollider(game.paddle.transform, game.paddle.collide)

@@ -3,7 +3,7 @@ import ".."/gametypes
 
 proc sysShake*(game: var Game) =
   let transformIdx = game.camera.transform
-  template transform: untyped = game.transforms[transformIdx.int]
+  template transform: untyped = game.transforms[transformIdx]
   template shake: untyped = game.camera.shake
 
   if shake.duration > 0:

@@ -2,9 +2,9 @@ import ".."/gametypes
 
 proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
     fadeIdx: FadeIdx; flags: var set[ActorFlag]) =
-  template transform: untyped = game.transforms[transformIdx.int]
-  template draw: untyped = game.drawables[drawIdx.int]
-  let fade = game.fades[fadeIdx.int]
+  template transform: untyped = game.transforms[transformIdx]
+  template draw: untyped = game.drawables[drawIdx]
+  let fade = game.fades[fadeIdx]
 
   if draw.color[3] > 0:
     let step = 255 * fade.step

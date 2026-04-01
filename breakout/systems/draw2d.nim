@@ -5,14 +5,14 @@ const Tolerance = 0.75'f32
 
 proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
     intrpl: float32) =
-  let transform = game.transforms[transformIdx.int]
+  let transform = game.transforms[transformIdx]
   if HasPrevious notin transform.flags:
     return
 
-  let previous = game.previous[game.transformPrevious[transformIdx.int].int]
+  let previous = game.transforms.previous(transformIdx)
   let position = lerp(previous.position, transform.world.origin, intrpl)
   let scale = lerp(previous.scale, transform.world.scale, intrpl)
-  let draw2d = game.drawables[drawIdx.int]
+  let draw2d = game.drawables[drawIdx]
 
   let width = int32(draw2d.width.float32 * scale.x)
   let height = int32(draw2d.height.float32 * scale.y)
