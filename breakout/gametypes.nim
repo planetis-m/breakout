@@ -1,3 +1,4 @@
+import std/assertions
 import raylib, vmath, pools
 export pools
 
@@ -219,8 +220,8 @@ proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
   let transformIdx = game.transforms.alloc(transform)
   let hierarchyIdx = game.hierarchies.alloc(hierarchy)
   let previousIdx = game.previous.alloc(previous)
-  doAssert hierarchyIdx.int == transformIdx.int
-  doAssert previousIdx.int == transformIdx.int
+  assert hierarchyIdx.int == transformIdx.int
+  assert previousIdx.int == transformIdx.int
   result = transformIdx
 
   if parent != NoTransformIdx:

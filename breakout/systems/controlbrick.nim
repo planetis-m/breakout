@@ -6,7 +6,7 @@ proc sysControlBrick*(game: var Game) =
   for i in 0..<actorCount:
     template brick: untyped = game.actors[i]
     if brick.kind == BrickKind and
-        game.colliders[brick.collide].collision.flags.containsAll({Hit}):
+        Hit in game.colliders[brick.collide].collision.flags:
       game.fades[brick.fade].step = 0.05
       if rand(1.0) > 0.98:
         game.createBall(

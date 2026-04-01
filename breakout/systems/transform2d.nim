@@ -6,7 +6,7 @@ proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
 
   let shouldUpdate = force or transform.flags.intersects({Dirty, Fresh})
   if shouldUpdate:
-    if transform.flags.containsAll({Fresh}):
+    if Fresh in transform.flags:
       transform.flags.excl(Fresh)
     else:
       previous.position = transform.world.origin

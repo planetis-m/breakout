@@ -6,7 +6,7 @@ const Tolerance = 0.75'f32
 proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
     intrpl: float32) =
   let transform = game.transforms[transformIdx]
-  if not transform.flags.containsAll({HasPrevious}):
+  if HasPrevious notin transform.flags:
     return
 
   let previous = game.previous[transformIdx.previousIdx]
