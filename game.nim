@@ -1,6 +1,6 @@
 import
-  std/monotimes,
-  breakout/[blueprints, gametypes, procgen, raylib],
+  std/[monotimes, random],
+  breakout/[blueprints, gametypes, raylib],
   breakout/systems/[collide, controlball, controlbrick, controlpaddle, draw2d,
     fade, handleevents, move, shake, transform2d]
 
@@ -70,8 +70,9 @@ proc run(game: var Game) =
         waitTime(sleepTime.float64 / 1_000_000_000.0)
 
 proc main =
+  randomize()
   var game = initGame(740, 555)
-  createScene(game, DefaultBenchScale)
+  createScene(game)
   run(game)
 
 main()

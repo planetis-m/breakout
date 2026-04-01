@@ -1,8 +1,8 @@
-import std/math
-import gametypes, procgen, vmath
+import std/[math, random]
+import gametypes, vmath
 
-proc createBall*(game: var Game; x, y: float32; seed: uint32) =
-  let angle = angleFromSeed(seed)
+proc createBall*(game: var Game; x, y: float32) =
+  let angle = PI.float32 + rand(1.0'f32) * PI.float32
   let node = game.allocNode(vec2(x, y), game.camera.node)
   game.balls.add(Ball(
     node: node,
@@ -58,9 +58,9 @@ proc createPaddle*(game: var Game; x, y: float32) =
     move: Move(direction: vec2(0, 0), speed: 20)
   )
 
-proc createScene*(game: var Game; scale: BenchScale) =
-  let columnCount = scale.columns
-  let rowCount = scale.rows
+proc createScene*(game: var Game) =
+  let columnCount = 10
+  let rowCount = 10
   let brickWidth = 50
   let brickHeight = 15
   let margin = 5
@@ -80,9 +80,7 @@ proc createScene*(game: var Game; scale: BenchScale) =
   )
   game.createBall(
     float32(game.windowWidth / 2),
-    float32(game.windowHeight - 60),
-    eventSeed(1'u32, 0, float32(game.windowWidth / 2),
-      float32(game.windowHeight - 60))
+    float32(game.windowHeight - 60)
   )
 
   for row in 0..<rowCount:
