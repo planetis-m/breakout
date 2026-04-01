@@ -35,5 +35,5 @@ proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
 proc sysDraw2d*(game: var Game; intrpl: float32) =
   clearBackground(game.clearColor)
   for actor in game.actors.items:
-    if actor.alive and actor.draw2d != NoDraw2dIdx:
+    if actor.kind != DeadKind and actor.draw2d != NoDraw2dIdx:
       game.drawTransform(actor.transform, actor.draw2d, intrpl)

@@ -10,6 +10,5 @@ proc updateTransform(game: var Game; transformIdx: TransformIdx; moveIdx: MoveId
 
 proc sysMove*(game: var Game) =
   for actor in game.actors.items:
-    if actor.alive and actor.move != NoMoveIdx and
-        actor.kind in {PaddleKind, BallKind, ParticleKind}:
+    if actor.move != NoMoveIdx and actor.kind in {PaddleKind, BallKind, ParticleKind}:
       game.updateTransform(actor.transform, actor.move)

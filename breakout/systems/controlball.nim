@@ -4,7 +4,7 @@ proc sysControlBall*(game: var Game) =
   let actorCount = game.actors.len
   for i in 0..<actorCount:
     template ball: untyped = game.actors[i]
-    if ball.kind == BallKind and ball.alive:
+    if ball.kind == BallKind:
       template collide: untyped = game.colliders[ball.collide]
       template move: untyped = game.moves[ball.move]
       template transform: untyped = game.transforms[ball.transform]

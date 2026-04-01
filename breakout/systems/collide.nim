@@ -38,21 +38,20 @@ proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
 proc sysCollide*(game: var Game) =
   if game.paddle != NoActorIdx:
     let paddle = game.actors[game.paddle.int]
-    if paddle.alive:
+    if paddle.kind == PaddleKind:
       game.prepareCollider(paddle.transform, paddle.collide)
 
   for actor in game.actors.items:
-    if actor.alive and actor.collide != NoCollideIdx and
-        actor.kind in {BallKind, BrickKind}:
+    if actor.collide != NoCollideIdx and actor.kind in {BallKind, BrickKind}:
       game.prepareCollider(actor.transform, actor.collide)
 
   for ball in game.actors.items:
-    if ball.kind == BallKind and ball.alive:
+    if ball.kind == BallKind:
       if game.paddle != NoActorIdx:
         let paddle = game.actors[game.paddle.int]
-        if paddle.alive:
+        if paddle.kind == PaddleKind:
           game.updateCollision(ball.collide, paddle.collide)
 
       for brick in game.actors.items:
-        if brick.kind == BrickKind and brick.alive:
+        if brick.kind == BrickKind:
           game.updateCollision(ball.collide, brick.collide)

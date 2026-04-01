@@ -1,7 +1,7 @@
 import ".."/gametypes
 
 proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
-    fadeIdx: FadeIdx; alive: var bool) =
+    fadeIdx: FadeIdx; kind: var ActorKind) =
   template transform: untyped = game.transforms[transformIdx]
   template draw: untyped = game.drawables[drawIdx]
   let fade = game.fades[fadeIdx]
@@ -14,14 +14,14 @@ proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx
     transform.flags.incl(Dirty)
 
     if transform.scale.x <= 0:
-      alive = false
+      kind = DeadKind
 
 proc cleanupDead*(game: var Game) =
   for i in countdown(game.actors.high, 0):
-    if not game.actors[i].alive:
+    if game.actors[i].kind == DeadKind:
       game.removeActor(ActorIdx(i))
 
 proc sysFade*(game: var Game) =
   for actor in mitems(game.actors):
-    if actor.alive and actor.fade != NoFadeIdx:
-      game.updateFading(actor.transform, actor.draw2d, actor.fade, actor.alive)
+    if actor.kind != DeadKind and actor.fade != NoFadeIdx:
+      game.updateFading(actor.transform, actor.draw2d, actor.fade, actor.kind)

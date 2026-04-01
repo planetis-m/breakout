@@ -12,6 +12,7 @@ type
     Dirty, Fresh, HasPrevious
 
   ActorKind* = enum
+    DeadKind,
     PaddleKind,
     BallKind,
     BrickKind,
@@ -75,7 +76,6 @@ type
     shake*: Shake
 
   Actor* = object
-    alive*: bool
     kind*: ActorKind
     transform*: TransformIdx
     collide*: CollideIdx
@@ -276,7 +276,6 @@ proc addActor*(game: var Game; kind: ActorKind; transform: TransformIdx;
     collide = NoCollideIdx; draw2d = NoDraw2dIdx; fade = NoFadeIdx;
     move = NoMoveIdx): ActorIdx =
   let actor = Actor(
-    alive: true,
     kind: kind,
     transform: transform,
     collide: collide,
