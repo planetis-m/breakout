@@ -1,7 +1,10 @@
 import ".."/gametypes
 
 proc sysControlPaddle*(game: var Game) =
-  let moveIdx = game.paddle.move
+  if game.paddle == NoActorIdx:
+    return
+
+  let moveIdx = game.actors[game.paddle.int].move
   template move: untyped = game.moves[moveIdx]
   move.direction.x = 0
 

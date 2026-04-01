@@ -11,9 +11,14 @@ type
   TransformFlag* = enum
     Dirty, Fresh, HasPrevious
 
-  ActorFlag* = enum
-    Alive
+  ActorKind* = enum
+    PaddleKind,
+    BallKind,
+    BrickKind,
+    ParticleKind,
+    TrailKind
 
+  ActorIdx* = distinct int
   TransformIdx* = distinct int
   HierarchyIdx* = distinct int
   PreviousIdx* = distinct int
@@ -69,38 +74,14 @@ type
     transform*: TransformIdx
     shake*: Shake
 
-  Paddle* = object
-    transform*: TransformIdx
-    collide*: CollideIdx
-    draw2d*: Draw2dIdx
-    move*: MoveIdx
-
-  Ball* = object
-    flags*: set[ActorFlag]
-    transform*: TransformIdx
-    collide*: CollideIdx
-    draw2d*: Draw2dIdx
-    move*: MoveIdx
-
-  Brick* = object
-    flags*: set[ActorFlag]
+  Actor* = object
+    alive*: bool
+    kind*: ActorKind
     transform*: TransformIdx
     collide*: CollideIdx
     draw2d*: Draw2dIdx
     fade*: FadeIdx
-
-  Particle* = object
-    flags*: set[ActorFlag]
-    transform*: TransformIdx
-    draw2d*: Draw2dIdx
-    fade*: FadeIdx
     move*: MoveIdx
-
-  Trail* = object
-    flags*: set[ActorFlag]
-    transform*: TransformIdx
-    draw2d*: Draw2dIdx
-    fade*: FadeIdx
 
   TransformStore* = object
     transforms: Pool[Transform2d, TransformIdx]
@@ -112,11 +93,8 @@ type
 
   Game* = object
     camera*: Camera
-    paddle*: Paddle
-    balls*: seq[Ball]
-    bricks*: seq[Brick]
-    particles*: seq[Particle]
-    trails*: seq[Trail]
+    paddle*: ActorIdx
+    actors*: seq[Actor]
 
     transforms*: TransformStore
     colliders*: Pool[Collide, CollideIdx]
@@ -134,6 +112,7 @@ type
     raylib*: RaylibContext
 
 const
+  NoActorIdx* = ActorIdx(-1)
   NoTransformIdx* = TransformIdx(-1)
   NoHierarchyIdx* = HierarchyIdx(-1)
   NoPreviousIdx* = PreviousIdx(-1)
@@ -142,6 +121,7 @@ const
   NoFadeIdx* = FadeIdx(-1)
   NoMoveIdx* = MoveIdx(-1)
 
+proc `==`*(a, b: ActorIdx): bool {.borrow.}
 proc `==`*(a, b: TransformIdx): bool {.borrow.}
 proc `==`*(a, b: HierarchyIdx): bool {.borrow.}
 proc `==`*(a, b: PreviousIdx): bool {.borrow.}
@@ -335,6 +315,41 @@ proc allocMove*(game: var Game; direction = vec2(0, 0); speed = 10'f32): MoveIdx
 proc freeMove*(game: var Game; idx: MoveIdx) =
   if idx != NoMoveIdx:
     game.moves.free(idx)
+
+proc addActor*(game: var Game; kind: ActorKind; transform: TransformIdx;
+    collide = NoCollideIdx; draw2d = NoDraw2dIdx; fade = NoFadeIdx;
+    move = NoMoveIdx): ActorIdx =
+  let actor = Actor(
+    alive: true,
+    kind: kind,
+    transform: transform,
+    collide: collide,
+    draw2d: draw2d,
+    fade: fade,
+    move: move
+  )
+  result = ActorIdx(game.actors.len)
+  game.actors.add(actor)
+
+proc freeActorResources*(game: var Game; actor: Actor) =
+  game.freeTransform(actor.transform)
+  game.freeCollide(actor.collide)
+  game.freeDraw2d(actor.draw2d)
+  game.freeFade(actor.fade)
+  game.freeMove(actor.move)
+
+proc removeActor*(game: var Game; idx: ActorIdx) =
+  if idx == NoActorIdx:
+    return
+
+  let lastIdx = ActorIdx(game.actors.high)
+  if game.paddle == idx:
+    game.paddle = NoActorIdx
+  elif idx != lastIdx and game.paddle == lastIdx:
+    game.paddle = idx
+
+  game.freeActorResources(game.actors[idx.int])
+  game.actors.del(idx.int)
 
 proc markDirty*(game: var Game; idx: TransformIdx) =
   if idx != NoTransformIdx:

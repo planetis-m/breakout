@@ -6,7 +6,7 @@ const Tolerance = 0.75'f32
 proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
     intrpl: float32) =
   let transform = game.transforms[transformIdx]
-  if HasPrevious notin transform.flags:
+  if not transform.flags.containsAll({HasPrevious}):
     return
 
   let previous = game.transforms.previous(transformIdx)
@@ -34,20 +34,6 @@ proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
 
 proc sysDraw2d*(game: var Game; intrpl: float32) =
   clearBackground(game.clearColor)
-  game.drawTransform(game.paddle.transform, game.paddle.draw2d, intrpl)
-
-  for ball in game.balls.items:
-    if Alive in ball.flags:
-      game.drawTransform(ball.transform, ball.draw2d, intrpl)
-
-  for brick in game.bricks.items:
-    if Alive in brick.flags:
-      game.drawTransform(brick.transform, brick.draw2d, intrpl)
-
-  for particle in game.particles.items:
-    if Alive in particle.flags:
-      game.drawTransform(particle.transform, particle.draw2d, intrpl)
-
-  for trail in game.trails.items:
-    if Alive in trail.flags:
-      game.drawTransform(trail.transform, trail.draw2d, intrpl)
+  for actor in game.actors.items:
+    if actor.alive and actor.draw2d != NoDraw2dIdx:
+      game.drawTransform(actor.transform, actor.draw2d, intrpl)

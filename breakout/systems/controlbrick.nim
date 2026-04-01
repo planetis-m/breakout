@@ -2,8 +2,11 @@ import std/random
 import ".."/[blueprints, gametypes]
 
 proc sysControlBrick*(game: var Game) =
-  for brick in mitems(game.bricks):
-    if Alive in brick.flags and Hit in game.colliders[brick.collide].collision.flags:
+  let actorCount = game.actors.len
+  for i in 0..<actorCount:
+    template brick: untyped = game.actors[i]
+    if brick.kind == BrickKind and brick.alive and
+        game.colliders[brick.collide].collision.flags.containsAll({Hit}):
       game.fades[brick.fade].step = 0.05
       if rand(1.0) > 0.98:
         game.createBall(

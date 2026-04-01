@@ -7,73 +7,70 @@ proc createBall*(game: var Game; x, y: float32) =
     scale = vec2(1, 1),
     parent = game.camera.transform
   )
-  let ball = Ball(
-    flags: {Alive},
-    transform: transform,
-    collide: game.allocCollide(vec2(20, 20)),
-    draw2d: game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
-    move: game.allocMove(Vec2(x: cos(angle), y: sin(angle)), 14)
+  discard game.addActor(
+    BallKind,
+    transform,
+    collide = game.allocCollide(vec2(20, 20)),
+    draw2d = game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
+    move = game.allocMove(Vec2(x: cos(angle), y: sin(angle)), 14)
   )
-  game.balls.add(ball)
 
 proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
-  let brick = Brick(
-    flags: {Alive},
-    transform: game.allocTransform(
+  discard game.addActor(
+    BrickKind,
+    game.allocTransform(
       translation = vec2(x, y),
       scale = vec2(1, 1),
       parent = game.camera.transform
     ),
-    collide: game.allocCollide(vec2(width.float32, height.float32)),
-    draw2d: game.allocDraw2d(width, height, [255'u8, 255, 0, 255]),
-    fade: game.allocFade(0)
+    collide = game.allocCollide(vec2(width.float32, height.float32)),
+    draw2d = game.allocDraw2d(width, height, [255'u8, 255, 0, 255]),
+    fade = game.allocFade(0)
   )
-  game.bricks.add(brick)
 
 proc createExplosion*(game: var Game; x, y: float32) =
   let explosions = 32
   let step = TAU / explosions.float
   let fadeStep = 0.05
   for i in 0..<explosions:
-    let particle = Particle(
-      flags: {Alive},
-      transform: game.allocTransform(
+    discard game.addActor(
+      ParticleKind,
+      game.allocTransform(
         translation = vec2(x, y),
         scale = vec2(1, 1),
         parent = game.camera.transform
       ),
-      draw2d: game.allocDraw2d(20, 20, [255'u8, 255, 255, 255]),
-      fade: game.allocFade(fadeStep),
-      move: game.allocMove(
+      draw2d = game.allocDraw2d(20, 20, [255'u8, 255, 255, 255]),
+      fade = game.allocFade(fadeStep),
+      move = game.allocMove(
         Vec2(x: sin(step * i.float32), y: cos(step * i.float32)),
         20
       )
     )
-    game.particles.add(particle)
 
 proc createTrail*(game: var Game; x, y: float32) =
-  let trail = Trail(
-    flags: {Alive},
-    transform: game.allocTransform(
+  discard game.addActor(
+    TrailKind,
+    game.allocTransform(
       translation = vec2(x, y),
       scale = vec2(1, 1),
       parent = game.camera.transform
     ),
-    draw2d: game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
-    fade: game.allocFade(0.05)
+    draw2d = game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
+    fade = game.allocFade(0.05)
   )
-  game.trails.add(trail)
 
 proc createPaddle*(game: var Game; x, y: float32) =
-  game.paddle = Paddle(
-    transform: game.allocTransform(
+  game.paddle = game.addActor(
+    PaddleKind,
+    game.allocTransform(
       translation = vec2(x, y),
       scale = vec2(1, 1),
       parent = game.camera.transform
     ),
-    collide: game.allocCollide(vec2(100, 20)),
-    draw2d: game.allocDraw2d(100, 20, [255'u8, 0, 0, 255]),
-    move: game.allocMove(vec2(0, 0), 20)
+    collide = game.allocCollide(vec2(100, 20)),
+    draw2d = game.allocDraw2d(100, 20, [255'u8, 0, 0, 255]),
+    move = game.allocMove(vec2(0, 0), 20)
   )
 
 proc createScene*(game: var Game) =

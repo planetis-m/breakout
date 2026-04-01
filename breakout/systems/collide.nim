@@ -36,19 +36,23 @@ proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
     game.colliders[bIdx].collision = Collision(flags: {Hit}, hit: -hit)
 
 proc sysCollide*(game: var Game) =
-  game.prepareCollider(game.paddle.transform, game.paddle.collide)
+  if game.paddle != NoActorIdx:
+    let paddle = game.actors[game.paddle.int]
+    if paddle.alive:
+      game.prepareCollider(paddle.transform, paddle.collide)
 
-  for ball in game.balls.items:
-    if Alive in ball.flags:
-      game.prepareCollider(ball.transform, ball.collide)
+  for actor in game.actors.items:
+    if actor.alive and actor.collide != NoCollideIdx and
+        actor.kind in {BallKind, BrickKind}:
+      game.prepareCollider(actor.transform, actor.collide)
 
-  for brick in game.bricks.items:
-    if Alive in brick.flags:
-      game.prepareCollider(brick.transform, brick.collide)
+  for ball in game.actors.items:
+    if ball.kind == BallKind and ball.alive:
+      if game.paddle != NoActorIdx:
+        let paddle = game.actors[game.paddle.int]
+        if paddle.alive:
+          game.updateCollision(ball.collide, paddle.collide)
 
-  for ball in game.balls.items:
-    if Alive in ball.flags:
-      game.updateCollision(ball.collide, game.paddle.collide)
-      for brick in game.bricks.items:
-        if Alive in brick.flags:
+      for brick in game.actors.items:
+        if brick.kind == BrickKind and brick.alive:
           game.updateCollision(ball.collide, brick.collide)
