@@ -150,29 +150,35 @@ proc initTransformNode(translation: Vec2): TransformNode =
   )
 
 proc parent*(game: Game; idx: NodeIdx): NodeIdx =
-  result = game.nodes[idx.int].hierarchy.parent
+  template hierarchy: untyped = game.nodes[idx.int].hierarchy
+  result = hierarchy.parent
 
 proc firstChild*(game: Game; idx: NodeIdx): NodeIdx =
-  result = game.nodes[idx.int].hierarchy.head
+  template hierarchy: untyped = game.nodes[idx.int].hierarchy
+  result = hierarchy.head
 
 proc nextSibling*(game: Game; idx: NodeIdx): NodeIdx =
-  result = game.nodes[idx.int].hierarchy.next
+  template hierarchy: untyped = game.nodes[idx.int].hierarchy
+  result = hierarchy.next
 
 proc prependChild(game: var Game; parent, child: NodeIdx) =
-  let head = game.nodes[parent.int].hierarchy.head
+  template childHierarchy: untyped = game.nodes[child.int].hierarchy
+  template parentHierarchy: untyped = game.nodes[parent.int].hierarchy
+  let head = parentHierarchy.head
 
-  game.nodes[child.int].hierarchy.parent = parent
-  game.nodes[child.int].hierarchy.prev = NoNodeIdx
-  game.nodes[child.int].hierarchy.next = head
+  childHierarchy.parent = parent
+  childHierarchy.prev = NoNodeIdx
+  childHierarchy.next = head
   if head != NoNodeIdx:
     game.nodes[head.int].hierarchy.prev = child
-  game.nodes[parent.int].hierarchy.head = child
+  parentHierarchy.head = child
 
 proc removeNode(game: var Game; node: NodeIdx) =
-  let parent = game.nodes[node.int].hierarchy.parent
-  let prev = game.nodes[node.int].hierarchy.prev
-  let next = game.nodes[node.int].hierarchy.next
-  let head = game.nodes[node.int].hierarchy.head
+  template hierarchy: untyped = game.nodes[node.int].hierarchy
+  let parent = hierarchy.parent
+  let prev = hierarchy.prev
+  let next = hierarchy.next
+  let head = hierarchy.head
 
   if parent != NoNodeIdx and game.nodes[parent.int].hierarchy.head == node:
     game.nodes[parent.int].hierarchy.head = next
@@ -181,7 +187,7 @@ proc removeNode(game: var Game; node: NodeIdx) =
   if next != NoNodeIdx:
     game.nodes[next.int].hierarchy.prev = prev
 
-  game.nodes[node.int].hierarchy = Hierarchy(
+  hierarchy = Hierarchy(
     head: head,
     prev: NoNodeIdx,
     next: NoNodeIdx,
@@ -204,12 +210,14 @@ proc freeNode*(game: var Game; idx: NodeIdx) =
     return
 
   game.removeNode(idx)
-  game.nodes[idx.int].active = false
+  template transformNode: untyped = game.nodes[idx.int]
+  transformNode.active = false
   game.freeNodes.add(idx.int32)
 
 proc markDirty*(game: var Game; idx: NodeIdx) =
   if idx != NoNodeIdx:
-    game.nodes[idx.int].transform.flags.incl(Dirty)
+    template transform: untyped = game.nodes[idx.int].transform
+    transform.flags.incl(Dirty)
 
 proc initCollide*(size: Vec2): Collide =
   result = Collide(

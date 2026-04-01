@@ -2,8 +2,9 @@ import ".."/[blueprints, gametypes, procgen]
 
 proc updateBrick(game: var Game; brick: var Brick) =
   if not brick.dead and Hit in brick.collide.collision.flags:
+    template transform: untyped = game.nodes[brick.node.int].transform
     brick.fade.step = 0.05
-    let position = game.nodes[brick.node.int].transform.translation
+    let position = transform.translation
     let spawnSeed = eventSeed(2'u32, game.tickId, position.x, position.y)
     if chanceFromSeed(spawnSeed) > 0.98:
       game.createBall(

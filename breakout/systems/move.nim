@@ -2,8 +2,9 @@ import ".."/gametypes
 
 proc moveNode(game: var Game; node: NodeIdx; move: Move) =
   if move.direction.x != 0 or move.direction.y != 0:
-    game.nodes[node.int].transform.translation.x += move.direction.x * move.speed
-    game.nodes[node.int].transform.translation.y += move.direction.y * move.speed
+    template transform: untyped = game.nodes[node.int].transform
+    transform.translation.x += move.direction.x * move.speed
+    transform.translation.y += move.direction.y * move.speed
     game.markDirty(node)
 
 proc movePaddle(game: var Game) =

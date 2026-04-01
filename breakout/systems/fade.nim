@@ -3,12 +3,13 @@ import ".."/gametypes
 proc applyFade(game: var Game; node: NodeIdx; draw: var Draw2d; fade: Fade;
     dead: var bool) =
   if draw.color[3] > 0:
+    template transform: untyped = game.nodes[node.int].transform
     let step = 255 * fade.step
     draw.color[3] = draw.color[3] - step.uint8
-    game.nodes[node.int].transform.scale.x -= fade.step
-    game.nodes[node.int].transform.scale.y -= fade.step
+    transform.scale.x -= fade.step
+    transform.scale.y -= fade.step
     game.markDirty(node)
-    if game.nodes[node.int].transform.scale.x <= 0:
+    if transform.scale.x <= 0:
       dead = true
 
 proc fadeBricks(game: var Game) =

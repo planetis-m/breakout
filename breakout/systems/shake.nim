@@ -2,13 +2,20 @@ import ".."/[gametypes, procgen]
 
 proc updateCameraShake(game: var Game) =
   let node = game.camera.node
+  template transform: untyped = game.nodes[node.int].transform
 
   if game.camera.shake.duration > 0:
     game.camera.shake.duration -= 0.01
-    game.nodes[node.int].transform.translation.x =
-      shakeOffsetFromTick(game.tickId, 0, game.camera.shake.strength)
-    game.nodes[node.int].transform.translation.y =
-      shakeOffsetFromTick(game.tickId, 1, game.camera.shake.strength)
+    transform.translation.x = shakeOffsetFromTick(
+      game.tickId,
+      0,
+      game.camera.shake.strength
+    )
+    transform.translation.y = shakeOffsetFromTick(
+      game.tickId,
+      1,
+      game.camera.shake.strength
+    )
 
     game.clearColor[0] = shakeColorFromTick(game.tickId, 0)
     game.clearColor[1] = shakeColorFromTick(game.tickId, 1)
@@ -17,8 +24,8 @@ proc updateCameraShake(game: var Game) =
 
     if game.camera.shake.duration <= 0:
       game.camera.shake.duration = 0
-      game.nodes[node.int].transform.translation.x = 0
-      game.nodes[node.int].transform.translation.y = 0
+      transform.translation.x = 0
+      transform.translation.y = 0
       game.clearColor[0] = 0
       game.clearColor[1] = 0
       game.clearColor[2] = 0

@@ -33,18 +33,18 @@ proc updateCollision(a, b: var Collide) =
 
 proc preparePaddleCollider(game: var Game) =
   if game.paddle.active:
-    let transform = game.nodes[game.paddle.node.int].transform
+    template transform: untyped = game.nodes[game.paddle.node.int].transform
     prepareCollider(transform, game.paddle.collide)
 
 proc prepareBallColliders(game: var Game) =
   for ball in game.balls.mitems:
-    let transform = game.nodes[ball.node.int].transform
+    template transform: untyped = game.nodes[ball.node.int].transform
     prepareCollider(transform, ball.collide)
 
 proc prepareBrickColliders(game: var Game) =
   for brick in game.bricks.mitems:
     if not brick.dead:
-      let transform = game.nodes[brick.node.int].transform
+      template transform: untyped = game.nodes[brick.node.int].transform
       prepareCollider(transform, brick.collide)
 
 proc collideBallWithPaddle(game: var Game; ball: var Ball) =

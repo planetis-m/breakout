@@ -5,20 +5,15 @@ const
   Tolerance = 0.75'f32
 
 proc drawTransform(game: Game; node: NodeIdx; draw: Draw2d; intrpl: float32) =
-  let transformNode = game.nodes[node.int]
-  if not transformNode.active or HasPrevious notin transformNode.transform.flags:
+  template transformNode: untyped = game.nodes[node.int]
+  template transform: untyped = transformNode.transform
+  template previous: untyped = transformNode.previous
+
+  if not transformNode.active or HasPrevious notin transform.flags:
     return
 
-  let position = lerp(
-    transformNode.previous.position,
-    transformNode.transform.world.origin,
-    intrpl
-  )
-  let scale = lerp(
-    transformNode.previous.scale,
-    transformNode.transform.world.scale,
-    intrpl
-  )
+  let position = lerp(previous.position, transform.world.origin, intrpl)
+  let scale = lerp(previous.scale, transform.world.scale, intrpl)
 
   let width = int32(draw.width.float32 * scale.x)
   let height = int32(draw.height.float32 * scale.y)

@@ -1,25 +1,30 @@
 import ".."/[gametypes, vmath]
 
 proc updateTransformWorld(game: var Game; idx: NodeIdx) =
-  if Fresh in game.nodes[idx.int].transform.flags:
-    game.nodes[idx.int].transform.flags.excl(Fresh)
+  template transformNode: untyped = game.nodes[idx.int]
+  template transform: untyped = transformNode.transform
+  template previous: untyped = transformNode.previous
+
+  if Fresh in transform.flags:
+    transform.flags.excl(Fresh)
   else:
-    game.nodes[idx.int].previous.position = game.nodes[idx.int].transform.world.origin
-    game.nodes[idx.int].previous.rotation = game.nodes[idx.int].transform.world.rotation
-    game.nodes[idx.int].previous.scale = game.nodes[idx.int].transform.world.scale
-    game.nodes[idx.int].transform.flags.incl(HasPrevious)
-    game.nodes[idx.int].transform.flags.excl(Dirty)
+    previous.position = transform.world.origin
+    previous.rotation = transform.world.rotation
+    previous.scale = transform.world.scale
+    transform.flags.incl(HasPrevious)
+    transform.flags.excl(Dirty)
 
   let local = compose(
-    game.nodes[idx.int].transform.scale,
-    game.nodes[idx.int].transform.rotation,
-    game.nodes[idx.int].transform.translation
+    transform.scale,
+    transform.rotation,
+    transform.translation
   )
   let parent = game.parent(idx)
   if parent != NoNodeIdx:
-    game.nodes[idx.int].transform.world = game.nodes[parent.int].transform.world * local
+    template parentTransform: untyped = game.nodes[parent.int].transform
+    transform.world = parentTransform.world * local
   else:
-    game.nodes[idx.int].transform.world = local
+    transform.world = local
 
 proc sysTransform2d*(game: var Game) =
   var stack: seq[NodeIdx] = @[]
@@ -30,7 +35,8 @@ proc sysTransform2d*(game: var Game) =
     if sibling != NoNodeIdx:
       stack.add(sibling)
 
-    if game.nodes[current.int].transform.flags.intersects({Dirty, Fresh}):
+    template transform: untyped = game.nodes[current.int].transform
+    if transform.flags.intersects({Dirty, Fresh}):
       game.updateTransformWorld(current)
 
     let child = game.firstChild(current)
