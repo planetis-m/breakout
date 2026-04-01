@@ -38,5 +38,5 @@ proc sysControlBall*(game: var Game) =
 
         game.createExplosion(transform.translation.x, transform.translation.y)
 
-      transform.flags.incl(Dirty)
+      game.markDirty(ball.transform)
       game.createTrail(transform.translation.x, transform.translation.y)

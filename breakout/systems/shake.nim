@@ -14,7 +14,7 @@ proc sysShake*(game: var Game) =
     game.clearColor[0] = rand(255).uint8
     game.clearColor[1] = rand(255).uint8
     game.clearColor[2] = rand(255).uint8
-    transform.flags.incl(Dirty)
+    game.markDirty(transformIdx)
 
     if shake.duration <= 0:
       shake.duration = 0
@@ -23,3 +23,4 @@ proc sysShake*(game: var Game) =
       game.clearColor[0] = 0
       game.clearColor[1] = 0
       game.clearColor[2] = 0
+      game.markDirty(transformIdx)

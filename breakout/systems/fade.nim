@@ -11,7 +11,7 @@ proc updateFading(game: var Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx
     draw.color[3] = draw.color[3] - step.uint8
     transform.scale.x -= fade.step
     transform.scale.y -= fade.step
-    transform.flags.incl(Dirty)
+    game.markDirty(transformIdx)
 
     if transform.scale.x <= 0:
       kind = DeadKind
