@@ -1,31 +1,29 @@
-import ".."/gametypes
+import ".."/gamecore
 
-proc applyFade(game: var Game; node: NodeIdx; draw: var Draw2d; fade: Fade;
-    dead: var bool) =
-  if draw.color[3] > 0:
+proc applyFade(game: var Game; node: NodeIdx; draw: var Draw2d; fade: Fade) =
+  if fade.step > 0 and draw.color[3] > 0:
     template transform: untyped = game.nodes[node.int].transform
     let step = 255 * fade.step
     draw.color[3] = draw.color[3] - step.uint8
     transform.scale.x -= fade.step
     transform.scale.y -= fade.step
     game.markDirty(node)
-    if transform.scale.x <= 0:
-      dead = true
 
 proc fadeBricks(game: var Game) =
   for brick in game.bricks.mitems:
-    if not brick.dead:
-      game.applyFade(brick.node, brick.draw, brick.fade, brick.dead)
+    game.applyFade(brick.node, brick.draw, brick.fade)
 
 proc fadeParticles(game: var Game) =
   for particle in game.particles.mitems:
-    if not particle.dead:
-      game.applyFade(particle.node, particle.draw, particle.fade, particle.dead)
+    game.applyFade(particle.node, particle.draw, particle.fade)
 
 proc fadeTrails(game: var Game) =
   for trail in game.trails.mitems:
-    if not trail.dead:
-      game.applyFade(trail.node, trail.draw, trail.fade, trail.dead)
+    game.applyFade(trail.node, trail.draw, trail.fade)
+
+func shouldCleanup(game: Game; node: NodeIdx): bool =
+  template transform: untyped = game.nodes[node.int].transform
+  result = transform.scale.x <= 0
 
 proc sysFade*(game: var Game) =
   game.fadeBricks()
@@ -35,7 +33,7 @@ proc sysFade*(game: var Game) =
 proc cleanupDeadBricks(game: var Game) =
   var i = game.bricks.high
   while i >= 0:
-    if game.bricks[i].dead:
+    if game.shouldCleanup(game.bricks[i].node):
       game.freeNode(game.bricks[i].node)
       game.bricks.del(i)
     dec i
@@ -43,7 +41,7 @@ proc cleanupDeadBricks(game: var Game) =
 proc cleanupDeadParticles(game: var Game) =
   var i = game.particles.high
   while i >= 0:
-    if game.particles[i].dead:
+    if game.shouldCleanup(game.particles[i].node):
       game.freeNode(game.particles[i].node)
       game.particles.del(i)
     dec i
@@ -51,7 +49,7 @@ proc cleanupDeadParticles(game: var Game) =
 proc cleanupDeadTrails(game: var Game) =
   var i = game.trails.high
   while i >= 0:
-    if game.trails[i].dead:
+    if game.shouldCleanup(game.trails[i].node):
       game.freeNode(game.trails[i].node)
       game.trails.del(i)
     dec i

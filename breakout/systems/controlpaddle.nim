@@ -1,7 +1,7 @@
-import ".."/gametypes
+import ".."/gamecore
 
 proc sysControlPaddle*(game: var Game) =
-  if not game.paddle.active:
+  if game.paddle.node == NoNodeIdx:
     return
 
   game.paddle.move.direction.x = 0

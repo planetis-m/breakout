@@ -1,6 +1,6 @@
 import
   std/[monotimes, random],
-  breakout/[blueprints, gametypes, raylib],
+  breakout/[blueprints, gamecore, raylib],
   breakout/systems/[collide, controlball, controlbrick, controlpaddle, draw2d,
     fade, handleevents, move, shake, transform2d]
 

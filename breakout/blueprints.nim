@@ -1,5 +1,5 @@
 import std/[math, random]
-import gametypes, vmath
+import gamecore, vmath
 
 proc createBall*(game: var Game; x, y: float32) =
   let angle = PI.float32 + rand(1.0'f32) * PI.float32
@@ -17,8 +17,7 @@ proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
     node: node,
     collide: initCollide(vec2(width.float32, height.float32)),
     draw: Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255]),
-    fade: Fade(step: 0),
-    dead: false
+    fade: Fade(step: 0)
   ))
 
 proc createExplosion*(game: var Game; x, y: float32) =
@@ -35,8 +34,7 @@ proc createExplosion*(game: var Game; x, y: float32) =
       move: Move(
         direction: Vec2(x: sin(step * i.float32), y: cos(step * i.float32)),
         speed: 20
-      ),
-      dead: false
+      )
     ))
 
 proc createTrail*(game: var Game; x, y: float32) =
@@ -44,14 +42,12 @@ proc createTrail*(game: var Game; x, y: float32) =
   game.trails.add(Trail(
     node: node,
     draw: Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255]),
-    fade: Fade(step: 0.05),
-    dead: false
+    fade: Fade(step: 0.05)
   ))
 
 proc createPaddle*(game: var Game; x, y: float32) =
   let node = game.allocNode(vec2(x, y), game.camera.node)
   game.paddle = Paddle(
-    active: true,
     node: node,
     collide: initCollide(vec2(100, 20)),
     draw: Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255]),

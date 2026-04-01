@@ -1,4 +1,4 @@
-import ".."/[blueprints, gametypes]
+import ".."/[blueprints, gamecore]
 
 proc updateBallBounds(game: var Game; ball: var Ball) =
   let node = ball.node
@@ -22,7 +22,7 @@ proc updateBallBounds(game: var Game; ball: var Ball) =
     ball.move.direction.y *= -1
 
 proc updateBallCollision(game: var Game; ball: var Ball) =
-  if Hit in ball.collide.collision.flags:
+  if ball.collide.collision.hasHit:
     template transform: untyped = game.nodes[ball.node.int].transform
     game.camera.shake.duration = 0.1
 

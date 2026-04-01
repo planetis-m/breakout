@@ -1,4 +1,4 @@
-import ".."/[gametypes, raylib]
+import ".."/[gamecore, raylib]
 
 proc handleEvents*(game: var Game) =
   pollInput()

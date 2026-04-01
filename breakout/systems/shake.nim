@@ -1,5 +1,5 @@
 import std/random
-import ".."/gametypes
+import ".."/gamecore
 
 proc updateCameraShake(game: var Game) =
   let node = game.camera.node

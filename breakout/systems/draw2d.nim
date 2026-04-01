@@ -1,5 +1,5 @@
 import math
-import ".."/[gametypes, raylib, vmath]
+import ".."/[gamecore, raylib, vmath]
 
 const
   Tolerance = 0.75'f32
@@ -9,7 +9,7 @@ proc drawTransform(game: Game; node: NodeIdx; draw: Draw2d; intrpl: float32) =
   template transform: untyped = transformNode.transform
   template previous: untyped = transformNode.previous
 
-  if not transformNode.active or HasPrevious notin transform.flags:
+  if HasPrevious notin transform.flags:
     return
 
   let position = lerp(previous.position, transform.world.origin, intrpl)
@@ -36,20 +36,17 @@ proc drawTransform(game: Game; node: NodeIdx; draw: Draw2d; intrpl: float32) =
 proc sysDraw2d*(game: var Game; intrpl: float32) =
   clearBackground(game.clearColor)
 
-  if game.paddle.active:
+  if game.paddle.node != NoNodeIdx:
     game.drawTransform(game.paddle.node, game.paddle.draw, intrpl)
 
   for ball in game.balls.items:
     game.drawTransform(ball.node, ball.draw, intrpl)
 
   for brick in game.bricks.items:
-    if not brick.dead:
-      game.drawTransform(brick.node, brick.draw, intrpl)
+    game.drawTransform(brick.node, brick.draw, intrpl)
 
   for particle in game.particles.items:
-    if not particle.dead:
-      game.drawTransform(particle.node, particle.draw, intrpl)
+    game.drawTransform(particle.node, particle.draw, intrpl)
 
   for trail in game.trails.items:
-    if not trail.dead:
-      game.drawTransform(trail.node, trail.draw, intrpl)
+    game.drawTransform(trail.node, trail.draw, intrpl)

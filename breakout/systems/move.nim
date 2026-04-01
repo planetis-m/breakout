@@ -1,4 +1,4 @@
-import ".."/gametypes
+import ".."/gamecore
 
 proc moveNode(game: var Game; node: NodeIdx; move: Move) =
   if move.direction.x != 0 or move.direction.y != 0:
@@ -8,7 +8,7 @@ proc moveNode(game: var Game; node: NodeIdx; move: Move) =
     game.markDirty(node)
 
 proc movePaddle(game: var Game) =
-  if game.paddle.active:
+  if game.paddle.node != NoNodeIdx:
     game.moveNode(game.paddle.node, game.paddle.move)
 
 proc moveBalls(game: var Game) =
@@ -17,8 +17,7 @@ proc moveBalls(game: var Game) =
 
 proc moveParticles(game: var Game) =
   for particle in game.particles.items:
-    if not particle.dead:
-      game.moveNode(particle.node, particle.move)
+    game.moveNode(particle.node, particle.move)
 
 proc sysMove*(game: var Game) =
   game.movePaddle()

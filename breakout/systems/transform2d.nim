@@ -1,4 +1,4 @@
-import ".."/[gametypes, vmath]
+import ".."/[gamecore, vmath]
 
 proc updateTransformWorld(game: var Game; idx: NodeIdx) =
   template transformNode: untyped = game.nodes[idx.int]
