@@ -10,38 +10,28 @@ type
   FadeIdx* = distinct int
   MoveIdx* = distinct int
 
-  BallIdx* = distinct int
-  BrickIdx* = distinct int
-  ParticleIdx* = distinct int
-  TrailIdx* = distinct int
-
   Collision* = object
     hasHit*: bool
     hit*: Vec2
 
   Collide* = object
-    active*: bool
     size*: Vec2
     min*, max*: Point2
     center*: Point2
     collision*: Collision
 
   Draw2d* = object
-    active*: bool
     width*, height*: int32
     color*: array[4, uint8]
 
   Fade* = object
-    active*: bool
     step*: float32
 
   Move* = object
-    active*: bool
     direction*: Vec2
     speed*: float32
 
   Transform2d* = object
-    active*: bool
     world*: Mat2d
     translation*: Vec2
     rotation*: Rad
@@ -130,25 +120,16 @@ const
   NoDraw2dIdx* = Draw2dIdx(-1)
   NoFadeIdx* = FadeIdx(-1)
   NoMoveIdx* = MoveIdx(-1)
-  NoBallIdx* = BallIdx(-1)
-  NoBrickIdx* = BrickIdx(-1)
-  NoParticleIdx* = ParticleIdx(-1)
-  NoTrailIdx* = TrailIdx(-1)
 
 proc `==`*(a, b: TransformIdx): bool {.borrow.}
 proc `==`*(a, b: CollideIdx): bool {.borrow.}
 proc `==`*(a, b: Draw2dIdx): bool {.borrow.}
 proc `==`*(a, b: FadeIdx): bool {.borrow.}
 proc `==`*(a, b: MoveIdx): bool {.borrow.}
-proc `==`*(a, b: BallIdx): bool {.borrow.}
-proc `==`*(a, b: BrickIdx): bool {.borrow.}
-proc `==`*(a, b: ParticleIdx): bool {.borrow.}
-proc `==`*(a, b: TrailIdx): bool {.borrow.}
 
 proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
     scale = vec2(1, 1); parent = NoTransformIdx): TransformIdx =
   let value = Transform2d(
-    active: true,
     world: mat2d(),
     translation: translation,
     rotation: rotation,
@@ -170,12 +151,11 @@ proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
 
 proc freeTransform*(game: var Game; idx: TransformIdx) =
   if idx != NoTransformIdx:
-    game.transforms[idx.int].active = false
+    game.transforms[idx.int] = default(Transform2d)
     game.freeTransforms.add(idx)
 
 proc allocCollide*(game: var Game; size = vec2(0, 0)): CollideIdx =
   let value = Collide(
-    active: true,
     size: size,
     min: point2(0, 0),
     max: point2(0, 0),
@@ -191,12 +171,12 @@ proc allocCollide*(game: var Game; size = vec2(0, 0)): CollideIdx =
 
 proc freeCollide*(game: var Game; idx: CollideIdx) =
   if idx != NoCollideIdx:
-    game.colliders[idx.int].active = false
+    game.colliders[idx.int] = default(Collide)
     game.freeColliders.add(idx)
 
 proc allocDraw2d*(game: var Game; width, height: int32;
     color: array[4, uint8]): Draw2dIdx =
-  let value = Draw2d(active: true, width: width, height: height, color: color)
+  let value = Draw2d(width: width, height: height, color: color)
   if game.freeDrawables.len > 0:
     result = game.freeDrawables.pop()
     game.drawables[result.int] = value
@@ -206,11 +186,11 @@ proc allocDraw2d*(game: var Game; width, height: int32;
 
 proc freeDraw2d*(game: var Game; idx: Draw2dIdx) =
   if idx != NoDraw2dIdx:
-    game.drawables[idx.int].active = false
+    game.drawables[idx.int] = default(Draw2d)
     game.freeDrawables.add(idx)
 
 proc allocFade*(game: var Game; step = 0'f32): FadeIdx =
-  let value = Fade(active: true, step: step)
+  let value = Fade(step: step)
   if game.freeFades.len > 0:
     result = game.freeFades.pop()
     game.fades[result.int] = value
@@ -220,11 +200,11 @@ proc allocFade*(game: var Game; step = 0'f32): FadeIdx =
 
 proc freeFade*(game: var Game; idx: FadeIdx) =
   if idx != NoFadeIdx:
-    game.fades[idx.int].active = false
+    game.fades[idx.int] = default(Fade)
     game.freeFades.add(idx)
 
 proc allocMove*(game: var Game; direction = vec2(0, 0); speed = 10'f32): MoveIdx =
-  let value = Move(active: true, direction: direction, speed: speed)
+  let value = Move(direction: direction, speed: speed)
   if game.freeMoves.len > 0:
     result = game.freeMoves.pop()
     game.moves[result.int] = value
@@ -234,7 +214,7 @@ proc allocMove*(game: var Game; direction = vec2(0, 0); speed = 10'f32): MoveIdx
 
 proc freeMove*(game: var Game; idx: MoveIdx) =
   if idx != NoMoveIdx:
-    game.moves[idx.int].active = false
+    game.moves[idx.int] = default(Move)
     game.freeMoves.add(idx)
 
 proc markDirty*(game: var Game; idx: TransformIdx) =

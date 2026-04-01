@@ -3,9 +3,9 @@ import ".."/[blueprints, gametypes]
 proc sysControlBall*(game: var Game) =
   for ball in mitems(game.balls):
     if ball.alive:
-      var collide = addr game.colliders[ball.collide.int]
-      var move = addr game.moves[ball.move.int]
-      var transform = addr game.transforms[ball.transform.int]
+      template collide: untyped = game.colliders[ball.collide.int]
+      template move: untyped = game.moves[ball.move.int]
+      template transform: untyped = game.transforms[ball.transform.int]
 
       if collide.min.x < 0:
         transform.translation.x = collide.size.x / 2

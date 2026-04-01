@@ -1,6 +1,6 @@
 import std/[math, random], gametypes, vmath
 
-proc createBall*(game: var Game; x, y: float32): BallIdx =
+proc createBall*(game: var Game; x, y: float32) =
   let angle = PI.float32 + rand(1.0'f32) * PI.float32
   let transform = game.allocTransform(
     translation = vec2(x, y),
@@ -14,10 +14,9 @@ proc createBall*(game: var Game; x, y: float32): BallIdx =
     draw2d: game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
     move: game.allocMove(Vec2(x: cos(angle), y: sin(angle)), 14)
   )
-  result = BallIdx(game.balls.len)
   game.balls.add(ball)
 
-proc createBrick*(game: var Game; x, y: float32; width, height: int32): BrickIdx =
+proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
   let brick = Brick(
     alive: true,
     transform: game.allocTransform(
@@ -29,7 +28,6 @@ proc createBrick*(game: var Game; x, y: float32; width, height: int32): BrickIdx
     draw2d: game.allocDraw2d(width, height, [255'u8, 255, 0, 255]),
     fade: game.allocFade(0)
   )
-  result = BrickIdx(game.bricks.len)
   game.bricks.add(brick)
 
 proc createExplosion*(game: var Game; x, y: float32) =
@@ -99,10 +97,10 @@ proc createScene*(game: var Game) =
   )
 
   game.createPaddle(float32(game.windowWidth / 2), float32(game.windowHeight - 30))
-  discard game.createBall(float32(game.windowWidth / 2), float32(game.windowHeight - 60))
+  game.createBall(float32(game.windowWidth / 2), float32(game.windowHeight - 60))
 
   for row in 0..<rowCount:
     let y = startingY + row * (brickHeight + margin) + brickHeight div 2
     for col in 0..<columnCount:
       let x = startingX + col * (brickWidth + margin) + brickWidth div 2
-      discard game.createBrick(x.float32, y.float32, brickWidth.int32, brickHeight.int32)
+      game.createBrick(x.float32, y.float32, brickWidth.int32, brickHeight.int32)

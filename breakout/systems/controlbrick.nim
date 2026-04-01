@@ -6,7 +6,7 @@ proc sysControlBrick*(game: var Game) =
     if brick.alive and game.colliders[brick.collide.int].collision.hasHit:
       game.fades[brick.fade.int].step = 0.05
       if rand(1.0) > 0.98:
-        discard game.createBall(
+        game.createBall(
           float32(game.windowWidth / 2),
           float32(game.windowHeight / 2)
         )
