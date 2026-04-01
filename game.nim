@@ -1,15 +1,11 @@
 import
-  std / [random, monotimes, os],
-  breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils],
+  std / [random, monotimes],
+  breakout / [raylib, heaparrays, gametypes, blueprints, slottables, utils],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
-  let sdlContext = sdlInit(InitVideo or InitEvents)
-  let window = newWindow("Breakout", SdlWindowPosCentered,
-      SdlWindowPosCentered, windowWidth, windowHeight, SdlWindowShown)
-
-  let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
+  let raylibContext = initRaylib("Breakout", windowWidth, windowHeight)
 
   let world = World(
     signature: initSlotTableOfCap[set[HasComponent]](MaxEntities),
@@ -25,16 +21,12 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
   result = Game(
     world: world,
-    #snapshot: initSnapHandler(),
-
     camera: InvalidId,
     isRunning: true,
     windowWidth: windowWidth,
     windowHeight: windowHeight,
 
-    renderer: renderer,
-    window: window,
-    sdlContext: sdlContext,
+    raylib: raylibContext,
 
     clearColor: [0'u8, 0, 0, 255]
   )
@@ -59,16 +51,18 @@ proc update(game: var Game) =
   inc(game.tickId)
 
 proc render(game: var Game, intrpl: float32) =
+  beginDrawing()
   sysDraw2d(game, intrpl)
-  game.renderer.impl.present()
+  endDrawing()
+  swapScreenBuffer()
 
 proc run(game: var Game) =
   const
     TickRate = 25
-    TickDuration = 1_000_000_000 div TickRate # to nanosecs per tick
+    TickDuration = 1_000_000_000 div TickRate
     MaxTicks = 5 # 20% of tickRate
     FrameRate = 60 # desired frames per second
-    FrameDuration = 1_000_000_000 div FrameRate # desired nanosecs per frame
+    FrameDuration = 1_000_000_000 div FrameRate
 
   var
     lastTime = getMonoTime().ticks
@@ -89,21 +83,17 @@ proc run(game: var Game) =
       inc ticks
 
     if ticks > 0:
-      let alpha = accumulator.float32 / TickDuration / 1_000_000_000
+      let alpha = accumulator.float32 / TickDuration.float32
       game.render(alpha)
-      # calculate the ideal sleep time based on the target frame rate and the actual frame time
+
       let actualFrameDuration = getMonoTime().ticks - now
-      let sleepTime = (FrameDuration - actualFrameDuration) div 1_000_000
+      let sleepTime = FrameDuration - actualFrameDuration
       if sleepTime > 0:
-        sleep(sleepTime)
+        waitTime(sleepTime.float64 / 1_000_000_000.0)
 
 proc main =
   randomize()
   var game = initGame(740, 555)
-  # Restore previous snapshot of the World
-  #if snapExists(game.snapshot):
-    #restore(game)
-  #else:
   createScene(game)
 
   run(game)

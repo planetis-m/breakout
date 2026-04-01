@@ -1,20 +1,9 @@
-import ".."/[gametypes, sdlpriv]
-
-template setInputState(val) =
-  case event.key.keysym.scancode
-  of SdlScancodeLeft, SdlScancodeA:
-    game.inputState[Left] = val
-  of SdlScancodeRight, SdlScancodeD:
-    game.inputState[Right] = val
-  else: discard
+import ".."/[gametypes, raylib]
 
 proc handleEvents*(game: var Game) =
-  var event = defaultEvent
-  while pollEvent(event):
-    if event.kind == QuitEvent or (event.kind == KeyDown and
-          event.key.keysym.scancode == SdlScancodeEscape):
-      game.isRunning = false
-    elif event.kind == KeyDown and not event.key.repeat:
-      setInputState(true)
-    elif event.kind == KeyUp and not event.key.repeat:
-      setInputState(false)
+  pollInput()
+  if windowShouldClose() or keyPressed(KEY_ESCAPE):
+    game.isRunning = false
+
+  game.inputState[Left] = keyDown(KEY_LEFT) or keyDown(KEY_A)
+  game.inputState[Right] = keyDown(KEY_RIGHT) or keyDown(KEY_D)

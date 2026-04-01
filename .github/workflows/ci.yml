@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          repo-token: ${{ github.token }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            git \
+            libasound2-dev \
+            libegl1-mesa-dev \
+            libgl1-mesa-dev \
+            libwayland-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxinerama-dev \
+            libxkbcommon-dev \
+            libxi-dev \
+            libxrandr-dev \
+            make \
+            wayland-protocols
+
+      - name: Build raylib
+        run: |
+          git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+          make -C /tmp/raylib/src \
+            PLATFORM=PLATFORM_DESKTOP \
+            GLFW_LINUX_ENABLE_WAYLAND=TRUE \
+            GLFW_LINUX_ENABLE_X11=TRUE \
+            RAYLIB_LIBTYPE=SHARED \
+            CUSTOM_CFLAGS='-DSUPPORT_CUSTOM_FRAME_CONTROL=1'
+          cp /tmp/raylib/src/raylib.h .
+          cp /tmp/raylib/src/libraylib.so* .
+
+      - name: Build game
+        run: nim c -d:release game.nim
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          repo-token: ${{ github.token }}
+
+      - name: Build raylib
+        run: |
+          git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+          make -C /tmp/raylib/src \
+            PLATFORM=PLATFORM_DESKTOP \
+            RAYLIB_LIBTYPE=SHARED \
+            CUSTOM_CFLAGS='-DSUPPORT_CUSTOM_FRAME_CONTROL=1'
+          cp /tmp/raylib/src/raylib.h .
+          cp /tmp/raylib/src/libraylib*.dylib .
+
+      - name: Build game
+        run: nim c -d:release game.nim
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          repo-token: ${{ github.token }}
+
+      - name: Install system dependencies
+        uses: johnwason/vcpkg-action@v7
+        id: vcpkg
+        with:
+          pkgs: raylib
+          triplet: x64-windows-release
+          token: ${{ github.token }}
+
+      - name: Copy raylib runtime
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg\installed\x64-windows-release
+        run: |
+          Copy-Item "$env:VCPKG_ROOT\bin\raylib.dll" .\raylib.dll -Force
+
+      - name: Build game
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg\installed\x64-windows-release
+        run: |
+          $env:PATH = "$env:VCPKG_ROOT\bin;$pwd;$env:PATH"
+          nim c --cc:vcc -d:VcpkgRoot="$env:VCPKG_ROOT" -d:release game.nim

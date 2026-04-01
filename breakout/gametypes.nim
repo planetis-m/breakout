@@ -1,4 +1,4 @@
-import sdlpriv, vmath, entities, slottables, heaparrays, std/monotimes
+import raylib, vmath, entities, slottables, heaparrays
 export entities
 
 type
@@ -73,14 +73,8 @@ type
     shake*: ref Shake
     transform*: Array[Transform2d]
 
-  # SnapHandler* = object
-  #   savefile*: string
-  #   lastTime*: MonoTime
-  #   retries*: int
-
   Game* = object
     world*: World
-    # snapshot*: SnapHandler
 
     toDelete*: seq[Entity]
     inputState*: array[Input, bool]
@@ -91,6 +85,4 @@ type
     windowWidth*, windowHeight*: int32
     tickId*: int
 
-    renderer*: Renderer
-    window*: Window
-    sdlContext*: SdlContext
+    raylib*: RaylibContext

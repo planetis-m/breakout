@@ -1,4 +1,4 @@
-import entities, bingo, std/streams
+import entities
 
 type
   Entry*[T] = tuple
@@ -87,27 +87,3 @@ proc `[]`*[T](x: var SlotTable[T], e: Entity): var T =
 iterator pairs*[T](x: SlotTable[T]): Entry[T] =
   for i in 0 ..< x.len:
     yield x.data[i]
-
-# Serialization
-proc storeBin*[T](s: Stream; a: SlotTable[T]) =
-  write(s, int64(a.slots.len))
-  for x in a.slots:
-    write(s, x.version)
-    if x.version mod 2 > 0:
-      storeBin(s, a.data[x.idx].value)
-
-proc initFromBin*[T](dst: var SlotTable[T]; s: Stream) =
-  let len = s.readInt64()
-  dst.clear()
-  var nextFree = len.int
-  for i in 0 ..< len:
-    var version: EntityImpl
-    read(s, version)
-    if version mod 2 > 0:
-      let value = binTo(s, T)
-      dst.data.add((e: toEntity(i.EntityImpl, version), value: value))
-      dst.slots.add(toEntity(dst.data.high.EntityImpl, version))
-    else:
-      dst.slots.add(toEntity(nextFree.EntityImpl, version))
-      nextFree = i.int
-  dst.freeHead = nextFree
