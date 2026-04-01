@@ -83,20 +83,14 @@ type
     fade*: FadeIdx
     move*: MoveIdx
 
-  TransformStore* = object
-    transforms: Pool[Transform2d, TransformIdx]
-    hierarchies: Pool[Hierarchy, HierarchyIdx]
-    previous: Pool[Previous, PreviousIdx]
-    transformHierarchy: seq[HierarchyIdx]
-    hierarchyTransform: seq[TransformIdx]
-    transformPrevious: seq[PreviousIdx]
-
   Game* = object
     camera*: Camera
     paddle*: ActorIdx
     actors*: seq[Actor]
 
-    transforms*: TransformStore
+    transforms*: Pool[Transform2d, TransformIdx]
+    hierarchies*: Pool[Hierarchy, HierarchyIdx]
+    previous*: Pool[Previous, PreviousIdx]
     colliders*: Pool[Collide, CollideIdx]
     drawables*: Pool[Draw2d, Draw2dIdx]
     fades*: Pool[Fade, FadeIdx]
@@ -136,70 +130,64 @@ func containsAll*[K: enum](mask, required: set[K]): bool {.inline.} =
 func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
   (a * b) != {}
 
-proc `[]`*(store: TransformStore; idx: TransformIdx): Transform2d =
-  store.transforms[idx]
+func hierarchyIdx*(idx: TransformIdx): HierarchyIdx {.inline.} =
+  HierarchyIdx(idx.int)
 
-proc `[]`*(store: var TransformStore; idx: TransformIdx): var Transform2d =
-  store.transforms[idx]
+func previousIdx*(idx: TransformIdx): PreviousIdx {.inline.} =
+  PreviousIdx(idx.int)
 
-proc previous*(store: TransformStore; idx: TransformIdx): Previous =
-  store.previous[store.transformPrevious[idx.int]]
+func transformIdx*(idx: HierarchyIdx): TransformIdx {.inline.} =
+  TransformIdx(idx.int)
 
-proc previous*(store: var TransformStore; idx: TransformIdx): var Previous =
-  store.previous[store.transformPrevious[idx.int]]
-
-proc parent*(store: TransformStore; idx: TransformIdx): TransformIdx =
-  let hierarchyIdx = store.transformHierarchy[idx.int]
-  let parentHierarchyIdx = store.hierarchies[hierarchyIdx].parent
+proc parent*(game: Game; idx: TransformIdx): TransformIdx =
+  let parentHierarchyIdx = game.hierarchies[idx.hierarchyIdx].parent
   if parentHierarchyIdx == NoHierarchyIdx:
     result = NoTransformIdx
   else:
-    result = store.hierarchyTransform[parentHierarchyIdx.int]
+    result = parentHierarchyIdx.transformIdx
 
-proc firstChild*(store: TransformStore; idx: TransformIdx): TransformIdx =
-  let hierarchyIdx = store.transformHierarchy[idx.int]
-  let childHierarchyIdx = store.hierarchies[hierarchyIdx].head
+proc firstChild*(game: Game; idx: TransformIdx): TransformIdx =
+  let childHierarchyIdx = game.hierarchies[idx.hierarchyIdx].head
   if childHierarchyIdx == NoHierarchyIdx:
     result = NoTransformIdx
   else:
-    result = store.hierarchyTransform[childHierarchyIdx.int]
+    result = childHierarchyIdx.transformIdx
 
-proc nextSibling*(store: TransformStore; idx: TransformIdx): TransformIdx =
-  let hierarchyIdx = store.transformHierarchy[idx.int]
-  let siblingHierarchyIdx = store.hierarchies[hierarchyIdx].next
+proc nextSibling*(game: Game; idx: TransformIdx): TransformIdx =
+  let siblingHierarchyIdx = game.hierarchies[idx.hierarchyIdx].next
   if siblingHierarchyIdx == NoHierarchyIdx:
     result = NoTransformIdx
   else:
-    result = store.hierarchyTransform[siblingHierarchyIdx.int]
+    result = siblingHierarchyIdx.transformIdx
 
-proc prependChild(store: var TransformStore; parent, child: TransformIdx) =
-  let childHierarchyIdx = store.transformHierarchy[child.int]
-  let parentHierarchyIdx = store.transformHierarchy[parent.int]
-  template hierarchy: untyped = store.hierarchies[childHierarchyIdx]
-  template parentHierarchy: untyped = store.hierarchies[parentHierarchyIdx]
+proc prependChild(game: var Game; parent, child: TransformIdx) =
+  let childHierarchyIdx = child.hierarchyIdx
+  let parentHierarchyIdx = parent.hierarchyIdx
+  template hierarchy: untyped = game.hierarchies[childHierarchyIdx]
+  template parentHierarchy: untyped = game.hierarchies[parentHierarchyIdx]
 
   hierarchy.parent = parentHierarchyIdx
   hierarchy.prev = NoHierarchyIdx
   hierarchy.next = parentHierarchy.head
   if parentHierarchy.head != NoHierarchyIdx:
-    store.hierarchies[parentHierarchy.head].prev = childHierarchyIdx
+    game.hierarchies[parentHierarchy.head].prev = childHierarchyIdx
   parentHierarchy.head = childHierarchyIdx
 
-proc removeNode(store: var TransformStore; node: TransformIdx) =
-  let hierarchyIdx = store.transformHierarchy[node.int]
-  template hierarchy: untyped = store.hierarchies[hierarchyIdx]
+proc removeNode(game: var Game; node: TransformIdx) =
+  let idx = node.hierarchyIdx
+  template hierarchy: untyped = game.hierarchies[idx]
 
   let parent = hierarchy.parent
   let prev = hierarchy.prev
   let next = hierarchy.next
   let head = hierarchy.head
 
-  if parent != NoHierarchyIdx and store.hierarchies[parent].head == hierarchyIdx:
-    store.hierarchies[parent].head = next
+  if parent != NoHierarchyIdx and game.hierarchies[parent].head == idx:
+    game.hierarchies[parent].head = next
   if prev != NoHierarchyIdx:
-    store.hierarchies[prev].next = next
+    game.hierarchies[prev].next = next
   if next != NoHierarchyIdx:
-    store.hierarchies[next].prev = prev
+    game.hierarchies[next].prev = prev
 
   hierarchy = Hierarchy(
     head: head,
@@ -208,74 +196,42 @@ proc removeNode(store: var TransformStore; node: TransformIdx) =
     parent: NoHierarchyIdx
   )
 
-proc allocHierarchy(store: var TransformStore): HierarchyIdx =
-  let value = Hierarchy(
-    head: NoHierarchyIdx,
-    prev: NoHierarchyIdx,
-    next: NoHierarchyIdx,
-    parent: NoHierarchyIdx
-  )
-  result = store.hierarchies.alloc(value)
-  if result.int == store.hierarchyTransform.len:
-    store.hierarchyTransform.add(NoTransformIdx)
-
-proc freeHierarchy(store: var TransformStore; idx: HierarchyIdx) =
-  if idx != NoHierarchyIdx:
-    store.hierarchyTransform[idx.int] = NoTransformIdx
-    store.hierarchies.free(idx)
-
-proc allocPrevious(store: var TransformStore): PreviousIdx =
-  let value = Previous(
-    position: point2(0, 0),
-    rotation: 0.Rad,
-    scale: vec2(1, 1)
-  )
-  result = store.previous.alloc(value)
-
-proc freePrevious(store: var TransformStore; idx: PreviousIdx) =
-  if idx != NoPreviousIdx:
-    store.previous.free(idx)
-
-proc allocTransform*(store: var TransformStore; translation = vec2(0, 0); rotation = 0.Rad;
+proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
     scale = vec2(1, 1); parent = NoTransformIdx): TransformIdx =
-  let value = Transform2d(
+  let transform = Transform2d(
     world: mat2d(),
     translation: translation,
     rotation: rotation,
     scale: scale,
     flags: {Dirty, Fresh}
   )
-  let hierarchyIdx = store.allocHierarchy()
-  let previousIdx = store.allocPrevious()
-  result = store.transforms.alloc(value)
-  if result.int == store.transformHierarchy.len:
-    store.transformHierarchy.add(NoHierarchyIdx)
-    store.transformPrevious.add(NoPreviousIdx)
-
-  store.transformHierarchy[result.int] = hierarchyIdx
-  store.transformPrevious[result.int] = previousIdx
-  store.hierarchyTransform[hierarchyIdx.int] = result
+  let hierarchy = Hierarchy(
+    head: NoHierarchyIdx,
+    prev: NoHierarchyIdx,
+    next: NoHierarchyIdx,
+    parent: NoHierarchyIdx
+  )
+  let previous = Previous(
+    position: point2(0, 0),
+    rotation: 0.Rad,
+    scale: vec2(1, 1)
+  )
+  let transformIdx = game.transforms.alloc(transform)
+  let hierarchyIdx = game.hierarchies.alloc(hierarchy)
+  let previousIdx = game.previous.alloc(previous)
+  doAssert hierarchyIdx.int == transformIdx.int
+  doAssert previousIdx.int == transformIdx.int
+  result = transformIdx
 
   if parent != NoTransformIdx:
-    store.prependChild(parent, result)
-
-proc freeTransform*(store: var TransformStore; idx: TransformIdx) =
-  if idx != NoTransformIdx:
-    let hierarchyIdx = store.transformHierarchy[idx.int]
-    let previousIdx = store.transformPrevious[idx.int]
-    store.removeNode(idx)
-    store.transformHierarchy[idx.int] = NoHierarchyIdx
-    store.transformPrevious[idx.int] = NoPreviousIdx
-    store.freeHierarchy(hierarchyIdx)
-    store.freePrevious(previousIdx)
-    store.transforms.free(idx)
-
-proc allocTransform*(game: var Game; translation = vec2(0, 0); rotation = 0.Rad;
-    scale = vec2(1, 1); parent = NoTransformIdx): TransformIdx =
-  game.transforms.allocTransform(translation, rotation, scale, parent)
+    game.prependChild(parent, result)
 
 proc freeTransform*(game: var Game; idx: TransformIdx) =
-  game.transforms.freeTransform(idx)
+  if idx != NoTransformIdx:
+    game.removeNode(idx)
+    game.transforms.free(idx)
+    game.hierarchies.free(idx.hierarchyIdx)
+    game.previous.free(idx.previousIdx)
 
 proc allocCollide*(game: var Game; size = vec2(0, 0)): CollideIdx =
   let value = Collide(

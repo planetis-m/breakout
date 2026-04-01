@@ -2,7 +2,7 @@ import ".."/[gametypes, vmath]
 
 proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
   template transform: untyped = game.transforms[idx]
-  template previous: untyped = game.transforms.previous(idx)
+  template previous: untyped = game.previous[idx.previousIdx]
 
   let shouldUpdate = force or transform.flags.intersects({Dirty, Fresh})
   if shouldUpdate:
@@ -16,7 +16,7 @@ proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
       transform.flags.excl(Dirty)
 
     let local = compose(transform.scale, transform.rotation, transform.translation)
-    let parent = game.transforms.parent(idx)
+    let parent = game.parent(idx)
     if parent != NoTransformIdx:
       let parentTransform = game.transforms[parent]
       transform.world = parentTransform.world * local
@@ -28,10 +28,10 @@ proc updateTransformTree(game: var Game; idx: TransformIdx; force = false) =
 
   game.updateTransformWorld(idx, force)
 
-  var child = game.transforms.firstChild(idx)
+  var child = game.firstChild(idx)
   while child != NoTransformIdx:
     game.updateTransformTree(child, subtreeDirty)
-    child = game.transforms.nextSibling(child)
+    child = game.nextSibling(child)
 
 proc sysTransform2d*(game: var Game) =
   game.updateTransformTree(game.camera.transform)

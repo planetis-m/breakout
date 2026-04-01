@@ -9,7 +9,7 @@ proc drawTransform(game: Game; transformIdx: TransformIdx; drawIdx: Draw2dIdx;
   if not transform.flags.containsAll({HasPrevious}):
     return
 
-  let previous = game.transforms.previous(transformIdx)
+  let previous = game.previous[transformIdx.previousIdx]
   let position = lerp(previous.position, transform.world.origin, intrpl)
   let scale = lerp(previous.scale, transform.world.scale, intrpl)
   let draw2d = game.drawables[drawIdx]
