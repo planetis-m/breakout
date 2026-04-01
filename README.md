@@ -1,133 +1,137 @@
 # breakout-ecs
 
-This is a port of [rs-breakout](https://github.com/michalbe/rs-breakout)
-"A Breakout clone written in Rust using a strict ECS architecture" to Nim.
-It was done for learning purposes. It also incorporates improvements done by me.
-These are explained below.
+A small Breakout clone in Nim that doubles as a compact ECS playground: fixed-timestep simulation, hierarchical transforms, explicit component storage, and a minimal raylib platform layer.
 
-## Entity management was redesigned
+## Why Try It?
 
-The original codebase when updating a system or creating a new entity, it iterates up
-to ``MAX_ENTITIES``. This was eliminated by using a specialized data structure.
+- Strict ECS without drowning in framework code.
+- Fixed-step gameplay with interpolation, so the game loop stays easy to reason about.
+- Dense component storage plus entity signatures instead of scanning `MAX_ENTITIES`.
+- Small enough to read in one sitting, but still complete enough to be useful as a reference.
+- Runs on Linux, macOS, and Windows through the same core game code.
 
-For entity management (creation, deletion) a ``SlotMap`` is used. It also holds
-a dense sequence of ``set[HasComponent]`` which is the "signature" for each entity.
-A signature is a bit-set describing the component composition of an entity.
-This is used for iterating over all entities, skipping the ones that don't match a system's "registered" components.
-These are encoded as `Query`, another bit-set and the check performed is: `signature * Query == Query`.
+## What It Looks Like
 
-## Fixed timestep with interpolation
-
-Alpha value is used to interpolate between next and previous transforms. Interpolation function
-for `angles` was implemented.
-
-## Improvements to the hierarchical scene graph
-
-As explained by the original authors in their documentation for
-[backcountry](https://piesku.com/backcountry/architecture#scene)
-
-> Transforms can have child transforms attached to them. We use this to group
-> entities into larger wholes (e.g. a character is a hierarchy of body parts,
-> the hat and the gun).
-
-I changed the implementation of ``children: [Option<usize>; MAX_CHILDREN]``
-with the design described at
-[skypjack's blog](https://skypjack.github.io/2019-06-25-ecs-baf-part-4/).
-Now it is a seperate ``Hierarchy`` component following the unconstrained model.
-Immediate updates are implemented by traversing this hierarchy using dfs traversal.
-
-## Custom vector math library
-
-A type safe vector math library was created for use in the game. ``distinct`` types are
-used to prohibit operations that have no physical meaning, such as adding two points.
+The scene is built from a few direct helpers:
 
 ```nim
-type
-  Rad* = distinct float32
-
-func lerp*(a, b: Rad, t: float32): Rad =
-  # interpolates angles
-
-type
-  Vec2* = object
-    x*, y*: float32
-
-  Point2* {.borrow: `.`.} = distinct Vec2
-
-func `+`*(a, b: Vec2): Vec2
-func `-`*(a, b: Point2): Vec2
-func `+`*(p: Point2, v: Vec2): Point2
-func `-`*(p: Point2, v: Vec2): Point2
-func `+`*(a, b: Point2): Point2 {.
-    error: "Adding 2 Point2s doesn't make physical sense".}
+discard createPaddle(game.world, camera, float32(game.windowWidth / 2),
+    float32(game.windowHeight - 30))
+discard createBall(game.world, camera, float32(game.windowWidth / 2),
+    float32(game.windowHeight - 60))
+discard createBrick(game.world, camera, x.float32, y.float32,
+    brickWidth.int32, brickHeight.int32)
 ```
 
-## Blueprints DSL
-
-``build`` is a macro that allows you to declaratively specify an entity and its components.
-It produces ``mixin`` proc calls that register the components for the entity with the arguments specified.
-The macro also supports nested entities (children in the hierarchical scene graph) and composes perfectly
-with user-made procedures. These must have signature ``proc (w: World, e: Entity, ...): Entity``
-and tagged with ``entity``.
-
-### Examples
-
-1. Creates a new entity, with these components, returns the entity handle.
+And each entity is just explicit component registration:
 
 ```nim
-let ent1 = game.build(blueprint(with Transform2d(), Fade(step: 0.5),
-    Collide(size: vec2(100.0, 20.0)), Move(speed: 600.0)))
+proc createBall*(world: var World, parent: Entity, x, y: float32): Entity =
+  let angle = Pi.float32 + rand(1.0'f32) * Pi.float32
+  let entity = createEntity(world)
+  mixTransform2d(world, entity, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1), parent)
+  mixCollide(world, entity, Vec2(x: 20.0, y: 20.0))
+  mixControlBall(world, entity)
+  mixDraw2d(world, entity, 20, 20, [0'u8, 255, 0, 255])
+  mixMove(world, entity, Vec2(x: cos(angle), y: sin(angle)), 14)
+  result = entity
 ```
 
-2. Specifies a hierarchy of entities, the children (explosion particles) are built inside a loop.
-The `build` macro composes with all of Nim's control flow constructs.
+## Install
+
+You need:
+
+- Nim
+- raylib headers plus a shared raylib library next to the built game executable
+
+The Nim package file is intentionally minimal:
 
 ```nim
-proc createExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
-  let explosions = 32
-  let step = Tau / explosions.float
-  let fadeStep = 0.05
-  result = world.build(blueprint(id = explosion)):
-    with(Transform2d(translation: Vec2(x: x, y: y), parent: parent))
-    children:
-      for i in 0 ..< explosions:
-        blueprint:
-          with:
-            Transform2d(parent: explosion)
-            Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255])
-            Fade(step: fadeStep)
-            Move(direction: Vec2(x: sin(step * i.float), y: cos(step * i.float)), speed: 20.0)
+requires "nim >= 1.5.0"
 ```
 
-It expands to:
+## Quick Start
 
-```nim
-let explosion = createEntity(world)
-mixTransform2d(world, explosion, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1),
-               parent)
-for i in 0 ..< explosions:
-  let :tmp_1493172298 = createEntity(world)
-  mixTransform2d(world, :tmp_1493172298, mat2d(), vec2(0, 0), Rad(0),
-                 vec2(1, 1), explosion)
-  mixDraw2d(world, :tmp_1493172298, 20, 20, [255'u8, 255, 255, 255])
-  mixFade(world, :tmp_1493172298, fadeStep)
-  mixMove(world, :tmp_1493172298,
-          Vec2(x: sin(step * float(i)), y: cos(step * float(i))), 20.0)
-explosion
+### Linux
+
+Build raylib as a shared library, copy it into the project root, then build the game:
+
+```bash
+git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+make -C /tmp/raylib/src \
+  PLATFORM=PLATFORM_DESKTOP \
+  GLFW_LINUX_ENABLE_WAYLAND=TRUE \
+  GLFW_LINUX_ENABLE_X11=FALSE \
+  RAYLIB_LIBTYPE=SHARED \
+  CUSTOM_CFLAGS='-DSUPPORT_CUSTOM_FRAME_CONTROL=1'
+cp /tmp/raylib/src/raylib.h .
+cp /tmp/raylib/src/libraylib.so* .
+nim c -d:release game.nim
+./game
+```
+
+### Windows
+
+Install `raylib` with vcpkg, copy `raylib.dll` next to the executable, then build with Nim's MSVC backend:
+
+```powershell
+nim c --cc:vcc -d:VcpkgRoot="C:\path\to\vcpkg\installed\x64-windows-release" -d:release game.nim
+```
+
+### macOS
+
+Build raylib as a shared library and place `raylib.h` plus `libraylib*.dylib` in the project root before compiling:
+
+```bash
+nim c -d:release game.nim
+./game
+```
+
+## What To Look At
+
+If you are reading the code for ideas, start here:
+
+- [game.nim](game.nim): fixed timestep loop, interpolation, and raylib frame control.
+- [breakout/blueprints.nim](breakout/blueprints.nim): scene creation helpers for paddle, ball, bricks, and particle explosion.
+- [breakout/mixins.nim](breakout/mixins.nim): the small API for attaching components to entities.
+- [breakout/slottables.nim](breakout/slottables.nim): the slot-table based entity store.
+- [breakout/systems](breakout/systems): the game logic, one system per file.
+
+## Core Ideas
+
+### Fixed Timestep, Explicit Rendering
+
+The game updates on a fixed simulation tick and renders with interpolation. Rendering and input polling are driven explicitly through raylib custom frame control, while gameplay timing stays on `MonoTime`.
+
+### ECS Without Full-Framework Weight
+
+Entities are lightweight IDs. Component presence is tracked by a signature set, and systems iterate only the entities that match their required components.
+
+### Hierarchical Scene Graph
+
+Transforms support parent-child relationships, so the camera and spawned effects can move as a group without introducing separate scene abstractions.
+
+## Run Commands
+
+Build a debug binary:
+
+```bash
+nim c game.nim
+```
+
+Build a release binary:
+
+```bash
+nim c -d:release game.nim
 ```
 
 ## Acknowledgments
 
-- [Fixed-Time-Step Implementation](http://lspiroengine.com/?p=378)
-- [bitquid](http://bitsquid.blogspot.com/2014/10/building-data-oriented-entity-system.html)
-- [Goodluck](https://github.com/piesku/goodluck) A hackable template for creating small and fast browser games.
 - [rs-breakout](https://github.com/michalbe/rs-breakout)
-- [Breakout Tutorial](https://github.com/piesku/breakout/tree/tutorial)
-- [Backcountry Architecture](https://piesku.com/backcountry/architecture) lessons learned when using ECS in a game
-- [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/) excellent series that describe ECS designs
-- [ECS with sparse array notes](https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf)
-- [Trace of Radiance](https://github.com/mratsim/trace-of-radiance#correctness) the idea of using distinct types in a math lib
-- #nim-gamedev, a friendly community interested in making games with nim.
+- [Backcountry Architecture](https://piesku.com/backcountry/architecture)
+- [ECS Back and Forth](https://skypjack.github.io/2019-02-14-ecs-baf-part-1/)
+- [bitquid](http://bitsquid.blogspot.com/2014/10/building-data-oriented-entity-system.html)
 
 ## License
-This library is distributed under the [MIT license](LICENSE).
+
+Distributed under the [MIT license](LICENSE).
