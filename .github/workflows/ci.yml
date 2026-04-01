@@ -25,7 +25,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
-            cmake \
             git \
             libasound2-dev \
             libegl1-mesa-dev \
@@ -37,20 +36,20 @@ jobs:
             libxkbcommon-dev \
             libxi-dev \
             libxrandr-dev \
+            make \
             wayland-protocols
 
       - name: Build raylib
         run: |
           git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
-          cmake -S /tmp/raylib -B /tmp/raylib/build \
-            -DBUILD_SHARED_LIBS=ON \
-            -DCUSTOMIZE_BUILD=ON \
-            -DSUPPORT_CUSTOM_FRAME_CONTROL=ON \
-            -DGLFW_BUILD_WAYLAND=ON \
-            -DGLFW_BUILD_X11=ON
-          cmake --build /tmp/raylib/build --config Release
+          make -C /tmp/raylib/src \
+            PLATFORM=PLATFORM_DESKTOP \
+            GLFW_LINUX_ENABLE_WAYLAND=TRUE \
+            GLFW_LINUX_ENABLE_X11=TRUE \
+            RAYLIB_LIBTYPE=SHARED \
+            CUSTOM_CFLAGS='-DSUPPORT_CUSTOM_FRAME_CONTROL=1'
           cp /tmp/raylib/src/raylib.h .
-          find /tmp/raylib/build -maxdepth 2 -name 'libraylib.so*' -exec cp {} . \;
+          cp /tmp/raylib/src/libraylib.so* .
 
       - name: Build game
         run: nim c -d:release game.nim
@@ -67,19 +66,15 @@ jobs:
           nim-version: stable
           repo-token: ${{ github.token }}
 
-      - name: Install build tools
-        run: brew install cmake
-
       - name: Build raylib
         run: |
           git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
-          cmake -S /tmp/raylib -B /tmp/raylib/build \
-            -DBUILD_SHARED_LIBS=ON \
-            -DCUSTOMIZE_BUILD=ON \
-            -DSUPPORT_CUSTOM_FRAME_CONTROL=ON
-          cmake --build /tmp/raylib/build --config Release
+          make -C /tmp/raylib/src \
+            PLATFORM=PLATFORM_DESKTOP \
+            RAYLIB_LIBTYPE=SHARED \
+            CUSTOM_CFLAGS='-DSUPPORT_CUSTOM_FRAME_CONTROL=1'
           cp /tmp/raylib/src/raylib.h .
-          find /tmp/raylib/build -maxdepth 2 -name 'libraylib*.dylib' -exec cp {} . \;
+          cp /tmp/raylib/src/libraylib*.dylib .
 
       - name: Build game
         run: nim c -d:release game.nim
@@ -99,8 +94,6 @@ jobs:
       - name: Install system dependencies
         uses: johnwason/vcpkg-action@v7
         id: vcpkg
-        env:
-          VCPKG_CMAKE_CONFIGURE_OPTIONS: -DCUSTOMIZE_BUILD=ON -DSUPPORT_CUSTOM_FRAME_CONTROL=ON
         with:
           pkgs: raylib
           triplet: x64-windows-release
