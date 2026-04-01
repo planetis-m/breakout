@@ -1,10 +1,10 @@
-import ".."/[gametypes, heaparrays, vmath, mixins, slottables], std/random
+import std/random
+import ".."/gametypes
 
-const Query = {HasTransform2d, HasShake}
-
-proc update(game: var Game, entity: Entity) =
-  template transform: untyped = game.world.transform[entity.idx]
-  template shake: untyped = game.world.shake[]
+proc sysShake*(game: var Game) =
+  let transformIdx = game.camera.transform
+  var transform = addr game.transforms[transformIdx.int]
+  var shake = addr game.camera.shake
 
   if shake.duration > 0:
     shake.duration -= 0.01
@@ -14,8 +14,7 @@ proc update(game: var Game, entity: Entity) =
     game.clearColor[0] = rand(255).uint8
     game.clearColor[1] = rand(255).uint8
     game.clearColor[2] = rand(255).uint8
-
-    game.world.mixDirty(entity)
+    transform.dirty = true
 
     if shake.duration <= 0:
       shake.duration = 0
@@ -24,8 +23,3 @@ proc update(game: var Game, entity: Entity) =
       game.clearColor[0] = 0
       game.clearColor[1] = 0
       game.clearColor[2] = 0
-
-proc sysShake*(game: var Game) =
-  let signature = game.world.signature[game.camera]
-  if Query <= signature:
-    update(game, game.camera)

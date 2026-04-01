@@ -1,27 +1,13 @@
 import
   std / [random, monotimes],
-  breakout / [raylib, heaparrays, gametypes, blueprints, slottables, utils],
+  breakout / [raylib, gametypes, blueprints],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
   let raylibContext = initRaylib("Breakout", windowWidth, windowHeight)
 
-  let world = World(
-    signature: initSlotTableOfCap[set[HasComponent]](MaxEntities),
-
-    collide: initArray[Collide](),
-    draw2d: initArray[Draw2d](),
-    fade: initArray[Fade](),
-    hierarchy: initArray[Hierarchy](),
-    move: initArray[Move](),
-    previous: initArray[Previous](),
-    transform: initArray[Transform2d]()
-  )
-
   result = Game(
-    world: world,
-    camera: InvalidId,
     isRunning: true,
     windowWidth: windowWidth,
     windowHeight: windowHeight,
@@ -41,7 +27,7 @@ proc update(game: var Game) =
   sysShake(game)
   sysFade(game)
   # Garbage collection
-  cleanup(game)
+  cleanupDead(game)
   # Animation and movement
   sysMove(game)
   sysTransform2d(game)

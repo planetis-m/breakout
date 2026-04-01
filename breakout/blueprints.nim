@@ -1,46 +1,82 @@
-import std/[random, math], mixins, utils, vmath, gametypes
+import std/[math, random], gametypes, vmath
 
-proc createBall*(world: var World, parent: Entity, x, y: float32): Entity =
-  let angle = Pi.float32 + rand(1.0'f32) * Pi.float32
-  let entity = createEntity(world)
-  mixTransform2d(world, entity, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1), parent)
-  mixCollide(world, entity, Vec2(x: 20.0, y: 20.0))
-  mixControlBall(world, entity)
-  mixDraw2d(world, entity, 20, 20, [0'u8, 255, 0, 255])
-  mixMove(world, entity, Vec2(x: cos(angle), y: sin(angle)), 14)
-  result = entity
+proc createBall*(game: var Game; x, y: float32): BallIdx =
+  let angle = PI.float32 + rand(1.0'f32) * PI.float32
+  let transform = game.allocTransform(
+    translation = vec2(x, y),
+    scale = vec2(1, 1),
+    parent = game.camera.transform
+  )
+  let ball = Ball(
+    alive: true,
+    transform: transform,
+    collide: game.allocCollide(vec2(20, 20)),
+    draw2d: game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
+    move: game.allocMove(Vec2(x: cos(angle), y: sin(angle)), 14)
+  )
+  result = BallIdx(game.balls.len)
+  game.balls.add(ball)
 
-proc createBrick*(world: var World, parent: Entity, x, y: float32, width, height: int32): Entity =
-  let entity = createEntity(world)
-  mixTransform2d(world, entity, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1), parent)
-  mixCollide(world, entity, Vec2(x: width.float32, y: height.float32))
-  mixControlBrick(world, entity)
-  mixDraw2d(world, entity, width, height, [255'u8, 255, 0, 255])
-  mixFade(world, entity, 0.0)
-  result = entity
+proc createBrick*(game: var Game; x, y: float32; width, height: int32): BrickIdx =
+  let brick = Brick(
+    alive: true,
+    transform: game.allocTransform(
+      translation = vec2(x, y),
+      scale = vec2(1, 1),
+      parent = game.camera.transform
+    ),
+    collide: game.allocCollide(vec2(width.float32, height.float32)),
+    draw2d: game.allocDraw2d(width, height, [255'u8, 255, 0, 255]),
+    fade: game.allocFade(0)
+  )
+  result = BrickIdx(game.bricks.len)
+  game.bricks.add(brick)
 
-proc createExplosion*(world: var World, parent: Entity, x, y: float32): Entity =
+proc createExplosion*(game: var Game; x, y: float32) =
   let explosions = 32
-  let step = Tau / explosions.float
+  let step = TAU / explosions.float
   let fadeStep = 0.05
-  let explosion = createEntity(world)
-  mixTransform2d(world, explosion, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1), parent)
-  for i in 0 ..< explosions:
-    let particle = createEntity(world)
-    mixTransform2d(world, particle, mat2d(), vec2(0, 0), Rad(0), vec2(1, 1), explosion)
-    mixDraw2d(world, particle, 20, 20, [255'u8, 255, 255, 255])
-    mixFade(world, particle, fadeStep)
-    mixMove(world, particle, Vec2(x: sin(step * i.float32), y: cos(step * i.float32)), 20)
-  result = explosion
+  for i in 0..<explosions:
+    let particle = Particle(
+      alive: true,
+      transform: game.allocTransform(
+        translation = vec2(x, y),
+        scale = vec2(1, 1),
+        parent = game.camera.transform
+      ),
+      draw2d: game.allocDraw2d(20, 20, [255'u8, 255, 255, 255]),
+      fade: game.allocFade(fadeStep),
+      move: game.allocMove(
+        Vec2(x: sin(step * i.float32), y: cos(step * i.float32)),
+        20
+      )
+    )
+    game.particles.add(particle)
 
-proc createPaddle*(world: var World, parent: Entity, x, y: float32): Entity =
-  let entity = createEntity(world)
-  mixTransform2d(world, entity, mat2d(), Vec2(x: x, y: y), Rad(0), vec2(1, 1), parent)
-  mixCollide(world, entity, Vec2(x: 100, y: 20))
-  mixControlPaddle(world, entity)
-  mixDraw2d(world, entity, 100, 20, [255'u8, 0, 0, 255])
-  mixMove(world, entity, vec2(0, 0), 20)
-  result = entity
+proc createTrail*(game: var Game; x, y: float32) =
+  let trail = Trail(
+    alive: true,
+    transform: game.allocTransform(
+      translation = vec2(x, y),
+      scale = vec2(1, 1),
+      parent = game.camera.transform
+    ),
+    draw2d: game.allocDraw2d(20, 20, [0'u8, 255, 0, 255]),
+    fade: game.allocFade(0.05)
+  )
+  game.trails.add(trail)
+
+proc createPaddle*(game: var Game; x, y: float32) =
+  game.paddle = Paddle(
+    transform: game.allocTransform(
+      translation = vec2(x, y),
+      scale = vec2(1, 1),
+      parent = game.camera.transform
+    ),
+    collide: game.allocCollide(vec2(100, 20)),
+    draw2d: game.allocDraw2d(100, 20, [255'u8, 0, 0, 255]),
+    move: game.allocMove(vec2(0, 0), 20)
+  )
 
 proc createScene*(game: var Game) =
   let columnCount = 10
@@ -53,14 +89,20 @@ proc createScene*(game: var Game) =
   let startingX = (game.windowWidth - gridWidth) div 2
   let startingY = 50
 
-  let camera = createEntity(game.world)
-  mixTransform2d(game.world, camera, mat2d(), vec2(0, 0), Rad(0), vec2(1, 1), InvalidId)
-  mixShake(game.world, camera, 0, 10)
-  discard createPaddle(game.world, camera, float32(game.windowWidth / 2), float32(game.windowHeight - 30))
-  discard createBall(game.world, camera, float32(game.windowWidth / 2), float32(game.windowHeight - 60))
-  for row in 0 ..< rowCount:
+  game.camera = Camera(
+    transform: game.allocTransform(
+      translation = vec2(0, 0),
+      scale = vec2(1, 1),
+      parent = NoTransformIdx
+    ),
+    shake: Shake(duration: 0, strength: 10)
+  )
+
+  game.createPaddle(float32(game.windowWidth / 2), float32(game.windowHeight - 30))
+  discard game.createBall(float32(game.windowWidth / 2), float32(game.windowHeight - 60))
+
+  for row in 0..<rowCount:
     let y = startingY + row * (brickHeight + margin) + brickHeight div 2
-    for col in 0 ..< columnCount:
+    for col in 0..<columnCount:
       let x = startingX + col * (brickWidth + margin) + brickWidth div 2
-      discard createBrick(game.world, camera, x.float32, y.float32, brickWidth.int32, brickHeight.int32)
-  game.camera = camera
+      discard game.createBrick(x.float32, y.float32, brickWidth.int32, brickHeight.int32)

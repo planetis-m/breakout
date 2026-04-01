@@ -1,51 +1,40 @@
-import ".."/[gametypes, heaparrays, vmath, blueprints, mixins, utils, slottables]
-
-const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}
-
-proc update(game: var Game, entity: Entity) =
-  template collide: untyped = game.world.collide[entity.idx]
-  template move: untyped = game.world.move[entity.idx]
-  template transform: untyped = game.world.transform[entity.idx]
-
-  if collide.min.x < 0:
-    transform.translation.x = collide.size.x / 2
-    move.direction.x *= -1
-
-  if collide.max.x > game.windowWidth.float32:
-    transform.translation.x = game.windowWidth.float32 - collide.size.x / 2
-    move.direction.x *= -1
-
-  if collide.min.y < 0:
-    transform.translation.y = collide.size.y / 2
-    move.direction.y *= -1
-
-  if collide.max.y > game.windowHeight.float32:
-    transform.translation.y = game.windowHeight.float32 - collide.size.y / 2
-    move.direction.y *= -1
-
-  if collide.collision.other != InvalidId:
-    let collision = collide.collision
-    if HasShake in game.world.signature[game.camera]:
-      template cameraShake: untyped = game.world.shake[]
-      cameraShake.duration = 0.1
-
-    if collision.hit.x != 0:
-      transform.translation.x += collision.hit.x
-      move.direction.x *= -1
-
-    if collision.hit.y != 0:
-      transform.translation.y += collision.hit.y
-      move.direction.y *= -1
-
-    discard game.world.createExplosion(game.camera, transform.translation.x,
-        transform.translation.y)
-
-  let ballFade = createEntity(game.world)
-  mixTransform2d(game.world, ballFade, mat2d(), transform.translation, Rad(0), vec2(1, 1), game.camera)
-  mixDraw2d(game.world, ballFade, 20, 20, [0'u8, 255, 0, 255])
-  mixFade(game.world, ballFade, 0.05)
+import ".."/[blueprints, gametypes]
 
 proc sysControlBall*(game: var Game) =
-  for entity, signature in game.world.signature.pairs:
-    if Query <= signature:
-      update(game, entity)
+  for ball in mitems(game.balls):
+    if ball.alive:
+      var collide = addr game.colliders[ball.collide.int]
+      var move = addr game.moves[ball.move.int]
+      var transform = addr game.transforms[ball.transform.int]
+
+      if collide.min.x < 0:
+        transform.translation.x = collide.size.x / 2
+        move.direction.x *= -1
+
+      if collide.max.x > game.windowWidth.float32:
+        transform.translation.x = game.windowWidth.float32 - collide.size.x / 2
+        move.direction.x *= -1
+
+      if collide.min.y < 0:
+        transform.translation.y = collide.size.y / 2
+        move.direction.y *= -1
+
+      if collide.max.y > game.windowHeight.float32:
+        transform.translation.y = game.windowHeight.float32 - collide.size.y / 2
+        move.direction.y *= -1
+
+      if collide.collision.hasHit:
+        game.camera.shake.duration = 0.1
+
+        if collide.collision.hit.x != 0:
+          transform.translation.x += collide.collision.hit.x
+          move.direction.x *= -1
+
+        if collide.collision.hit.y != 0:
+          transform.translation.y += collide.collision.hit.y
+          move.direction.y *= -1
+
+        game.createExplosion(transform.translation.x, transform.translation.y)
+
+      transform.dirty = true
+      game.createTrail(transform.translation.x, transform.translation.y)

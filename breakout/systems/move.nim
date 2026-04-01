@@ -1,18 +1,20 @@
-import ".."/[gametypes, heaparrays, vmath, mixins, slottables]
+import ".."/[gametypes, vmath]
 
-const Query = {HasTransform2d, HasMove}
-
-proc update(game: var Game, entity: Entity) =
-  template transform: untyped = game.world.transform[entity.idx]
-  template move: untyped = game.world.move[entity.idx]
-
+proc updateTransform(game: var Game; transformIdx: TransformIdx; moveIdx: MoveIdx) =
+  let move = game.moves[moveIdx.int]
   if move.direction.x != 0 or move.direction.y != 0:
+    var transform = addr game.transforms[transformIdx.int]
     transform.translation.x += move.direction.x * move.speed
     transform.translation.y += move.direction.y * move.speed
-
-    game.world.mixDirty(entity)
+    transform.dirty = true
 
 proc sysMove*(game: var Game) =
-  for entity, signature in game.world.signature.pairs:
-    if Query <= signature:
-      update(game, entity)
+  game.updateTransform(game.paddle.transform, game.paddle.move)
+
+  for ball in game.balls.items:
+    if ball.alive:
+      game.updateTransform(ball.transform, ball.move)
+
+  for particle in game.particles.items:
+    if particle.alive:
+      game.updateTransform(particle.transform, particle.move)
