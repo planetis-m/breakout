@@ -1,15 +1,17 @@
-import std/random
-import ".."/[blueprints, gametypes]
+import ".."/[blueprints, gametypes, procgen]
+
+proc updateBrick(game: var Game; brick: var Brick) =
+  if not brick.dead and Hit in brick.collide.collision.flags:
+    brick.fade.step = 0.05
+    let position = game.nodes[brick.node.int].transform.translation
+    let spawnSeed = eventSeed(2'u32, game.tickId, position.x, position.y)
+    if chanceFromSeed(spawnSeed) > 0.98:
+      game.createBall(
+        float32(game.windowWidth / 2),
+        float32(game.windowHeight / 2),
+        spawnSeed
+      )
 
 proc sysControlBrick*(game: var Game) =
-  let actorCount = game.actors.len
-  for i in 0..<actorCount:
-    template brick: untyped = game.actors[i]
-    if brick.kind == BrickKind and
-        Hit in game.colliders[brick.collide].collision.flags:
-      game.fades[brick.fade].step = 0.05
-      if rand(1.0) > 0.98:
-        game.createBall(
-          float32(game.windowWidth / 2),
-          float32(game.windowHeight / 2)
-        )
+  for brick in game.bricks.mitems:
+    game.updateBrick(brick)

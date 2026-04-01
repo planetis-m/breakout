@@ -1,14 +1,25 @@
-import ".."/[gametypes, vmath]
+import ".."/gametypes
 
-proc updateTransform(game: var Game; transformIdx: TransformIdx; moveIdx: MoveIdx) =
-  let move = game.moves[moveIdx]
+proc moveNode(game: var Game; node: NodeIdx; move: Move) =
   if move.direction.x != 0 or move.direction.y != 0:
-    template transform: untyped = game.transforms[transformIdx]
-    transform.translation.x += move.direction.x * move.speed
-    transform.translation.y += move.direction.y * move.speed
-    game.markDirty(transformIdx)
+    game.nodes[node.int].transform.translation.x += move.direction.x * move.speed
+    game.nodes[node.int].transform.translation.y += move.direction.y * move.speed
+    game.markDirty(node)
+
+proc movePaddle(game: var Game) =
+  if game.paddle.active:
+    game.moveNode(game.paddle.node, game.paddle.move)
+
+proc moveBalls(game: var Game) =
+  for ball in game.balls.items:
+    game.moveNode(ball.node, ball.move)
+
+proc moveParticles(game: var Game) =
+  for particle in game.particles.items:
+    if not particle.dead:
+      game.moveNode(particle.node, particle.move)
 
 proc sysMove*(game: var Game) =
-  for actor in game.actors.items:
-    if actor.move != NoMoveIdx and actor.kind in {PaddleKind, BallKind, ParticleKind}:
-      game.updateTransform(actor.transform, actor.move)
+  game.movePaddle()
+  game.moveBalls()
+  game.moveParticles()

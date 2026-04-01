@@ -7,13 +7,12 @@ proc computeAabb(transform: Transform2d; collide: var Collide) =
   collide.max = collide.center + collide.size / 2
 
 proc intersectAabb(a, b: Collide): bool =
-  a.min.x < b.max.x and a.min.y < b.max.y and
+  result = a.min.x < b.max.x and a.min.y < b.max.y and
     a.max.x > b.min.x and a.max.y > b.min.y
 
 proc penetrateAabb(a, b: Collide): Vec2 =
   let distanceX = a.center.x - b.center.x
   let penetrationX = a.size.x / 2 + b.size.x / 2 - abs(distanceX)
-
   let distanceY = a.center.y - b.center.y
   let penetrationY = a.size.y / 2 + b.size.y / 2 - abs(distanceY)
 
@@ -22,36 +21,46 @@ proc penetrateAabb(a, b: Collide): Vec2 =
   else:
     result = vec2(0, penetrationY * sgn(distanceY).float32)
 
-proc prepareCollider(game: var Game; transformIdx: TransformIdx; collideIdx: CollideIdx) =
-  template collider: untyped = game.colliders[collideIdx]
-  collider.collision = Collision(flags: {}, hit: vec2(0, 0))
-  computeAabb(game.transforms[transformIdx], collider)
+proc prepareCollider(transform: Transform2d; collide: var Collide) =
+  collide.collision = Collision(flags: {}, hit: vec2(0, 0))
+  computeAabb(transform, collide)
 
-proc updateCollision(game: var Game; aIdx, bIdx: CollideIdx) =
-  let a = game.colliders[aIdx]
-  let b = game.colliders[bIdx]
+proc updateCollision(a, b: var Collide) =
   if intersectAabb(a, b):
     let hit = penetrateAabb(a, b)
-    game.colliders[aIdx].collision = Collision(flags: {Hit}, hit: hit)
-    game.colliders[bIdx].collision = Collision(flags: {Hit}, hit: -hit)
+    a.collision = Collision(flags: {Hit}, hit: hit)
+    b.collision = Collision(flags: {Hit}, hit: -hit)
+
+proc preparePaddleCollider(game: var Game) =
+  if game.paddle.active:
+    let transform = game.nodes[game.paddle.node.int].transform
+    prepareCollider(transform, game.paddle.collide)
+
+proc prepareBallColliders(game: var Game) =
+  for ball in game.balls.mitems:
+    let transform = game.nodes[ball.node.int].transform
+    prepareCollider(transform, ball.collide)
+
+proc prepareBrickColliders(game: var Game) =
+  for brick in game.bricks.mitems:
+    if not brick.dead:
+      let transform = game.nodes[brick.node.int].transform
+      prepareCollider(transform, brick.collide)
+
+proc collideBallWithPaddle(game: var Game; ball: var Ball) =
+  if game.paddle.active:
+    updateCollision(ball.collide, game.paddle.collide)
+
+proc collideBallWithBricks(game: var Game; ball: var Ball) =
+  for brick in game.bricks.mitems:
+    if not brick.dead:
+      updateCollision(ball.collide, brick.collide)
 
 proc sysCollide*(game: var Game) =
-  if game.paddle != NoActorIdx:
-    let paddle = game.actors[game.paddle.int]
-    if paddle.kind == PaddleKind:
-      game.prepareCollider(paddle.transform, paddle.collide)
+  game.preparePaddleCollider()
+  game.prepareBallColliders()
+  game.prepareBrickColliders()
 
-  for actor in game.actors.items:
-    if actor.collide != NoCollideIdx and actor.kind in {BallKind, BrickKind}:
-      game.prepareCollider(actor.transform, actor.collide)
-
-  for ball in game.actors.items:
-    if ball.kind == BallKind:
-      if game.paddle != NoActorIdx:
-        let paddle = game.actors[game.paddle.int]
-        if paddle.kind == PaddleKind:
-          game.updateCollision(ball.collide, paddle.collide)
-
-      for brick in game.actors.items:
-        if brick.kind == BrickKind:
-          game.updateCollision(ball.collide, brick.collide)
+  for ball in game.balls.mitems:
+    game.collideBallWithPaddle(ball)
+    game.collideBallWithBricks(ball)
