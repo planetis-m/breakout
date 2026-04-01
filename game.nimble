@@ -8,6 +8,4 @@ license       = "MIT"
 # Dependencies
 
 requires "nim >= 1.5.0"
-requires "bingo >= 0.4.1"
-requires "sdl2#head"
 requires "fusion#head"

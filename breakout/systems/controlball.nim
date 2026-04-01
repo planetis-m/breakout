@@ -1,4 +1,4 @@
-import ".."/[gametypes, heaparrays, vmath, blueprints, builddsl, slottables]
+import ".."/[gametypes, heaparrays, vmath, blueprints, mixins, utils, slottables]
 
 const Query = {HasTransform2d, HasMove, HasCollide, HasControlBall}
 
@@ -40,11 +40,10 @@ proc update(game: var Game, entity: Entity) =
     discard game.world.createExplosion(game.camera, transform.translation.x,
         transform.translation.y)
 
-  let ballFade = game.world.build(blueprint):
-    with:
-      Transform2d(translation: transform.translation, parent: game.camera)
-      Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])
-      Fade(step: 0.05)
+  let ballFade = createEntity(game.world)
+  mixTransform2d(game.world, ballFade, mat2d(), transform.translation, Rad(0), vec2(1, 1), game.camera)
+  mixDraw2d(game.world, ballFade, 20, 20, [0'u8, 255, 0, 255])
+  mixFade(game.world, ballFade, 0.05)
 
 proc sysControlBall*(game: var Game) =
   for entity, signature in game.world.signature.pairs:

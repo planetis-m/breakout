@@ -4,6 +4,7 @@
 !/*.md
 !/*.rst
 !/*.nim
+!/*.h
 # Exclude root directories
 !/*/
 # Include all files in subdirectories

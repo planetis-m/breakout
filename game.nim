@@ -1,15 +1,11 @@
 import
   std / [random, monotimes, os],
-  breakout / [sdlpriv, heaparrays, gametypes, blueprints, slottables, utils],
+  breakout / [raylib, heaparrays, gametypes, blueprints, slottables, utils],
   breakout / systems / [collide, controlball, controlbrick, controlpaddle, draw2d,
       fade, move, shake, transform2d, handleevents]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
-  let sdlContext = sdlInit(InitVideo or InitEvents)
-  let window = newWindow("Breakout", SdlWindowPosCentered,
-      SdlWindowPosCentered, windowWidth, windowHeight, SdlWindowShown)
-
-  let renderer = newRenderer(window, -1, RendererAccelerated or RendererPresentVsync)
+  let raylibContext = initRaylib("Breakout", windowWidth, windowHeight)
 
   let world = World(
     signature: initSlotTableOfCap[set[HasComponent]](MaxEntities),
@@ -25,16 +21,12 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
 
   result = Game(
     world: world,
-    #snapshot: initSnapHandler(),
-
     camera: InvalidId,
     isRunning: true,
     windowWidth: windowWidth,
     windowHeight: windowHeight,
 
-    renderer: renderer,
-    window: window,
-    sdlContext: sdlContext,
+    raylib: raylibContext,
 
     clearColor: [0'u8, 0, 0, 255]
   )
@@ -59,8 +51,9 @@ proc update(game: var Game) =
   inc(game.tickId)
 
 proc render(game: var Game, intrpl: float32) =
+  beginDrawing()
   sysDraw2d(game, intrpl)
-  game.renderer.impl.present()
+  endDrawing()
 
 proc run(game: var Game) =
   const
@@ -100,10 +93,6 @@ proc run(game: var Game) =
 proc main =
   randomize()
   var game = initGame(740, 555)
-  # Restore previous snapshot of the World
-  #if snapExists(game.snapshot):
-    #restore(game)
-  #else:
   createScene(game)
 
   run(game)
