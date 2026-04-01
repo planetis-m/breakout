@@ -37,16 +37,16 @@ proc sysDraw2d*(game: var Game; intrpl: float32) =
   clearBackground(game.clearColor)
 
   if game.paddle.node != NoNodeIdx:
-    game.drawTransform(game.paddle.node, game.paddle.draw, intrpl)
+    game.drawTransform(game.paddle.node, game.draws[game.paddle.draw.int], intrpl)
 
   for ball in game.balls.items:
-    game.drawTransform(ball.node, ball.draw, intrpl)
+    game.drawTransform(ball.node, game.draws[ball.draw.int], intrpl)
 
   for brick in game.bricks.items:
-    game.drawTransform(brick.node, brick.draw, intrpl)
+    game.drawTransform(brick.node, game.draws[brick.draw.int], intrpl)
 
   for particle in game.particles.items:
-    game.drawTransform(particle.node, particle.draw, intrpl)
+    game.drawTransform(particle.node, game.draws[particle.draw.int], intrpl)
 
   for trail in game.trails.items:
-    game.drawTransform(trail.node, trail.draw, intrpl)
+    game.drawTransform(trail.node, game.draws[trail.draw.int], intrpl)

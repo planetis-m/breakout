@@ -6,6 +6,15 @@ const
   NoNodeIdx* = NodeIdx(-1'i32)
 
 proc `==`*(a, b: NodeIdx): bool {.borrow.}
+proc `==`*(a, b: BallIdx): bool {.borrow.}
+proc `==`*(a, b: BrickIdx): bool {.borrow.}
+proc `==`*(a, b: ParticleIdx): bool {.borrow.}
+proc `==`*(a, b: TrailIdx): bool {.borrow.}
+proc `==`*(a, b: CollideIdx): bool {.borrow.}
+proc `==`*(a, b: Draw2dIdx): bool {.borrow.}
+proc `==`*(a, b: FadeIdx): bool {.borrow.}
+proc `==`*(a, b: MoveIdx): bool {.borrow.}
+proc `==`*(a, b: ShakeIdx): bool {.borrow.}
 
 func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
   result = (a * b) != {}
@@ -111,3 +120,59 @@ proc initCollide*(size: Vec2): Collide =
 
 func hasHit*(collision: Collision): bool {.inline.} =
   result = collision.hit.x != 0 or collision.hit.y != 0
+
+proc ballCount*(game: Game): int {.inline.} =
+  game.balls.len
+
+proc brickCount*(game: Game): int {.inline.} =
+  game.bricks.len
+
+proc particleCount*(game: Game): int {.inline.} =
+  game.particles.len
+
+proc trailCount*(game: Game): int {.inline.} =
+  game.trails.len
+
+proc addCollide*(game: var Game; value: sink Collide): CollideIdx =
+  result = CollideIdx(game.collides.len.int32)
+  game.collides.add(value)
+
+proc addDraw*(game: var Game; value: sink Draw2d): Draw2dIdx =
+  result = Draw2dIdx(game.draws.len.int32)
+  game.draws.add(value)
+
+proc addFade*(game: var Game; value: sink Fade): FadeIdx =
+  result = FadeIdx(game.fades.len.int32)
+  game.fades.add(value)
+
+proc addMove*(game: var Game; value: sink Move): MoveIdx =
+  result = MoveIdx(game.moves.len.int32)
+  game.moves.add(value)
+
+proc addShake*(game: var Game; value: sink Shake): ShakeIdx =
+  result = ShakeIdx(game.shakes.len.int32)
+  game.shakes.add(value)
+
+proc deleteBall*(game: var Game; idx: BallIdx) =
+  let i = idx.int
+  let ball = game.balls[i]
+  game.freeNode(ball.node)
+  game.balls.del(i)
+
+proc deleteBrick*(game: var Game; idx: BrickIdx) =
+  let i = idx.int
+  let brick = game.bricks[i]
+  game.freeNode(brick.node)
+  game.bricks.del(i)
+
+proc deleteParticle*(game: var Game; idx: ParticleIdx) =
+  let i = idx.int
+  let particle = game.particles[i]
+  game.freeNode(particle.node)
+  game.particles.del(i)
+
+proc deleteTrail*(game: var Game; idx: TrailIdx) =
+  let i = idx.int
+  let trail = game.trails[i]
+  game.freeNode(trail.node)
+  game.trails.del(i)

@@ -34,33 +34,34 @@ proc updateCollision(a, b: var Collide) =
 proc preparePaddleCollider(game: var Game) =
   if game.paddle.node != NoNodeIdx:
     template transform: untyped = game.nodes[game.paddle.node.int].transform
-    prepareCollider(transform, game.paddle.collide)
+    prepareCollider(transform, game.collides[game.paddle.collide.int])
 
 proc prepareBallColliders(game: var Game) =
   for ball in game.balls.mitems:
     template transform: untyped = game.nodes[ball.node.int].transform
-    prepareCollider(transform, ball.collide)
+    prepareCollider(transform, game.collides[ball.collide.int])
 
 proc prepareBrickColliders(game: var Game) =
   for brick in game.bricks.mitems:
-    if brick.fade.step == 0:
+    if game.fades[brick.fade.int].step == 0:
       template transform: untyped = game.nodes[brick.node.int].transform
-      prepareCollider(transform, brick.collide)
+      prepareCollider(transform, game.collides[brick.collide.int])
 
-proc collideBallWithPaddle(game: var Game; ball: var Ball) =
+proc collideBallWithPaddle(game: var Game; idx: BallIdx) =
   if game.paddle.node != NoNodeIdx:
-    updateCollision(ball.collide, game.paddle.collide)
+    updateCollision(game.collides[game.balls[idx.int].collide.int], game.collides[game.paddle.collide.int])
 
-proc collideBallWithBricks(game: var Game; ball: var Ball) =
+proc collideBallWithBricks(game: var Game; idx: BallIdx) =
   for brick in game.bricks.mitems:
-    if brick.fade.step == 0:
-      updateCollision(ball.collide, brick.collide)
+    if game.fades[brick.fade.int].step == 0:
+      updateCollision(game.collides[game.balls[idx.int].collide.int], game.collides[brick.collide.int])
 
 proc sysCollide*(game: var Game) =
   game.preparePaddleCollider()
   game.prepareBallColliders()
   game.prepareBrickColliders()
 
-  for ball in game.balls.mitems:
-    game.collideBallWithPaddle(ball)
-    game.collideBallWithBricks(ball)
+  for i in 0..<game.ballCount:
+    let idx = BallIdx(i.int32)
+    game.collideBallWithPaddle(idx)
+    game.collideBallWithBricks(idx)

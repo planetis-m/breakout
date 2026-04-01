@@ -6,18 +6,18 @@ proc createBall*(game: var Game; x, y: float32) =
   let node = game.allocNode(vec2(x, y), game.camera.node)
   game.balls.add(Ball(
     node: node,
-    collide: initCollide(vec2(20, 20)),
-    draw: Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255]),
-    move: Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14)
+    collide: game.addCollide(initCollide(vec2(20, 20))),
+    draw: game.addDraw(Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])),
+    move: game.addMove(Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14))
   ))
 
 proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
   let node = game.allocNode(vec2(x, y), game.camera.node)
   game.bricks.add(Brick(
     node: node,
-    collide: initCollide(vec2(width.float32, height.float32)),
-    draw: Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255]),
-    fade: Fade(step: 0)
+    collide: game.addCollide(initCollide(vec2(width.float32, height.float32))),
+    draw: game.addDraw(Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255])),
+    fade: game.addFade(Fade(step: 0))
   ))
 
 proc createExplosion*(game: var Game; x, y: float32) =
@@ -29,29 +29,29 @@ proc createExplosion*(game: var Game; x, y: float32) =
     let node = game.allocNode(vec2(x, y), game.camera.node)
     game.particles.add(Particle(
       node: node,
-      draw: Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255]),
-      fade: Fade(step: fadeStep),
-      move: Move(
+      draw: game.addDraw(Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255])),
+      fade: game.addFade(Fade(step: fadeStep)),
+      move: game.addMove(Move(
         direction: Vec2(x: sin(step * i.float32), y: cos(step * i.float32)),
         speed: 20
-      )
+      ))
     ))
 
 proc createTrail*(game: var Game; x, y: float32) =
   let node = game.allocNode(vec2(x, y), game.camera.node)
   game.trails.add(Trail(
     node: node,
-    draw: Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255]),
-    fade: Fade(step: 0.05)
+    draw: game.addDraw(Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255])),
+    fade: game.addFade(Fade(step: 0.05))
   ))
 
 proc createPaddle*(game: var Game; x, y: float32) =
   let node = game.allocNode(vec2(x, y), game.camera.node)
   game.paddle = Paddle(
     node: node,
-    collide: initCollide(vec2(100, 20)),
-    draw: Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255]),
-    move: Move(direction: vec2(0, 0), speed: 20)
+    collide: game.addCollide(initCollide(vec2(100, 20))),
+    draw: game.addDraw(Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255])),
+    move: game.addMove(Move(direction: vec2(0, 0), speed: 20))
   )
 
 proc createScene*(game: var Game) =
@@ -67,7 +67,7 @@ proc createScene*(game: var Game) =
 
   game.camera = Camera(
     node: game.allocNode(vec2(0, 0)),
-    shake: Shake(duration: 0, strength: 10)
+    shake: game.addShake(Shake(duration: 0, strength: 10))
   )
 
   game.createPaddle(

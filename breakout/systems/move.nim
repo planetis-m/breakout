@@ -9,15 +9,15 @@ proc moveNode(game: var Game; node: NodeIdx; move: Move) =
 
 proc movePaddle(game: var Game) =
   if game.paddle.node != NoNodeIdx:
-    game.moveNode(game.paddle.node, game.paddle.move)
+    game.moveNode(game.paddle.node, game.moves[game.paddle.move.int])
 
 proc moveBalls(game: var Game) =
   for ball in game.balls.items:
-    game.moveNode(ball.node, ball.move)
+    game.moveNode(ball.node, game.moves[ball.move.int])
 
 proc moveParticles(game: var Game) =
   for particle in game.particles.items:
-    game.moveNode(particle.node, particle.move)
+    game.moveNode(particle.node, game.moves[particle.move.int])
 
 proc sysMove*(game: var Game) =
   game.movePaddle()

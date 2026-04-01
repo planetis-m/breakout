@@ -18,9 +18,9 @@ an afternoon and learn from.
 
 ## Why It Is Worth Reading
 
-- The game state is concrete and direct. `Game` owns `balls`, `bricks`,
-  `particles`, `trails`, and `nodes` instead of routing everything through a
-  generic entity abstraction.
+- The game state is concrete and direct. `Game` owns parallel component arrays
+  for balls, bricks, particles, trails, and transform nodes instead of routing
+  everything through a generic entity abstraction.
 - Systems stay small and obvious. Movement, collision, fade, shake, transform,
   and draw each live in their own file.
 - The transform graph is still hierarchical, so the camera and spawned effects
@@ -49,7 +49,7 @@ game.createBall(
 )
 ```
 
-And systems work directly on typed collections:
+And systems work directly on typed indexed storage:
 
 ```nim
 proc moveNode(game: var Game; node: NodeIdx; move: Move) =
@@ -132,9 +132,9 @@ Start here if you are reading the code:
 
 ### Direct Data Over Generic Abstractions
 
-The code keeps concrete gameplay types front and center. You can search for
-`Ball`, `Brick`, or `Paddle` and immediately find their storage, update logic,
-and rendering path.
+The code keeps concrete gameplay data front and center. You can search for ball,
+brick, or paddle storage and immediately find the matching update logic and
+rendering path.
 
 ### Fixed Timestep With Interpolated Rendering
 

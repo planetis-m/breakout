@@ -8,6 +8,15 @@ type
     Dirty, Fresh, HasPrevious
 
   NodeIdx* = distinct int32
+  BallIdx* = distinct int32
+  BrickIdx* = distinct int32
+  ParticleIdx* = distinct int32
+  TrailIdx* = distinct int32
+  CollideIdx* = distinct int32
+  Draw2dIdx* = distinct int32
+  FadeIdx* = distinct int32
+  MoveIdx* = distinct int32
+  ShakeIdx* = distinct int32
 
   Collision* = object
     hit*: Vec2
@@ -58,36 +67,36 @@ type
 
   Camera* = object
     node*: NodeIdx
-    shake*: Shake
+    shake*: ShakeIdx
 
   Paddle* = object
     node*: NodeIdx
-    collide*: Collide
-    draw*: Draw2d
-    move*: Move
+    collide*: CollideIdx
+    draw*: Draw2dIdx
+    move*: MoveIdx
 
   Ball* = object
     node*: NodeIdx
-    collide*: Collide
-    draw*: Draw2d
-    move*: Move
+    collide*: CollideIdx
+    draw*: Draw2dIdx
+    move*: MoveIdx
 
   Brick* = object
     node*: NodeIdx
-    collide*: Collide
-    draw*: Draw2d
-    fade*: Fade
+    collide*: CollideIdx
+    draw*: Draw2dIdx
+    fade*: FadeIdx
 
   Particle* = object
     node*: NodeIdx
-    draw*: Draw2d
-    fade*: Fade
-    move*: Move
+    draw*: Draw2dIdx
+    fade*: FadeIdx
+    move*: MoveIdx
 
   Trail* = object
     node*: NodeIdx
-    draw*: Draw2d
-    fade*: Fade
+    draw*: Draw2dIdx
+    fade*: FadeIdx
 
   Game* = object
     camera*: Camera
@@ -96,6 +105,12 @@ type
     bricks*: seq[Brick]
     particles*: seq[Particle]
     trails*: seq[Trail]
+
+    collides*: seq[Collide]
+    draws*: seq[Draw2d]
+    fades*: seq[Fade]
+    moves*: seq[Move]
+    shakes*: seq[Shake]
 
     nodes*: seq[TransformNode]
     freeNodes*: seq[int32]

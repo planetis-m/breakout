@@ -1,9 +1,11 @@
 import std/random
 import ".."/[blueprints, gamecore]
 
-proc updateBrick(game: var Game; brick: var Brick) =
-  if brick.fade.step == 0 and brick.collide.collision.hasHit:
-    brick.fade.step = 0.05
+proc updateBrick(game: var Game; idx: BrickIdx) =
+  template brick: untyped = game.bricks[idx.int]
+  template fade: untyped = game.fades[brick.fade.int]
+  if fade.step == 0 and game.collides[brick.collide.int].collision.hasHit:
+    fade.step = 0.05
     if rand(1.0) > 0.98:
       game.createBall(
         float32(game.windowWidth / 2),
@@ -11,5 +13,5 @@ proc updateBrick(game: var Game; brick: var Brick) =
       )
 
 proc sysControlBrick*(game: var Game) =
-  for brick in game.bricks.mitems:
-    game.updateBrick(brick)
+  for i in 0..<game.brickCount:
+    game.updateBrick(BrickIdx(i.int32))

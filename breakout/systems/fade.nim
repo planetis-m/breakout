@@ -11,15 +11,15 @@ proc applyFade(game: var Game; node: NodeIdx; draw: var Draw2d; fade: Fade) =
 
 proc fadeBricks(game: var Game) =
   for brick in game.bricks.mitems:
-    game.applyFade(brick.node, brick.draw, brick.fade)
+    game.applyFade(brick.node, game.draws[brick.draw.int], game.fades[brick.fade.int])
 
 proc fadeParticles(game: var Game) =
   for particle in game.particles.mitems:
-    game.applyFade(particle.node, particle.draw, particle.fade)
+    game.applyFade(particle.node, game.draws[particle.draw.int], game.fades[particle.fade.int])
 
 proc fadeTrails(game: var Game) =
   for trail in game.trails.mitems:
-    game.applyFade(trail.node, trail.draw, trail.fade)
+    game.applyFade(trail.node, game.draws[trail.draw.int], game.fades[trail.fade.int])
 
 func shouldCleanup(game: Game; node: NodeIdx): bool =
   template transform: untyped = game.nodes[node.int].transform
@@ -31,27 +31,24 @@ proc sysFade*(game: var Game) =
   game.fadeTrails()
 
 proc cleanupDeadBricks(game: var Game) =
-  var i = game.bricks.high
+  var i = game.brickCount - 1
   while i >= 0:
     if game.shouldCleanup(game.bricks[i].node):
-      game.freeNode(game.bricks[i].node)
-      game.bricks.del(i)
+      game.deleteBrick(BrickIdx(i.int32))
     dec i
 
 proc cleanupDeadParticles(game: var Game) =
-  var i = game.particles.high
+  var i = game.particleCount - 1
   while i >= 0:
     if game.shouldCleanup(game.particles[i].node):
-      game.freeNode(game.particles[i].node)
-      game.particles.del(i)
+      game.deleteParticle(ParticleIdx(i.int32))
     dec i
 
 proc cleanupDeadTrails(game: var Game) =
-  var i = game.trails.high
+  var i = game.trailCount - 1
   while i >= 0:
     if game.shouldCleanup(game.trails[i].node):
-      game.freeNode(game.trails[i].node)
-      game.trails.del(i)
+      game.deleteTrail(TrailIdx(i.int32))
     dec i
 
 proc cleanupDead*(game: var Game) =
