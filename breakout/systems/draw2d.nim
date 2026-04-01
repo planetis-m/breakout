@@ -5,9 +5,8 @@ const
   Tolerance = 0.75'f32
 
 proc drawTransform(game: Game; node: NodeIdx; draw: Draw2d; intrpl: float32) =
-  template transformNode: untyped = game.nodes[node.int]
-  template transform: untyped = transformNode.transform
-  template previous: untyped = transformNode.previous
+  template transform: untyped = game.transforms[node.int]
+  template previous: untyped = game.previouss[node.int]
 
   if HasPrevious notin transform.flags:
     return

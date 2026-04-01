@@ -6,7 +6,7 @@ proc updateBallBounds(game: var Game; idx: BallIdx) =
   template move: untyped = game.moves[ball.move.int]
   let node = ball.node
   let size = collide.size
-  template transform: untyped = game.nodes[node.int].transform
+  template transform: untyped = game.transforms[node.int]
 
   if collide.min.x < 0:
     transform.translation.x = size.x / 2
@@ -29,7 +29,7 @@ proc updateBallCollision(game: var Game; idx: BallIdx) =
   template collide: untyped = game.collides[ball.collide.int]
   template move: untyped = game.moves[ball.move.int]
   if collide.collision.hasHit:
-    template transform: untyped = game.nodes[ball.node.int].transform
+    template transform: untyped = game.transforms[ball.node.int]
     game.shakes[game.camera.shake.int].duration = 0.1
 
     if collide.collision.hit.x != 0:
@@ -44,7 +44,7 @@ proc updateBallCollision(game: var Game; idx: BallIdx) =
     game.createExplosion(position.x, position.y)
 
 proc updateBallTrail(game: var Game; idx: BallIdx) =
-  template transform: untyped = game.nodes[game.balls[idx.int].node.int].transform
+  template transform: untyped = game.transforms[game.balls[idx.int].node.int]
   let position = transform.translation
   game.markDirty(game.balls[idx.int].node)
   game.createTrail(position.x, position.y)

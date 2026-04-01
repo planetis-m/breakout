@@ -1,9 +1,8 @@
 import ".."/[gamecore, vmath]
 
 proc updateTransformWorld(game: var Game; idx: NodeIdx) =
-  template transformNode: untyped = game.nodes[idx.int]
-  template transform: untyped = transformNode.transform
-  template previous: untyped = transformNode.previous
+  template transform: untyped = game.transforms[idx.int]
+  template previous: untyped = game.previouss[idx.int]
 
   if Fresh in transform.flags:
     transform.flags.excl(Fresh)
@@ -21,7 +20,7 @@ proc updateTransformWorld(game: var Game; idx: NodeIdx) =
   )
   let parent = game.parent(idx)
   if parent != NoNodeIdx:
-    template parentTransform: untyped = game.nodes[parent.int].transform
+    template parentTransform: untyped = game.transforms[parent.int]
     transform.world = parentTransform.world * local
   else:
     transform.world = local
@@ -35,7 +34,7 @@ proc sysTransform2d*(game: var Game) =
     if sibling != NoNodeIdx:
       stack.add(sibling)
 
-    template transform: untyped = game.nodes[current.int].transform
+    template transform: untyped = game.transforms[current.int]
     if transform.flags.intersects({Dirty, Fresh}):
       game.updateTransformWorld(current)
 

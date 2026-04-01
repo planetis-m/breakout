@@ -60,11 +60,6 @@ type
     duration*: float32
     strength*: float32
 
-  TransformNode* = object
-    transform*: Transform2d
-    hierarchy*: Hierarchy
-    previous*: Previous
-
   Camera* = object
     node*: NodeIdx
     shake*: ShakeIdx
@@ -112,7 +107,9 @@ type
     moves*: seq[Move]
     shakes*: seq[Shake]
 
-    nodes*: seq[TransformNode]
+    transforms*: seq[Transform2d]
+    hierarchies*: seq[Hierarchy]
+    previouss*: seq[Previous]
     freeNodes*: seq[int32]
 
     inputState*: array[Input, bool]

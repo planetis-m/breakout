@@ -33,18 +33,18 @@ proc updateCollision(a, b: var Collide) =
 
 proc preparePaddleCollider(game: var Game) =
   if game.paddle.node != NoNodeIdx:
-    template transform: untyped = game.nodes[game.paddle.node.int].transform
+    template transform: untyped = game.transforms[game.paddle.node.int]
     prepareCollider(transform, game.collides[game.paddle.collide.int])
 
 proc prepareBallColliders(game: var Game) =
   for ball in game.balls.mitems:
-    template transform: untyped = game.nodes[ball.node.int].transform
+    template transform: untyped = game.transforms[ball.node.int]
     prepareCollider(transform, game.collides[ball.collide.int])
 
 proc prepareBrickColliders(game: var Game) =
   for brick in game.bricks.mitems:
     if game.fades[brick.fade.int].step == 0:
-      template transform: untyped = game.nodes[brick.node.int].transform
+      template transform: untyped = game.transforms[brick.node.int]
       prepareCollider(transform, game.collides[brick.collide.int])
 
 proc collideBallWithPaddle(game: var Game; idx: BallIdx) =

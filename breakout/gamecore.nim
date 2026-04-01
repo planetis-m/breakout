@@ -19,65 +19,67 @@ proc `==`*(a, b: ShakeIdx): bool {.borrow.}
 func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
   result = (a * b) != {}
 
-proc initTransformNode(translation: Vec2): TransformNode =
-  result = TransformNode(
-    transform: Transform2d(
-      world: mat2d(),
-      translation: translation,
-      rotation: 0.Rad,
-      scale: vec2(1, 1),
-      flags: {Dirty, Fresh}
-    ),
-    hierarchy: Hierarchy(
-      head: NoNodeIdx,
-      prev: NoNodeIdx,
-      next: NoNodeIdx,
-      parent: NoNodeIdx
-    ),
-    previous: Previous(
-      position: point2(0, 0),
-      rotation: 0.Rad,
-      scale: vec2(1, 1)
-    )
+proc initTransform2d(translation: Vec2): Transform2d =
+  Transform2d(
+    world: mat2d(),
+    translation: translation,
+    rotation: 0.Rad,
+    scale: vec2(1, 1),
+    flags: {Dirty, Fresh}
+  )
+
+proc initHierarchy: Hierarchy =
+  Hierarchy(
+    head: NoNodeIdx,
+    prev: NoNodeIdx,
+    next: NoNodeIdx,
+    parent: NoNodeIdx
+  )
+
+proc initPrevious: Previous =
+  Previous(
+    position: point2(0, 0),
+    rotation: 0.Rad,
+    scale: vec2(1, 1)
   )
 
 proc parent*(game: Game; idx: NodeIdx): NodeIdx =
-  template hierarchy: untyped = game.nodes[idx.int].hierarchy
+  template hierarchy: untyped = game.hierarchies[idx.int]
   result = hierarchy.parent
 
 proc firstChild*(game: Game; idx: NodeIdx): NodeIdx =
-  template hierarchy: untyped = game.nodes[idx.int].hierarchy
+  template hierarchy: untyped = game.hierarchies[idx.int]
   result = hierarchy.head
 
 proc nextSibling*(game: Game; idx: NodeIdx): NodeIdx =
-  template hierarchy: untyped = game.nodes[idx.int].hierarchy
+  template hierarchy: untyped = game.hierarchies[idx.int]
   result = hierarchy.next
 
 proc prependChild(game: var Game; parent, child: NodeIdx) =
-  template childHierarchy: untyped = game.nodes[child.int].hierarchy
-  template parentHierarchy: untyped = game.nodes[parent.int].hierarchy
+  template childHierarchy: untyped = game.hierarchies[child.int]
+  template parentHierarchy: untyped = game.hierarchies[parent.int]
   let head = parentHierarchy.head
 
   childHierarchy.parent = parent
   childHierarchy.prev = NoNodeIdx
   childHierarchy.next = head
   if head != NoNodeIdx:
-    game.nodes[head.int].hierarchy.prev = child
+    game.hierarchies[head.int].prev = child
   parentHierarchy.head = child
 
 proc removeNode(game: var Game; node: NodeIdx) =
-  template hierarchy: untyped = game.nodes[node.int].hierarchy
+  template hierarchy: untyped = game.hierarchies[node.int]
   let parent = hierarchy.parent
   let prev = hierarchy.prev
   let next = hierarchy.next
   let head = hierarchy.head
 
-  if parent != NoNodeIdx and game.nodes[parent.int].hierarchy.head == node:
-    game.nodes[parent.int].hierarchy.head = next
+  if parent != NoNodeIdx and game.hierarchies[parent.int].head == node:
+    game.hierarchies[parent.int].head = next
   if prev != NoNodeIdx:
-    game.nodes[prev.int].hierarchy.next = next
+    game.hierarchies[prev.int].next = next
   if next != NoNodeIdx:
-    game.nodes[next.int].hierarchy.prev = prev
+    game.hierarchies[next.int].prev = prev
 
   hierarchy = Hierarchy(
     head: head,
@@ -89,10 +91,14 @@ proc removeNode(game: var Game; node: NodeIdx) =
 proc allocNode*(game: var Game; translation: Vec2; parent = NoNodeIdx): NodeIdx =
   if game.freeNodes.len > 0:
     result = NodeIdx(game.freeNodes.pop())
-    game.nodes[result.int] = initTransformNode(translation)
+    game.transforms[result.int] = initTransform2d(translation)
+    game.hierarchies[result.int] = initHierarchy()
+    game.previouss[result.int] = initPrevious()
   else:
-    result = NodeIdx(game.nodes.len.int32)
-    game.nodes.add(initTransformNode(translation))
+    result = NodeIdx(game.transforms.len.int32)
+    game.transforms.add(initTransform2d(translation))
+    game.hierarchies.add(initHierarchy())
+    game.previouss.add(initPrevious())
 
   if parent != NoNodeIdx:
     game.prependChild(parent, result)
@@ -106,7 +112,7 @@ proc freeNode*(game: var Game; idx: NodeIdx) =
 
 proc markDirty*(game: var Game; idx: NodeIdx) =
   if idx != NoNodeIdx:
-    template transform: untyped = game.nodes[idx.int].transform
+    template transform: untyped = game.transforms[idx.int]
     transform.flags.incl(Dirty)
 
 proc initCollide*(size: Vec2): Collide =

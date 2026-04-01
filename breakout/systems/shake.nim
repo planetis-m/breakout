@@ -4,7 +4,7 @@ import ".."/gamecore
 proc updateCameraShake(game: var Game) =
   let node = game.camera.node
   template shake: untyped = game.shakes[game.camera.shake.int]
-  template transform: untyped = game.nodes[node.int].transform
+  template transform: untyped = game.transforms[node.int]
 
   if shake.duration > 0:
     shake.duration -= 0.01

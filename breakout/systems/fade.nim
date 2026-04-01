@@ -2,7 +2,7 @@ import ".."/gamecore
 
 proc applyFade(game: var Game; node: NodeIdx; draw: var Draw2d; fade: Fade) =
   if fade.step > 0 and draw.color[3] > 0:
-    template transform: untyped = game.nodes[node.int].transform
+    template transform: untyped = game.transforms[node.int]
     let step = 255 * fade.step
     draw.color[3] = draw.color[3] - step.uint8
     transform.scale.x -= fade.step
@@ -22,7 +22,7 @@ proc fadeTrails(game: var Game) =
     game.applyFade(trail.node, game.draws[trail.draw.int], game.fades[trail.fade.int])
 
 func shouldCleanup(game: Game; node: NodeIdx): bool =
-  template transform: untyped = game.nodes[node.int].transform
+  template transform: untyped = game.transforms[node.int]
   result = transform.scale.x <= 0
 
 proc sysFade*(game: var Game) =

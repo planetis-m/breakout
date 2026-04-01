@@ -2,7 +2,7 @@ import ".."/gamecore
 
 proc moveNode(game: var Game; node: NodeIdx; move: Move) =
   if move.direction.x != 0 or move.direction.y != 0:
-    template transform: untyped = game.nodes[node.int].transform
+    template transform: untyped = game.transforms[node.int]
     transform.translation.x += move.direction.x * move.speed
     transform.translation.y += move.direction.y * move.speed
     game.markDirty(node)
