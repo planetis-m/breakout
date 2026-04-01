@@ -23,15 +23,24 @@ proc updateTransformWorld(game: var Game; idx: TransformIdx; force = false) =
     else:
       transform.world = local
 
-proc updateTransformTree(game: var Game; idx: TransformIdx; force = false) =
-  let subtreeDirty = force or game.transforms[idx].flags.intersects({Dirty, Fresh})
-
-  game.updateTransformWorld(idx, force)
-
-  var child = game.firstChild(idx)
-  while child != NoTransformIdx:
-    game.updateTransformTree(child, subtreeDirty)
-    child = game.nextSibling(child)
-
 proc sysTransform2d*(game: var Game) =
-  game.updateTransformTree(game.camera.transform)
+  var stack: seq[tuple[idx: TransformIdx, force: bool]] = @[]
+  var current = game.camera.transform
+  var currentForce = false
+
+  while current != NoTransformIdx:
+    let subtreeDirty = currentForce or game.transforms[current].flags.intersects({Dirty, Fresh})
+    let sibling = game.nextSibling(current)
+    if sibling != NoTransformIdx:
+      stack.add((sibling, currentForce))
+
+    game.updateTransformWorld(current, currentForce)
+
+    let child = game.firstChild(current)
+    if child != NoTransformIdx:
+      current = child
+      currentForce = subtreeDirty
+    elif stack.len > 0:
+      (current, currentForce) = stack.pop()
+    else:
+      current = NoTransformIdx
