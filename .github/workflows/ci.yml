@@ -92,23 +92,25 @@ jobs:
           nim-version: stable
           repo-token: ${{ github.token }}
 
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install system dependencies
+        uses: johnwason/vcpkg-action@v7
+        id: vcpkg
+        with:
+          pkgs: raylib
+          triplet: x64-windows-release
+          token: ${{ github.token }}
 
-      - name: Build raylib
+      - name: Copy raylib runtime
         shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg\installed\x64-windows-release
         run: |
-          git clone --depth 1 https://github.com/raysan5/raylib.git $env:TEMP\raylib
-          cmake -S $env:TEMP\raylib -B $env:TEMP\raylib\build `
-            -DBUILD_SHARED_LIBS=ON `
-            -DCMAKE_BUILD_TYPE=Release
-          cmake --build $env:TEMP\raylib\build --config Release
-          Copy-Item $env:TEMP\raylib\src\raylib.h .\raylib.h -Force
-          Copy-Item $env:TEMP\raylib\build\raylib\Release\raylib.dll .\raylib.dll -Force
-          Copy-Item $env:TEMP\raylib\build\raylib\Release\raylib.lib .\raylib.lib -Force
+          Copy-Item "$env:VCPKG_ROOT\bin\raylib.dll" .\raylib.dll -Force
 
       - name: Build game
         shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg\installed\x64-windows-release
         run: |
-          $env:PATH = "$pwd;$env:PATH"
-          nim c --cc:vcc -d:release game.nim
+          $env:PATH = "$env:VCPKG_ROOT\bin;$pwd;$env:PATH"
+          nim c --cc:vcc -d:VcpkgRoot="$env:VCPKG_ROOT" -d:release game.nim

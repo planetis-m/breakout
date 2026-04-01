@@ -1,6 +1,7 @@
 import std/os
 
 const ProjectRoot = currentSourcePath.parentDir.parentDir
+const VcpkgRoot {.strdefine.} = ""
 
 when defined(linux):
   {.passc: "-I\"" & ProjectRoot & "\"".}
@@ -9,8 +10,10 @@ elif defined(macosx):
   {.passc: "-I\"" & ProjectRoot & "\"".}
   {.passl: "-L\"" & ProjectRoot & "\" -lraylib".}
 elif defined(windows):
-  {.passc: "-I\"" & ProjectRoot & "\"".}
-  {.passl: "/LIBPATH:\"" & ProjectRoot & "\" raylib.lib user32.lib gdi32.lib winmm.lib shell32.lib".}
+  when VcpkgRoot.len == 0:
+    {.error: "Define VcpkgRoot for Windows builds (for example: -d:VcpkgRoot=%VCPKG_ROOT%)".}
+  {.passc: "-I\"" & ProjectRoot & "\" -I\"" & VcpkgRoot / "include" & "\"".}
+  {.passl: "/LIBPATH:\"" & VcpkgRoot / "lib" & "\" raylib.lib user32.lib gdi32.lib winmm.lib shell32.lib".}
 else:
   {.error: "Unsupported platform".}
 
