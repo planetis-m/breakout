@@ -26,7 +26,7 @@ type
 
   Draw2d* = object
     width*, height*: int32
-    color*: array[4, uint8]
+    color*: Color
 
   Fade* = object
     step*: float32
@@ -101,7 +101,7 @@ type
     freeNodes*: seq[int32]
 
     inputState*: array[Input, bool]
-    clearColor*: array[4, uint8]
+    clearColor*: Color
 
     isRunning*: bool
     windowWidth*, windowHeight*: int32

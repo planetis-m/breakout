@@ -1,10 +1,10 @@
 import ".."/gamecore
 
 proc applyFade(game: var Game; node: NodeIdx; draw: var Draw2d; fade: Fade) =
-  if fade.step > 0 and draw.color[3] > 0:
+  if fade.step > 0 and draw.color.a > 0:
     template transform: untyped = game.nodes[node.int].transform
-    let step = 255 * fade.step
-    draw.color[3] = draw.color[3] - step.uint8
+    let step = (255 * fade.step).uint8
+    draw.color.a = draw.color.a - step
     transform.scale.x -= fade.step
     transform.scale.y -= fade.step
     game.markDirty(node)

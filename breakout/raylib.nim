@@ -15,9 +15,6 @@ proc `=destroy`(context: var RaylibContext) =
 
 proc `=copy`(context: var RaylibContext; original: RaylibContext) {.error.}
 
-func toColor(color: array[4, uint8]): Color =
-  Color(r: color[0], g: color[1], b: color[2], a: color[3])
-
 proc initRaylib*(title: string; width, height: int32): RaylibContext =
   if isRaylibContextAlive:
     raise newException(ObjectAlreadyInitialized,
@@ -58,10 +55,10 @@ proc beginDrawing*() =
 proc endDrawing*() =
   endDrawingRaw()
 
-proc clearBackground*(color: array[4, uint8]) =
-  clearBackgroundRaw(toColor(color))
+proc clearBackground*(color: Color) =
+  clearBackgroundRaw(color)
 
-proc drawRectangle*(x, y, width, height: int32; color: array[4, uint8]) =
-  drawRectangleRaw(x.cint, y.cint, width.cint, height.cint, toColor(color))
+proc drawRectangle*(x, y, width, height: int32; color: Color) =
+  drawRectangleRaw(x.cint, y.cint, width.cint, height.cint, color)
 
-export KeyboardKey, KEY_A, KEY_D, KEY_ESCAPE, KEY_LEFT, KEY_RIGHT
+export Color, KeyboardKey, KEY_A, KEY_D, KEY_ESCAPE, KEY_LEFT, KEY_RIGHT

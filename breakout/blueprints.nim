@@ -1,5 +1,5 @@
 import std/[math, random]
-import gamecore, vmath
+import gamecore, raylib, vmath
 
 proc createBall*(game: var Game; x, y: float32; parent = NoNodeIdx) =
   let angle = PI.float32 + rand(1.0'f32) * PI.float32
@@ -7,7 +7,7 @@ proc createBall*(game: var Game; x, y: float32; parent = NoNodeIdx) =
   game.balls.add(Ball(
     node: node,
     collide: initCollide(vec2(20, 20)),
-    draw: Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255]),
+    draw: Draw2d(width: 20, height: 20, color: Color(r: 0, g: 255, b: 0, a: 255)),
     move: Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14)
   ))
 
@@ -17,7 +17,7 @@ proc createBrick*(game: var Game; x, y: float32; width, height: int32;
   game.bricks.add(Brick(
     node: node,
     collide: initCollide(vec2(width.float32, height.float32)),
-    draw: Draw2d(width: width, height: height, color: [255'u8, 255, 0, 255]),
+    draw: Draw2d(width: width, height: height, color: Color(r: 255, g: 255, b: 0, a: 255)),
     fade: Fade(step: 0)
   ))
 
@@ -30,7 +30,7 @@ proc createExplosion*(game: var Game; x, y: float32; parent = NoNodeIdx) =
     let node = game.allocNode(vec2(x, y), parent)
     game.particles.add(Particle(
       node: node,
-      draw: Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255]),
+      draw: Draw2d(width: 20, height: 20, color: Color(r: 255, g: 255, b: 255, a: 255)),
       fade: Fade(step: fadeStep),
       move: Move(
         direction: Vec2(x: sin(step * i.float32), y: cos(step * i.float32)),
@@ -42,7 +42,7 @@ proc createTrail*(game: var Game; x, y: float32; parent = NoNodeIdx) =
   let node = game.allocNode(vec2(x, y), parent)
   game.trails.add(Trail(
     node: node,
-    draw: Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255]),
+    draw: Draw2d(width: 20, height: 20, color: Color(r: 0, g: 255, b: 0, a: 255)),
     fade: Fade(step: 0.05)
   ))
 
@@ -51,7 +51,7 @@ proc createPaddle*(game: var Game; x, y: float32; parent = NoNodeIdx) =
   game.paddle = Paddle(
     node: node,
     collide: initCollide(vec2(100, 20)),
-    draw: Draw2d(width: 100, height: 20, color: [255'u8, 0, 0, 255]),
+    draw: Draw2d(width: 100, height: 20, color: Color(r: 255, g: 0, b: 0, a: 255)),
     move: Move(direction: vec2(0, 0), speed: 20)
   )
 

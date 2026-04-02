@@ -12,7 +12,7 @@ proc initGame*(windowWidth, windowHeight: int32): Game =
     windowWidth: windowWidth,
     windowHeight: windowHeight,
     raylib: raylibContext,
-    clearColor: [0'u8, 0, 0, 255]
+    clearColor: Color(r: 0, g: 0, b: 0, a: 255)
   )
 
 proc update(game: var Game) =

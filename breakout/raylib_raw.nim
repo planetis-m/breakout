@@ -32,33 +32,18 @@ const
   KEY_RIGHT* = KeyboardKey(262)
   KEY_LEFT* = KeyboardKey(263)
 
-proc initWindowRaw*(width, height: cint; title: cstring) {.
-    importc: "InitWindow", cdecl, header: "raylib.h".}
-proc closeWindowRaw*() {.
-    importc: "CloseWindow", cdecl, header: "raylib.h".}
-proc isWindowReadyRaw*(): bool {.
-    importc: "IsWindowReady", cdecl, header: "raylib.h".}
-proc windowShouldCloseRaw*(): bool {.
-    importc: "WindowShouldClose", cdecl, header: "raylib.h".}
-proc setExitKeyRaw*(key: cint) {.
-    importc: "SetExitKey", cdecl, header: "raylib.h".}
-proc pollInputEventsRaw*() {.
-    importc: "PollInputEvents", cdecl, header: "raylib.h".}
-proc swapScreenBufferRaw*() {.
-    importc: "SwapScreenBuffer", cdecl, header: "raylib.h".}
-proc waitTimeRaw*(seconds: cdouble) {.
-    importc: "WaitTime", cdecl, header: "raylib.h".}
-proc getTimeRaw*(): cdouble {.
-    importc: "GetTime", cdecl, header: "raylib.h".}
-proc beginDrawingRaw*() {.
-    importc: "BeginDrawing", cdecl, header: "raylib.h".}
-proc endDrawingRaw*() {.
-    importc: "EndDrawing", cdecl, header: "raylib.h".}
-proc clearBackgroundRaw*(color: Color) {.
-    importc: "ClearBackground", cdecl, header: "raylib.h".}
-proc drawRectangleRaw*(posX, posY, width, height: cint; color: Color) {.
-    importc: "DrawRectangle", cdecl, header: "raylib.h".}
-proc isKeyDownRaw*(key: cint): bool {.
-    importc: "IsKeyDown", cdecl, header: "raylib.h".}
-proc isKeyPressedRaw*(key: cint): bool {.
-    importc: "IsKeyPressed", cdecl, header: "raylib.h".}
+proc initWindowRaw*(width, height: cint; title: cstring) {.importc: "InitWindow", cdecl, header: "raylib.h".}
+proc closeWindowRaw*() {.importc: "CloseWindow", cdecl, header: "raylib.h".}
+proc isWindowReadyRaw*(): bool {.importc: "IsWindowReady", cdecl, header: "raylib.h".}
+proc windowShouldCloseRaw*(): bool {.importc: "WindowShouldClose", cdecl, header: "raylib.h".}
+proc setExitKeyRaw*(key: cint) {.importc: "SetExitKey", cdecl, header: "raylib.h".}
+proc pollInputEventsRaw*() {.importc: "PollInputEvents", cdecl, header: "raylib.h".}
+proc swapScreenBufferRaw*() {.importc: "SwapScreenBuffer", cdecl, header: "raylib.h".}
+proc waitTimeRaw*(seconds: cdouble) {.importc: "WaitTime", cdecl, header: "raylib.h".}
+proc getTimeRaw*(): cdouble {.importc: "GetTime", cdecl, header: "raylib.h".}
+proc beginDrawingRaw*() {.importc: "BeginDrawing", cdecl, header: "raylib.h".}
+proc endDrawingRaw*() {.importc: "EndDrawing", cdecl, header: "raylib.h".}
+proc clearBackgroundRaw*(color: Color) {.importc: "ClearBackground", cdecl, header: "raylib.h".}
+proc drawRectangleRaw*(posX, posY, width, height: cint; color: Color) {.importc: "DrawRectangle", cdecl, header: "raylib.h".}
+proc isKeyDownRaw*(key: cint): bool {.importc: "IsKeyDown", cdecl, header: "raylib.h".}
+proc isKeyPressedRaw*(key: cint): bool {.importc: "IsKeyPressed", cdecl, header: "raylib.h".}

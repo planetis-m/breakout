@@ -12,18 +12,18 @@ proc updateCameraShake(game: var Game) =
     transform.translation.y = game.camera.shake.strength -
       rand(game.camera.shake.strength * 2)
 
-    game.clearColor[0] = rand(255).uint8
-    game.clearColor[1] = rand(255).uint8
-    game.clearColor[2] = rand(255).uint8
+    game.clearColor.r = rand(255).uint8
+    game.clearColor.g = rand(255).uint8
+    game.clearColor.b = rand(255).uint8
     game.markDirty(node)
 
     if game.camera.shake.duration <= 0:
       game.camera.shake.duration = 0
       transform.translation.x = 0
       transform.translation.y = 0
-      game.clearColor[0] = 0
-      game.clearColor[1] = 0
-      game.clearColor[2] = 0
+      game.clearColor.r = 0
+      game.clearColor.g = 0
+      game.clearColor.b = 0
       game.markDirty(node)
 
 proc sysShake*(game: var Game) =
