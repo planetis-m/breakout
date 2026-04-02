@@ -8,16 +8,16 @@ type
 
 var isRaylibContextAlive: bool
 
-proc `=destroy`(context: var RaylibContext) =
+proc `=destroy`*(context: var RaylibContext) =
   if isRaylibContextAlive and context.notMoved and isWindowReadyRaw():
     closeWindowRaw()
     isRaylibContextAlive = false
 
-proc `=wasMoved`(context: var RaylibContext) =
+proc `=wasMoved`*(context: var RaylibContext) =
   context.notMoved = false
 
-proc `=copy`(context: var RaylibContext; original: RaylibContext) {.error.}
-proc `=dup`(context: RaylibContext): RaylibContext {.error.}
+proc `=copy`*(context: var RaylibContext; original: RaylibContext) {.error.}
+proc `=dup`*(context: RaylibContext): RaylibContext {.error.}
 
 proc initRaylib*(title: string; width, height: int32): RaylibContext =
   if isRaylibContextAlive:
