@@ -3,34 +3,15 @@ import raylib_raw
 type
   ObjectAlreadyInitialized* = object of Defect
 
-  RaylibContext* = object
-    notMoved: bool
-
-var isRaylibContextAlive: bool
-
-proc `=destroy`*(context: var RaylibContext) =
-  if isRaylibContextAlive and context.notMoved and isWindowReadyRaw():
-    closeWindowRaw()
-    isRaylibContextAlive = false
-
-proc `=wasMoved`*(context: var RaylibContext) =
-  context.notMoved = false
-
-proc `=copy`*(context: var RaylibContext; original: RaylibContext) {.error.}
-proc `=dup`*(context: RaylibContext): RaylibContext {.error.}
-
-proc initRaylib*(title: string; width, height: int32): RaylibContext =
-  if isRaylibContextAlive:
-    raise newException(ObjectAlreadyInitialized,
-      "Cannot initialize `RaylibContext` more than once at a time.")
-
+proc initRaylib*(title: string; width, height: int32) =
   initWindowRaw(width.cint, height.cint, title.cstring)
   if not isWindowReadyRaw():
     raise newException(Defect, "raylib failed to initialize the window.")
 
   setExitKeyRaw(0)
-  isRaylibContextAlive = true
-  result = RaylibContext(notMoved: true)
+
+proc closeRaylib*() =
+  closeWindowRaw()
 
 proc pollInput*() =
   pollInputEventsRaw()

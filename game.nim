@@ -5,13 +5,10 @@ import
     fade, handleevents, move, shake, transform2d]
 
 proc initGame*(windowWidth, windowHeight: int32): Game =
-  let raylibContext = initRaylib("Breakout", windowWidth, windowHeight)
-
   result = Game(
     isRunning: true,
     windowWidth: windowWidth,
     windowHeight: windowHeight,
-    raylib: raylibContext,
     clearColor: Color(r: 0, g: 0, b: 0, a: 255)
   )
 
@@ -71,8 +68,12 @@ proc run(game: var Game) =
 
 proc main =
   randomize()
-  var game = initGame(740, 555)
-  createScene(game)
-  run(game)
+  initRaylib("Breakout", 740, 555)
+  try:
+    var game = initGame(740, 555)
+    createScene(game)
+    run(game)
+  finally:
+    closeRaylib()
 
 main()

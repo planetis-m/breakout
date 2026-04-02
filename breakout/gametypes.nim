@@ -106,5 +106,3 @@ type
     isRunning*: bool
     windowWidth*, windowHeight*: int32
     tickId*: int
-
-    raylib*: RaylibContext
