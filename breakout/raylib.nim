@@ -13,6 +13,9 @@ proc `=destroy`(context: var RaylibContext) =
     closeWindowRaw()
     isRaylibContextAlive = false
 
+proc `=wasMoved`(context: var RaylibContext) =
+  context.notMoved = false
+
 proc `=copy`(context: var RaylibContext; original: RaylibContext) {.error.}
 
 proc initRaylib*(title: string; width, height: int32): RaylibContext =
