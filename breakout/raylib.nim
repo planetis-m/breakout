@@ -17,6 +17,7 @@ proc `=wasMoved`(context: var RaylibContext) =
   context.notMoved = false
 
 proc `=copy`(context: var RaylibContext; original: RaylibContext) {.error.}
+proc `=dup`(context: RaylibContext): RaylibContext {.error.}
 
 proc initRaylib*(title: string; width, height: int32): RaylibContext =
   if isRaylibContextAlive:
