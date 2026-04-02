@@ -6,6 +6,7 @@ const
   NoNodeIdx* = NodeIdx(-1'i32)
 
 proc `==`*(a, b: NodeIdx): bool {.borrow.}
+template `?=`(name, value): bool = (let name = value; name != NoNodeIdx)
 
 func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
   result = (a * b) != {}
@@ -33,42 +34,44 @@ proc initTransformNode(translation: Vec2): TransformNode =
   )
 
 proc parent*(game: Game; idx: NodeIdx): NodeIdx =
-  template hierarchy: untyped = game.nodes[idx.int].hierarchy
-  result = hierarchy.parent
+  template node: untyped = game.nodes[idx.int]
+  result = node.hierarchy.parent
 
 proc firstChild*(game: Game; idx: NodeIdx): NodeIdx =
-  template hierarchy: untyped = game.nodes[idx.int].hierarchy
-  result = hierarchy.head
+  template node: untyped = game.nodes[idx.int]
+  result = node.hierarchy.head
 
 proc nextSibling*(game: Game; idx: NodeIdx): NodeIdx =
-  template hierarchy: untyped = game.nodes[idx.int].hierarchy
-  result = hierarchy.next
+  template node: untyped = game.nodes[idx.int]
+  result = node.hierarchy.next
 
 proc prependChild(game: var Game; parent, child: NodeIdx) =
   template childHierarchy: untyped = game.nodes[child.int].hierarchy
   template parentHierarchy: untyped = game.nodes[parent.int].hierarchy
-  let head = parentHierarchy.head
+  template head: untyped = parentHierarchy.head
+  template firstChild: untyped = game.nodes[headId.int].hierarchy
 
   childHierarchy.parent = parent
   childHierarchy.prev = NoNodeIdx
   childHierarchy.next = head
-  if head != NoNodeIdx:
-    game.nodes[head.int].hierarchy.prev = child
+  if headId ?= head:
+    firstChild.prev = child
   parentHierarchy.head = child
 
 proc removeNode(game: var Game; node: NodeIdx) =
   template hierarchy: untyped = game.nodes[node.int].hierarchy
-  let parent = hierarchy.parent
-  let prev = hierarchy.prev
-  let next = hierarchy.next
+  template parent: untyped = game.nodes[parentId.int].hierarchy
+  template nextSibling: untyped = game.nodes[nextSiblingId.int].hierarchy
+  template prevSibling: untyped = game.nodes[prevSiblingId.int].hierarchy
   let head = hierarchy.head
 
-  if parent != NoNodeIdx and game.nodes[parent.int].hierarchy.head == node:
-    game.nodes[parent.int].hierarchy.head = next
-  if prev != NoNodeIdx:
-    game.nodes[prev.int].hierarchy.next = next
-  if next != NoNodeIdx:
-    game.nodes[next.int].hierarchy.prev = prev
+  if parentId ?= hierarchy.parent:
+    if parent.head == node:
+      parent.head = hierarchy.next
+  if nextSiblingId ?= hierarchy.next:
+    nextSibling.prev = hierarchy.prev
+  if prevSiblingId ?= hierarchy.prev:
+    prevSibling.next = hierarchy.next
 
   hierarchy = Hierarchy(
     head: head,
@@ -79,14 +82,16 @@ proc removeNode(game: var Game; node: NodeIdx) =
 
 proc allocNode*(game: var Game; translation: Vec2; parent = NoNodeIdx): NodeIdx =
   if game.freeNodes.len > 0:
-    result = NodeIdx(game.freeNodes.pop())
-    game.nodes[result.int] = initTransformNode(translation)
+    let freeNodeId = NodeIdx(game.freeNodes.pop())
+    game.nodes[freeNodeId.int] = initTransformNode(translation)
+    result = freeNodeId
   else:
-    result = NodeIdx(game.nodes.len.int32)
+    let nodeId = NodeIdx(game.nodes.len.int32)
     game.nodes.add(initTransformNode(translation))
+    result = nodeId
 
-  if parent != NoNodeIdx:
-    game.prependChild(parent, result)
+  if parentId ?= parent:
+    game.prependChild(parentId, result)
 
 proc freeNode*(game: var Game; idx: NodeIdx) =
   if idx == NoNodeIdx:
