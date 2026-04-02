@@ -11,8 +11,7 @@ proc createBall*(game: var Game; x, y: float32; parent = NoNodeIdx) =
     move: Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14)
   ))
 
-proc createBrick*(game: var Game; x, y: float32; width, height: int32;
-    parent = NoNodeIdx) =
+proc createBrick*(game: var Game; x, y: float32; width, height: int32; parent = NoNodeIdx) =
   let node = game.allocNode(vec2(x, y), parent)
   game.bricks.add(Brick(
     node: node,

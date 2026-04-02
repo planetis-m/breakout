@@ -6,7 +6,7 @@ const
   NoNodeIdx* = NodeIdx(-1'i32)
 
 proc `==`*(a, b: NodeIdx): bool {.borrow.}
-template `?=`(name, value): bool = (let name = value; name != NoNodeIdx)
+template `?=`*(name, value): bool = (let name = value; name != NoNodeIdx)
 
 func intersects*[K: enum](a, b: set[K]): bool {.inline.} =
   result = (a * b) != {}

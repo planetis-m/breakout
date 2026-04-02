@@ -19,8 +19,7 @@ proc updateTransformWorld(game: var Game; idx: NodeIdx) =
     transform.rotation,
     transform.translation
   )
-  let parent = game.parent(idx)
-  if parent != NoNodeIdx:
+  if parent ?= game.parent(idx):
     template parentTransform: untyped = game.nodes[parent.int].transform
     transform.world = parentTransform.world * local
   else:
@@ -31,16 +30,14 @@ proc sysTransform2d*(game: var Game) =
   var current = game.camera.node
 
   while current != NoNodeIdx:
-    let sibling = game.nextSibling(current)
-    if sibling != NoNodeIdx:
+    if sibling ?= game.nextSibling(current):
       stack.add(sibling)
 
     template transform: untyped = game.nodes[current.int].transform
     if transform.flags.intersects({Dirty, Fresh}):
       game.updateTransformWorld(current)
 
-    let child = game.firstChild(current)
-    if child != NoNodeIdx:
+    if child ?= game.firstChild(current):
       current = child
     elif stack.len > 0:
       current = stack.pop()
