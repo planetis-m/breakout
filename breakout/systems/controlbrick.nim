@@ -7,7 +7,8 @@ proc updateBrick(game: var Game; brick: var Brick) =
     if rand(1.0) > 0.98:
       game.createBall(
         float32(game.windowWidth / 2),
-        float32(game.windowHeight / 2)
+        float32(game.windowHeight / 2),
+        game.camera.node
       )
 
 proc sysControlBrick*(game: var Game) =

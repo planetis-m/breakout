@@ -1,9 +1,9 @@
 import std/[math, random]
 import gamecore, vmath
 
-proc createBall*(game: var Game; x, y: float32) =
+proc createBall*(game: var Game; x, y: float32; parent = NoNodeIdx) =
   let angle = PI.float32 + rand(1.0'f32) * PI.float32
-  let node = game.allocNode(vec2(x, y), game.camera.node)
+  let node = game.allocNode(vec2(x, y), parent)
   game.balls.add(Ball(
     node: node,
     collide: initCollide(vec2(20, 20)),
@@ -11,8 +11,9 @@ proc createBall*(game: var Game; x, y: float32) =
     move: Move(direction: Vec2(x: cos(angle), y: sin(angle)), speed: 14)
   ))
 
-proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
-  let node = game.allocNode(vec2(x, y), game.camera.node)
+proc createBrick*(game: var Game; x, y: float32; width, height: int32;
+    parent = NoNodeIdx) =
+  let node = game.allocNode(vec2(x, y), parent)
   game.bricks.add(Brick(
     node: node,
     collide: initCollide(vec2(width.float32, height.float32)),
@@ -20,13 +21,13 @@ proc createBrick*(game: var Game; x, y: float32; width, height: int32) =
     fade: Fade(step: 0)
   ))
 
-proc createExplosion*(game: var Game; x, y: float32) =
+proc createExplosion*(game: var Game; x, y: float32; parent = NoNodeIdx) =
   let explosions = 32
   let step = TAU / explosions.float
   let fadeStep = 0.05
 
   for i in 0..<explosions:
-    let node = game.allocNode(vec2(x, y), game.camera.node)
+    let node = game.allocNode(vec2(x, y), parent)
     game.particles.add(Particle(
       node: node,
       draw: Draw2d(width: 20, height: 20, color: [255'u8, 255, 255, 255]),
@@ -37,16 +38,16 @@ proc createExplosion*(game: var Game; x, y: float32) =
       )
     ))
 
-proc createTrail*(game: var Game; x, y: float32) =
-  let node = game.allocNode(vec2(x, y), game.camera.node)
+proc createTrail*(game: var Game; x, y: float32; parent = NoNodeIdx) =
+  let node = game.allocNode(vec2(x, y), parent)
   game.trails.add(Trail(
     node: node,
     draw: Draw2d(width: 20, height: 20, color: [0'u8, 255, 0, 255]),
     fade: Fade(step: 0.05)
   ))
 
-proc createPaddle*(game: var Game; x, y: float32) =
-  let node = game.allocNode(vec2(x, y), game.camera.node)
+proc createPaddle*(game: var Game; x, y: float32; parent = NoNodeIdx) =
+  let node = game.allocNode(vec2(x, y), parent)
   game.paddle = Paddle(
     node: node,
     collide: initCollide(vec2(100, 20)),
@@ -65,22 +66,17 @@ proc createScene*(game: var Game) =
   let startingX = (game.windowWidth - gridWidth) div 2
   let startingY = 50
 
+  let cameraNode = game.allocNode(vec2(0, 0))
   game.camera = Camera(
-    node: game.allocNode(vec2(0, 0)),
+    node: cameraNode,
     shake: Shake(duration: 0, strength: 10)
   )
 
-  game.createPaddle(
-    float32(game.windowWidth / 2),
-    float32(game.windowHeight - 30)
-  )
-  game.createBall(
-    float32(game.windowWidth / 2),
-    float32(game.windowHeight - 60)
-  )
+  game.createPaddle(float32(game.windowWidth / 2), float32(game.windowHeight - 30), cameraNode)
+  game.createBall(float32(game.windowWidth / 2), float32(game.windowHeight - 60), cameraNode)
 
   for row in 0..<rowCount:
     let y = startingY + row * (brickHeight + margin) + brickHeight div 2
     for col in 0..<columnCount:
       let x = startingX + col * (brickWidth + margin) + brickWidth div 2
-      game.createBrick(x.float32, y.float32, brickWidth.int32, brickHeight.int32)
+      game.createBrick(x.float32, y.float32, brickWidth.int32, brickHeight.int32, cameraNode)

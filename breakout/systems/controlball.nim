@@ -35,13 +35,13 @@ proc updateBallCollision(game: var Game; ball: var Ball) =
       ball.move.direction.y *= -1
 
     let position = transform.translation
-    game.createExplosion(position.x, position.y)
+    game.createExplosion(position.x, position.y, game.camera.node)
 
 proc updateBallTrail(game: var Game; ball: Ball) =
   template transform: untyped = game.nodes[ball.node.int].transform
   let position = transform.translation
   game.markDirty(ball.node)
-  game.createTrail(position.x, position.y)
+  game.createTrail(position.x, position.y, game.camera.node)
 
 proc updateBall(game: var Game; ball: var Ball) =
   game.updateBallBounds(ball)
