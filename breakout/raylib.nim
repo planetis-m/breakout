@@ -1,8 +1,5 @@
 import raylib_raw
 
-type
-  ObjectAlreadyInitialized* = object of Defect
-
 proc initRaylib*(title: string; width, height: int32) =
   initWindowRaw(width.cint, height.cint, title.cstring)
   if not isWindowReadyRaw():
